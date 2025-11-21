@@ -53,7 +53,7 @@ const ListaDeFuncionarios: React.FC<ListaDeFuncionariosProps> = ({ setActiveView
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({
         departamento: '', // Área
-        area: '',       // Gerência
+
         unidade: '',
         role: '',
         status: 'active',
@@ -61,11 +61,11 @@ const ListaDeFuncionarios: React.FC<ListaDeFuncionariosProps> = ({ setActiveView
 
     const uniqueOptions = useMemo(() => {
         const departamentos = [...new Set(allEmployees.map(e => e.departamento))].sort();
-        const areas = [...new Set(allEmployees.map(e => e.area))].sort();
+
         const unidades = [...new Set(allEmployees.map(e => e.unidade))].sort();
         const roles: PapelUsuario[] = ['user', 'manager', 'admin', 'rh'];
-        const statuses = [{value: 'active', text: 'Ativo'}, {value: 'inactive', text: 'Inativo'}];
-        return { departamentos, areas, unidades, roles, statuses };
+        const statuses = [{ value: 'active', text: 'Ativo' }, { value: 'inactive', text: 'Inativo' }];
+        return { departamentos, unidades, roles, statuses };
     }, [allEmployees]);
 
     const handleFilterChange = (filterName: keyof typeof filters, value: string) => {
@@ -76,7 +76,7 @@ const ListaDeFuncionarios: React.FC<ListaDeFuncionariosProps> = ({ setActiveView
         return allEmployees.filter(emp =>
             (searchTerm === '' || emp.nome.toLowerCase().includes(searchTerm.toLowerCase()) || emp.matricula.includes(searchTerm)) &&
             (filters.departamento === '' || emp.departamento === filters.departamento) &&
-            (filters.area === '' || emp.area === filters.area) &&
+
             (filters.unidade === '' || emp.unidade === filters.unidade) &&
             (filters.role === '' || emp.role === filters.role) &&
             (filters.status === '' || emp.status === filters.status)
@@ -87,9 +87,9 @@ const ListaDeFuncionarios: React.FC<ListaDeFuncionariosProps> = ({ setActiveView
     const handleToggleStatus = async (employeeId: number, employeeName: string, currentStatus: 'active' | 'inactive') => {
         const action = currentStatus === 'active' ? 'inativar' : 'reativar';
         const title = currentStatus === 'active' ? 'Confirmar Inativação' : 'Confirmar Reativação';
-        
+
         if (currentStatus === 'active') {
-             const isManager = allEmployees.some(emp => emp.gestor === employeeId && emp.status === 'active');
+            const isManager = allEmployees.some(emp => emp.gestor === employeeId && emp.status === 'active');
             if (isManager) {
                 modal.alert({
                     title: 'Ação Bloqueada',
@@ -99,7 +99,7 @@ const ListaDeFuncionarios: React.FC<ListaDeFuncionariosProps> = ({ setActiveView
                 return;
             }
         }
-        
+
         const confirmed = await modal.confirm({
             title: title,
             message: `Tem certeza que deseja ${action} o colaborador "${employeeName}"?`,
@@ -139,7 +139,7 @@ const ListaDeFuncionarios: React.FC<ListaDeFuncionariosProps> = ({ setActiveView
                 <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 mb-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                         <div className="lg:col-span-2">
-                             <label htmlFor="search-term" className="block text-xs font-medium text-slate-600 mb-1">Buscar</label>
+                            <label htmlFor="search-term" className="block text-xs font-medium text-slate-600 mb-1">Buscar</label>
                             <div className="relative">
                                 <input
                                     id="search-term"
@@ -155,7 +155,7 @@ const ListaDeFuncionarios: React.FC<ListaDeFuncionariosProps> = ({ setActiveView
                             </div>
                         </div>
                         <FilterSelect label="Área" value={filters.departamento} options={uniqueOptions.departamentos} onChange={val => handleFilterChange('departamento', val)} />
-                        <FilterSelect label="Gerência" value={filters.area} options={uniqueOptions.areas} onChange={val => handleFilterChange('area', val)} />
+
                         <FilterSelect label="Perfil" value={filters.role} options={uniqueOptions.roles.map(r => ({ value: r, text: getRoleText(r) }))} onChange={val => handleFilterChange('role', val)} />
                         <FilterSelect label="Status" value={filters.status} options={uniqueOptions.statuses} onChange={val => handleFilterChange('status', val)} />
                     </div>
@@ -181,120 +181,122 @@ const ListaDeFuncionarios: React.FC<ListaDeFuncionariosProps> = ({ setActiveView
                             {filteredEmployees.map((employee) => {
                                 const manager = allEmployees.find(m => m.id === employee.gestor);
                                 const level = hierarchyLevels.find(h => h.level === employee.nivelHierarquico);
-                                
+
                                 return (
-                                <tr key={employee.id} className="bg-white border-b border-slate-200 hover:bg-slate-50">
-                                    <td className="px-6 py-4 font-semibold text-slate-800 whitespace-nowrap">
-                                        <div>{employee.nome}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-slate-600">{employee.cargo}</td>
-                                    <td className="px-6 py-4 text-slate-600">{level ? `${level.level} - ${level.description}` : employee.nivelHierarquico}</td>
-                                    <td className="px-6 py-4 text-slate-600">{manager ? manager.nome : '-'}</td>
-                                    <td className="px-6 py-4 text-slate-600">{getRoleText(employee.role)}</td>
-                                    <td className="px-6 py-4 text-slate-600">{employee.departamento}</td>
-                                    <td className="px-6 py-4 text-slate-600">{employee.unidade}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={getStatusBadge(employee.status)}>
-                                            {employee.status === 'active' ? 'Ativo' : 'Inativo'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="flex items-center justify-center space-x-2">
-                                            <button
-                                                onClick={() => onEditEmployee(employee.id)}
-                                                className="p-2 text-slate-500 hover:text-blue-600 rounded-full hover:bg-blue-100 transition"
-                                                title="Editar Colaborador"
-                                            >
-                                                <PencilIcon className="h-4 w-4" />
-                                            </button>
-                                            {employee.status === 'active' ? (
+                                    <tr key={employee.id} className="bg-white border-b border-slate-200 hover:bg-slate-50">
+                                        <td className="px-6 py-4 font-semibold text-slate-800 whitespace-nowrap">
+                                            <div>{employee.nome}</div>
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-600">{employee.cargo}</td>
+                                        <td className="px-6 py-4 text-slate-600">{level ? `${level.level} - ${level.description}` : employee.nivelHierarquico}</td>
+                                        <td className="px-6 py-4 text-slate-600">{manager ? manager.nome : '-'}</td>
+                                        <td className="px-6 py-4 text-slate-600">{getRoleText(employee.role)}</td>
+                                        <td className="px-6 py-4 text-slate-600">{employee.departamento}</td>
+                                        <td className="px-6 py-4 text-slate-600">{employee.unidade}</td>
+                                        <td className="px-6 py-4">
+                                            <span className={getStatusBadge(employee.status)}>
+                                                {employee.status === 'active' ? 'Ativo' : 'Inativo'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex items-center justify-center space-x-2">
                                                 <button
-                                                    onClick={() => handleToggleStatus(employee.id, employee.nome, 'active')}
-                                                    className="p-2 text-slate-500 hover:text-danger rounded-full hover:bg-red-100 transition"
-                                                    title="Inativar Colaborador"
+                                                    onClick={() => onEditEmployee(employee.id)}
+                                                    className="p-2 text-slate-500 hover:text-blue-600 rounded-full hover:bg-blue-100 transition"
+                                                    title="Editar Colaborador"
                                                 >
-                                                    <UserMinusIcon className="h-4 w-4" />
+                                                    <PencilIcon className="h-4 w-4" />
                                                 </button>
-                                            ) : (
-                                                 <button
-                                                    onClick={() => handleToggleStatus(employee.id, employee.nome, 'inactive')}
-                                                    className="p-2 text-slate-500 hover:text-success rounded-full hover:bg-green-100 transition"
-                                                    title="Reativar Colaborador"
-                                                >
-                                                    <UserPlusIcon className="h-4 w-4" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            )})}
+                                                {employee.status === 'active' ? (
+                                                    <button
+                                                        onClick={() => handleToggleStatus(employee.id, employee.nome, 'active')}
+                                                        className="p-2 text-slate-500 hover:text-danger rounded-full hover:bg-red-100 transition"
+                                                        title="Inativar Colaborador"
+                                                    >
+                                                        <UserMinusIcon className="h-4 w-4" />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleToggleStatus(employee.id, employee.nome, 'inactive')}
+                                                        className="p-2 text-slate-500 hover:text-success rounded-full hover:bg-green-100 transition"
+                                                        title="Reativar Colaborador"
+                                                    >
+                                                        <UserPlusIcon className="h-4 w-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
                         </tbody>
                     </table>
                 </div>
 
                 {/* Mobile View Cards */}
                 <div className="md:hidden space-y-4">
-                     {filteredEmployees.map((employee) => {
+                    {filteredEmployees.map((employee) => {
                         const manager = allEmployees.find(m => m.id === employee.gestor);
                         const level = hierarchyLevels.find(h => h.level === employee.nivelHierarquico);
-                        
+
                         return (
-                        <div key={employee.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                            <div className="flex justify-between items-start mb-3">
-                                <div>
-                                    <h4 className="font-bold text-slate-800">{employee.nome}</h4>
-                                    <p className="text-sm text-slate-500">{employee.cargo}</p>
+                            <div key={employee.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h4 className="font-bold text-slate-800">{employee.nome}</h4>
+                                        <p className="text-sm text-slate-500">{employee.cargo}</p>
+                                    </div>
+                                    <span className={getStatusBadge(employee.status)}>
+                                        {employee.status === 'active' ? 'Ativo' : 'Inativo'}
+                                    </span>
                                 </div>
-                                <span className={getStatusBadge(employee.status)}>
-                                    {employee.status === 'active' ? 'Ativo' : 'Inativo'}
-                                </span>
-                            </div>
-                            <div className="space-y-2 text-sm text-slate-600 mb-4">
-                                <div className="flex justify-between">
-                                    <span className="font-medium">Nível:</span>
-                                    <span>{level ? `${level.level} - ${level.description}` : employee.nivelHierarquico}</span>
+                                <div className="space-y-2 text-sm text-slate-600 mb-4">
+                                    <div className="flex justify-between">
+                                        <span className="font-medium">Nível:</span>
+                                        <span>{level ? `${level.level} - ${level.description}` : employee.nivelHierarquico}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="font-medium">Gestor:</span>
+                                        <span>{manager ? manager.nome : '-'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="font-medium">Área:</span>
+                                        <span>{employee.departamento}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="font-medium">Unidade:</span>
+                                        <span>{employee.unidade}</span>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="font-medium">Gestor:</span>
-                                    <span>{manager ? manager.nome : '-'}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="font-medium">Área:</span>
-                                    <span>{employee.departamento}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="font-medium">Unidade:</span>
-                                    <span>{employee.unidade}</span>
-                                </div>
-                            </div>
-                            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
-                                <button
-                                    onClick={() => onEditEmployee(employee.id)}
-                                    className="flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100"
-                                >
-                                    <PencilIcon className="h-4 w-4 mr-1.5" />
-                                    Editar
-                                </button>
-                                {employee.status === 'active' ? (
+                                <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
                                     <button
-                                        onClick={() => handleToggleStatus(employee.id, employee.nome, 'active')}
-                                        className="flex items-center px-3 py-1.5 text-sm font-medium text-danger bg-red-50 rounded-md hover:bg-red-100"
+                                        onClick={() => onEditEmployee(employee.id)}
+                                        className="flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100"
                                     >
-                                        <UserMinusIcon className="h-4 w-4 mr-1.5" />
-                                        Inativar
+                                        <PencilIcon className="h-4 w-4 mr-1.5" />
+                                        Editar
                                     </button>
-                                ) : (
-                                    <button
-                                        onClick={() => handleToggleStatus(employee.id, employee.nome, 'inactive')}
-                                        className="flex items-center px-3 py-1.5 text-sm font-medium text-success bg-green-50 rounded-md hover:bg-green-100"
-                                    >
-                                        <UserPlusIcon className="h-4 w-4 mr-1.5" />
-                                        Reativar
-                                    </button>
-                                )}
+                                    {employee.status === 'active' ? (
+                                        <button
+                                            onClick={() => handleToggleStatus(employee.id, employee.nome, 'active')}
+                                            className="flex items-center px-3 py-1.5 text-sm font-medium text-danger bg-red-50 rounded-md hover:bg-red-100"
+                                        >
+                                            <UserMinusIcon className="h-4 w-4 mr-1.5" />
+                                            Inativar
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleToggleStatus(employee.id, employee.nome, 'inactive')}
+                                            className="flex items-center px-3 py-1.5 text-sm font-medium text-success bg-green-50 rounded-md hover:bg-green-100"
+                                        >
+                                            <UserPlusIcon className="h-4 w-4 mr-1.5" />
+                                            Reativar
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )})}
+                        )
+                    })}
                 </div>
 
                 {filteredEmployees.length === 0 && (

@@ -85,7 +85,7 @@ const Cadastros: React.FC<RegistrationsProps> = ({ setActiveView }) => {
                 <RegistrationCard
                     icon={<BuildingLibraryIcon className="h-6 w-6" />}
                     title="Estrutura Organizacional"
-                    description="Gerencie as áreas, gerências e unidades da empresa."
+                    description="Gerencie as áreas e unidades da empresa."
                     onManageClick={() => setActiveView('organizational-structure')}
                 />
                 <RegistrationCard

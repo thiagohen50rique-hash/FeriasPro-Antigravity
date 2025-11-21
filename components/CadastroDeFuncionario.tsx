@@ -61,8 +61,7 @@ const CadastroDeFuncionario: React.FC<CadastroDeFuncionarioProps> = ({ setActive
         cpf: '',
         email: '',
         cargo: '',
-        departamento: '',
-        area: '',
+        departamento: '', // Área
         unidade: '',
         gestor: null,
         role: 'user',
@@ -83,7 +82,7 @@ const CadastroDeFuncionario: React.FC<CadastroDeFuncionarioProps> = ({ setActive
         } else {
             setFormData({
                 nome: '', matricula: '', dataAdmissao: '', cpf: '', email: '',
-                cargo: '', departamento: '', area: '', unidade: '',
+                cargo: '', departamento: '', unidade: '',
                 gestor: null, role: 'user', status: 'active', nivelHierarquico: 1,
             });
         }
@@ -146,6 +145,7 @@ const CadastroDeFuncionario: React.FC<CadastroDeFuncionarioProps> = ({ setActive
             const updatedEmployee: Funcionario = {
                 ...employeeToEdit,
                 ...formData,
+
             };
             updateEmployee(updatedEmployee);
             modal.alert({ title: 'Sucesso', message: 'Dados do colaborador alterados com sucesso!', confirmVariant: 'success' });

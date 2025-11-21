@@ -35,7 +35,6 @@ export interface FuncionarioBase {
   dataAdmissao: string;
   cargo: string;
   departamento: string;
-  area: string;
   unidade: string;
   gestor: number | null;
   email: string;
@@ -115,7 +114,7 @@ export interface RegraFeriasColetivas {
   inicio: string;
   fim: string;
   unidade?: string;
-  area?: string; // Gerência
+
   departamento?: string; // Área
   colaboradorIds?: number[];
 }

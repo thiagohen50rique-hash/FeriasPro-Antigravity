@@ -42,7 +42,7 @@ const findApplicableCollectiveRule = (employee: Funcionario, rules: RegraFeriasC
         if (rule.fim < today) continue;
         let matches = true;
         if (rule.unidade && rule.unidade !== employee.unidade) matches = false;
-        if (rule.area && rule.area !== employee.area) matches = false;
+
         if (rule.departamento && rule.departamento !== employee.departamento) matches = false;
         if (rule.colaboradorIds && rule.colaboradorIds.length > 0 && !rule.colaboradorIds.includes(employee.id)) matches = false;
         if (matches) return rule;
@@ -516,7 +516,7 @@ const CollectiveEntry: React.FC = () => {
 
     const [filters, setFilters] = useState({
         unidade: [] as string[],
-        gerencia: [] as string[],
+
         area: [] as string[],
     });
 
@@ -526,9 +526,9 @@ const CollectiveEntry: React.FC = () => {
     const filteredEmployees = useMemo(() => {
         return activeEmployees.filter(emp => {
             const matchUnidade = filters.unidade.length === 0 || filters.unidade.includes(emp.unidade);
-            const matchGerencia = filters.gerencia.length === 0 || filters.gerencia.includes(emp.area);
+
             const matchArea = filters.area.length === 0 || filters.area.includes(emp.departamento);
-            return matchUnidade && matchGerencia && matchArea;
+            return matchUnidade && matchArea;
         });
     }, [activeEmployees, filters]);
 
@@ -708,7 +708,7 @@ const CollectiveEntry: React.FC = () => {
                     <p className="text-sm text-slate-500 mb-4">Se nenhum filtro for aplicado, todos os colaboradores ativos serão considerados.</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <MultiSelect label="Unidade(s)" options={companyUnits} selected={filters.unidade} onChange={s => setFilters(f => ({ ...f, unidade: s }))} />
-                        <MultiSelect label="Gerência(s)" options={companyManagements} selected={filters.gerencia} onChange={s => setFilters(f => ({ ...f, gerencia: s }))} />
+
                         <MultiSelect label="Área(s)" options={companyAreas} selected={filters.area} onChange={s => setFilters(f => ({ ...f, area: s }))} />
                     </div>
                     <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800 flex items-center">

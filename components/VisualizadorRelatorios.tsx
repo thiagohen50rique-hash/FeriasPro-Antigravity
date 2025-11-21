@@ -115,7 +115,7 @@ const VisualizadorRelatorios: React.FC<ReportViewerProps> = ({ reportType, setAc
 
     const [filters, setFilters] = useState({
         unidade: '',
-        gerencia: '',
+
         area: '',
         colaborador: '',
         gestor: '',
@@ -180,7 +180,7 @@ const VisualizadorRelatorios: React.FC<ReportViewerProps> = ({ reportType, setAc
                             'employee.cargo': emp.cargo,
                             'employee.unidade': emp.unidade,
                             'employee.departamento': emp.departamento,
-                            'employee.area': emp.area,
+
                             'employee.matricula': emp.matricula,
                             'employee.dataAdmissao': emp.dataAdmissao
                         }))
@@ -217,7 +217,7 @@ const VisualizadorRelatorios: React.FC<ReportViewerProps> = ({ reportType, setAc
         // Filtering
         resultData = resultData.filter(item => {
             if (filters.unidade && item.employee.unidade !== filters.unidade) return false;
-            if (filters.gerencia && item.employee.area !== filters.gerencia) return false;
+
             if (filters.area && item.employee.departamento !== filters.area) return false;
             if (filters.colaborador && item.employee.id.toString() !== filters.colaborador) return false;
             if (filters.gestor && (item.employee.gestor?.toString() !== filters.gestor && item.employee.id.toString() !== filters.gestor)) return false;
@@ -326,7 +326,7 @@ const VisualizadorRelatorios: React.FC<ReportViewerProps> = ({ reportType, setAc
 
     const clearFilters = () => {
         setFilters({
-            unidade: '', gerencia: '', area: '', colaborador: '', gestor: '',
+            unidade: '', area: '', colaborador: '', gestor: '',
             limiteConcessaoDe: '', limiteConcessaoAte: '', inicioFeriasDe: '', inicioFeriasAte: '',
             mesAnoInicio: '', status: '',
         });
@@ -432,7 +432,7 @@ const VisualizadorRelatorios: React.FC<ReportViewerProps> = ({ reportType, setAc
                             <h5 className="font-semibold text-slate-700 mb-2">Filtros</h5>
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 <SelectInput label="Unidade" name="unidade" value={filters.unidade} onChange={handleFilterChange} options={companyUnits} />
-                                <SelectInput label="Gerência" name="gerencia" value={filters.gerencia} onChange={handleFilterChange} options={companyManagements} />
+
                                 <SelectInput label="Área" name="area" value={filters.area} onChange={handleFilterChange} options={companyAreas} />
                                 <SelectInput label="Colaboradores" name="colaborador" value={filters.colaborador} onChange={handleFilterChange} options={allEmployees.map(e => ({ value: e.id.toString(), label: e.nome }))} />
                                 <SelectInput label="Gestor" name="gestor" value={filters.gestor} onChange={handleFilterChange} options={gestorOptions} />

@@ -46,8 +46,8 @@ const CalendarioEquipe: React.FC = () => {
                     return allManagedUnitNames.includes(emp.departamento);
                 });
             case 'user':
-                // User sees everyone in their 'area' (Gerência).
-                return activeEmployees.filter(emp => emp.area === currentUser.area);
+                // User sees everyone in their 'departamento' (Área).
+                return activeEmployees.filter(emp => emp.departamento === currentUser.departamento);
             default:
                 // Admin, RH, etc. see everyone.
                 return activeEmployees;

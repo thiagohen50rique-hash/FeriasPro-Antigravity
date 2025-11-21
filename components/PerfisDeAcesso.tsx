@@ -10,13 +10,13 @@ const PerfisDeAcesso: React.FC = () => {
     const { user: currentUser } = useAuth();
     const modal = useModal();
     const [employees, setEmployees] = useState<Funcionario[]>(MOCK_EMPLOYEES);
-    const [filters, setFilters] = useState({ cargo: '', area: '', unidade: '', role: '', departamento: '' });
+    const [filters, setFilters] = useState({ cargo: '', unidade: '', role: '', departamento: '' });
     const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<number>>(new Set());
     const [bulkActionRole, setBulkActionRole] = useState<PapelUsuario>('user');
     const [isDirty, setIsDirty] = useState(false);
 
     const uniqueCargos = useMemo(() => [...new Set(MOCK_EMPLOYEES.map(e => e.cargo))], []);
-    const uniqueAreas = useMemo(() => [...new Set(MOCK_EMPLOYEES.map(e => e.area))], []);
+
     const uniqueDepartamentos = useMemo(() => [...new Set(MOCK_EMPLOYEES.map(e => e.departamento))], []);
     const uniqueUnidades = useMemo(() => [...new Set(MOCK_EMPLOYEES.map(e => e.unidade))], []);
     const uniqueRoles: PapelUsuario[] = ['user', 'manager', 'admin', 'rh'];
@@ -25,7 +25,7 @@ const PerfisDeAcesso: React.FC = () => {
         return employees.filter(emp => {
             return (
                 (filters.cargo ? emp.cargo === filters.cargo : true) &&
-                (filters.area ? emp.area === filters.area : true) &&
+
                 (filters.departamento ? emp.departamento === filters.departamento : true) &&
                 (filters.unidade ? emp.unidade === filters.unidade : true) &&
                 (filters.role ? emp.role === filters.role : true)
@@ -43,7 +43,7 @@ const PerfisDeAcesso: React.FC = () => {
     };
 
     const handleResetFilters = () => {
-        setFilters({ cargo: '', area: '', unidade: '', role: '', departamento: '' });
+        setFilters({ cargo: '', unidade: '', role: '', departamento: '' });
     }
 
     const handleSelectOne = (employeeId: number) => {
@@ -105,7 +105,7 @@ const PerfisDeAcesso: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                     <FilterSelect label="Cargo" value={filters.cargo} options={uniqueCargos} onChange={val => handleFilterChange('cargo', val)} />
                     <FilterSelect label="Área" value={filters.departamento} options={uniqueDepartamentos} onChange={val => handleFilterChange('departamento', val)} />
-                    <FilterSelect label="Gerência" value={filters.area} options={uniqueAreas} onChange={val => handleFilterChange('area', val)} />
+
                     <FilterSelect label="Unidade" value={filters.unidade} options={uniqueUnidades} onChange={val => handleFilterChange('unidade', val)} />
                     <FilterSelect label="Perfil" value={filters.role} options={uniqueRoles.map(r => ({ value: r, text: getRoleText(r) }))} onChange={val => handleFilterChange('role', val)} />
                     <div className="flex items-end">
@@ -146,7 +146,7 @@ const PerfisDeAcesso: React.FC = () => {
                             <th scope="col" className="px-6 py-3 font-semibold">Funcionário</th>
                             <th scope="col" className="px-6 py-3 font-semibold">Cargo</th>
                             <th scope="col" className="px-6 py-3 font-semibold">Área</th>
-                            <th scope="col" className="px-6 py-3 font-semibold">Gerência</th>
+
                             <th scope="col" className="px-6 py-3 font-semibold">Unidade</th>
                             <th scope="col" className="px-6 py-3 font-semibold">Perfil de Acesso</th>
                         </tr>
@@ -160,7 +160,7 @@ const PerfisDeAcesso: React.FC = () => {
                                 <td className="px-6 py-4 font-semibold text-slate-800 whitespace-nowrap">{emp.nome}</td>
                                 <td className="px-6 py-4 text-slate-600">{emp.cargo}</td>
                                 <td className="px-6 py-4 text-slate-600">{emp.departamento}</td>
-                                <td className="px-6 py-4 text-slate-600">{emp.area}</td>
+
                                 <td className="px-6 py-4 text-slate-600">{emp.unidade}</td>
                                 <td className="px-6 py-4">
                                     <select
@@ -175,7 +175,7 @@ const PerfisDeAcesso: React.FC = () => {
                             </tr>
                         )) : (
                             <tr>
-                                <td colSpan={7}>
+                                <td colSpan={6}>
                                     <div className="text-center py-16">
                                         <UsersIcon className="mx-auto h-12 w-12 text-slate-400" />
                                         <h4 className="mt-4 text-lg font-semibold text-slate-700">Nenhum Funcionário Encontrado</h4>

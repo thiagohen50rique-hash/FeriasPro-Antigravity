@@ -1,12 +1,12 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { 
-    NovoFeriadoEmpresa, 
-    FeriadoEmpresa, 
-    NovaRegraFeriasColetivas, 
-    RegraFeriasColetivas, 
-    Funcionario 
+import {
+    NovoFeriadoEmpresa,
+    FeriadoEmpresa,
+    NovaRegraFeriasColetivas,
+    RegraFeriasColetivas,
+    Funcionario
 } from '../tipos';
 import ArrowLeftIcon from './icons/ArrowLeftIcon';
 import { useModal } from '../hooks/useModal';
@@ -160,7 +160,7 @@ const FormularioFeriasColetivas: React.FC<Omit<CadastroDeFeriadoProps, 'holidayT
         inicio: '',
         fim: '',
         unidade: '',
-        area: '',
+
         departamento: '',
         colaboradorIds: []
     });
@@ -170,7 +170,7 @@ const FormularioFeriasColetivas: React.FC<Omit<CadastroDeFeriadoProps, 'holidayT
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
-    
+
     const handleMultiSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedIds = Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => parseInt(option.value, 10));
         setFormData(prev => ({ ...prev, colaboradorIds: selectedIds }));
@@ -189,13 +189,13 @@ const FormularioFeriasColetivas: React.FC<Omit<CadastroDeFeriadoProps, 'holidayT
             setError("A data de início deve ser anterior à data de fim.");
             return;
         }
-        
+
         const ruleData: NovaRegraFeriasColetivas = {
             descricao: formData.descricao,
             inicio: formData.inicio,
             fim: formData.fim,
             unidade: formData.unidade || undefined,
-            area: formData.area || undefined,
+
             departamento: formData.departamento || undefined,
             colaboradorIds: formData.colaboradorIds || undefined,
         };
@@ -223,36 +223,30 @@ const FormularioFeriasColetivas: React.FC<Omit<CadastroDeFeriadoProps, 'holidayT
                     <input type="date" id="cv-fim" name="fim" value={formData.fim} onChange={handleInputChange} required className="bg-white w-full border-gray-300 rounded-lg shadow-sm" />
                 </div>
             </div>
-            
+
             <div className="pt-6 border-t">
                 <h4 className="font-semibold text-slate-700">Filtros de Aplicação (Opcional)</h4>
                 <p className="text-sm text-slate-500 mb-4">Se nenhum filtro for aplicado, a regra valerá para todos os colaboradores.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                     <div>
+                    <div>
                         <label htmlFor="cv-unidade" className="block text-sm font-medium text-slate-700 mb-1">Unidade</label>
                         <select id="cv-unidade" name="unidade" value={formData.unidade} onChange={handleInputChange} className="bg-white w-full border-gray-300 rounded-lg shadow-sm">
-                           <option value="">Todas</option>
-                           {companyUnits.map(u => <option key={u} value={u}>{u}</option>)}
+                            <option value="">Todas</option>
+                            {companyUnits.map(u => <option key={u} value={u}>{u}</option>)}
                         </select>
                     </div>
-                     <div>
+                    <div>
                         <label htmlFor="cv-departamento" className="block text-sm font-medium text-slate-700 mb-1">Área</label>
                         <select id="cv-departamento" name="departamento" value={formData.departamento} onChange={handleInputChange} className="bg-white w-full border-gray-300 rounded-lg shadow-sm">
-                           <option value="">Todas</option>
-                           {companyAreas.map(a => <option key={a} value={a}>{a}</option>)}
+                            <option value="">Todas</option>
+                            {companyAreas.map(a => <option key={a} value={a}>{a}</option>)}
                         </select>
                     </div>
-                     <div>
-                        <label htmlFor="cv-area" className="block text-sm font-medium text-slate-700 mb-1">Gerência</label>
-                        <select id="cv-area" name="area" value={formData.area} onChange={handleInputChange} className="bg-white w-full border-gray-300 rounded-lg shadow-sm">
-                           <option value="">Todas</option>
-                           {companyManagements.map(m => <option key={m} value={m}>{m}</option>)}
-                        </select>
-                    </div>
+
                     <div className="lg:col-span-4">
                         <label htmlFor="cv-colaboradores" className="block text-sm font-medium text-slate-700 mb-1">Colaboradores Específicos</label>
                         <select id="cv-colaboradores" name="colaboradorIds" multiple value={formData.colaboradorIds?.map(String)} onChange={handleMultiSelectChange} className="bg-white w-full h-40 border-gray-300 rounded-lg shadow-sm">
-                           {allEmployees.map(e => <option key={e.id} value={e.id}>{e.nome}</option>)}
+                            {allEmployees.map(e => <option key={e.id} value={e.id}>{e.nome}</option>)}
                         </select>
                     </div>
                 </div>

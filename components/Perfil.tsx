@@ -81,7 +81,7 @@ const Perfil: React.FC = () => {
                         <DataField label="Data de Admissão" value={formatDate(employee.dataAdmissao)} />
                         <DataField label="Cargo" value={employee.cargo} />
                         <DataField label="Área" value={employee.departamento} />
-                        <DataField label="Gerência" value={employee.area} />
+
                         <DataField label="Gestor Imediato" value={manager ? manager.nome : 'N/A'} />
                         <DataField label="Unidade" value={employee.unidade} />
                     </div>
