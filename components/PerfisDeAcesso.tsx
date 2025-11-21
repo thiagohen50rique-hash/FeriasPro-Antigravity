@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useModal } from '../hooks/useModal';
 import UsersIcon from './icons/UsersIcon';
 
-const AccessProfiles: React.FC = () => {
+const PerfisDeAcesso: React.FC = () => {
     const { user: currentUser } = useAuth();
     const modal = useModal();
     const [employees, setEmployees] = useState<Funcionario[]>(MOCK_EMPLOYEES);
@@ -14,7 +14,7 @@ const AccessProfiles: React.FC = () => {
     const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<number>>(new Set());
     const [bulkActionRole, setBulkActionRole] = useState<PapelUsuario>('user');
     const [isDirty, setIsDirty] = useState(false);
-    
+
     const uniqueCargos = useMemo(() => [...new Set(MOCK_EMPLOYEES.map(e => e.cargo))], []);
     const uniqueAreas = useMemo(() => [...new Set(MOCK_EMPLOYEES.map(e => e.area))], []);
     const uniqueDepartamentos = useMemo(() => [...new Set(MOCK_EMPLOYEES.map(e => e.departamento))], []);
@@ -32,7 +32,7 @@ const AccessProfiles: React.FC = () => {
             );
         });
     }, [employees, filters]);
-    
+
     const isAllSelected = useMemo(() => {
         if (filteredEmployees.length === 0) return false;
         return filteredEmployees.every(emp => selectedEmployeeIds.has(emp.id));
@@ -45,7 +45,7 @@ const AccessProfiles: React.FC = () => {
     const handleResetFilters = () => {
         setFilters({ cargo: '', area: '', unidade: '', role: '', departamento: '' });
     }
-    
+
     const handleSelectOne = (employeeId: number) => {
         setSelectedEmployeeIds(prev => {
             const newSet = new Set(prev);
@@ -57,7 +57,7 @@ const AccessProfiles: React.FC = () => {
             return newSet;
         });
     };
-    
+
     const handleSelectAll = () => {
         if (isAllSelected) {
             setSelectedEmployeeIds(new Set());
@@ -66,14 +66,14 @@ const AccessProfiles: React.FC = () => {
             setSelectedEmployeeIds(new Set(allFilteredIds));
         }
     };
-    
+
     const handleRoleChange = (employeeId: number, newRole: PapelUsuario) => {
         setEmployees(prev =>
             prev.map(emp => (emp.id === employeeId ? { ...emp, role: newRole } : emp))
         );
         setIsDirty(true);
     };
-    
+
     const handleApplyBulkAction = () => {
         setEmployees(prev =>
             prev.map(emp =>
@@ -89,7 +89,7 @@ const AccessProfiles: React.FC = () => {
         modal.alert({ title: "Sucesso", message: "Alterações salvas com sucesso!", confirmVariant: 'success' });
         setIsDirty(false);
     }
-    
+
     useEffect(() => {
         // Clear selection when filters change to avoid confusion
         setSelectedEmployeeIds(new Set());
@@ -99,7 +99,7 @@ const AccessProfiles: React.FC = () => {
     return (
         <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg border border-slate-200">
             <h3 className="text-xl font-bold text-blue-900 mb-6">Gerenciamento de Perfis de Acesso</h3>
-            
+
             {/* Filters */}
             <div className="p-4 bg-slate-100 rounded-lg border border-slate-200 mb-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
@@ -107,7 +107,7 @@ const AccessProfiles: React.FC = () => {
                     <FilterSelect label="Área" value={filters.departamento} options={uniqueDepartamentos} onChange={val => handleFilterChange('departamento', val)} />
                     <FilterSelect label="Gerência" value={filters.area} options={uniqueAreas} onChange={val => handleFilterChange('area', val)} />
                     <FilterSelect label="Unidade" value={filters.unidade} options={uniqueUnidades} onChange={val => handleFilterChange('unidade', val)} />
-                    <FilterSelect label="Perfil" value={filters.role} options={uniqueRoles.map(r => ({value: r, text: getRoleText(r)}))} onChange={val => handleFilterChange('role', val)} />
+                    <FilterSelect label="Perfil" value={filters.role} options={uniqueRoles.map(r => ({ value: r, text: getRoleText(r) }))} onChange={val => handleFilterChange('role', val)} />
                     <div className="flex items-end">
                         <button onClick={handleResetFilters} className="w-full h-11 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition">
                             Limpar Filtros
@@ -118,10 +118,10 @@ const AccessProfiles: React.FC = () => {
 
             {/* Bulk Actions */}
             {selectedEmployeeIds.size > 0 && (
-                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6 flex items-center justify-between">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6 flex items-center justify-between">
                     <span className="font-semibold text-blue-800">{selectedEmployeeIds.size} funcionário(s) selecionado(s)</span>
                     <div className="flex items-center space-x-3">
-                         <select
+                        <select
                             value={bulkActionRole}
                             onChange={(e) => setBulkActionRole(e.target.value as PapelUsuario)}
                             className="w-48 bg-white border-gray-300 rounded-lg shadow-sm py-2"
@@ -155,7 +155,7 @@ const AccessProfiles: React.FC = () => {
                         {filteredEmployees.length > 0 ? filteredEmployees.map((emp) => (
                             <tr key={emp.id} className="bg-white border-b border-slate-200 hover:bg-slate-50">
                                 <td className="p-4">
-                                     <input type="checkbox" checked={selectedEmployeeIds.has(emp.id)} onChange={() => handleSelectOne(emp.id)} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                                    <input type="checkbox" checked={selectedEmployeeIds.has(emp.id)} onChange={() => handleSelectOne(emp.id)} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                                 </td>
                                 <td className="px-6 py-4 font-semibold text-slate-800 whitespace-nowrap">{emp.nome}</td>
                                 <td className="px-6 py-4 text-slate-600">{emp.cargo}</td>
@@ -188,11 +188,11 @@ const AccessProfiles: React.FC = () => {
                 </table>
             </div>
 
-             {/* Save Button */}
-             <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end">
-                <button 
-                    onClick={handleSaveChanges} 
-                    disabled={!isDirty} 
+            {/* Save Button */}
+            <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end">
+                <button
+                    onClick={handleSaveChanges}
+                    disabled={!isDirty}
                     className="px-6 py-2.5 text-sm font-semibold text-white bg-success rounded-lg shadow-sm hover:bg-success-hover disabled:bg-slate-300 disabled:cursor-not-allowed">
                     Salvar Alterações
                 </button>
@@ -201,7 +201,7 @@ const AccessProfiles: React.FC = () => {
     );
 };
 
-const FilterSelect: React.FC<{label: string, value: string, options: (string | {value:string, text:string})[], onChange: (v: string) => void}> = ({label, value, options, onChange}) => {
+const FilterSelect: React.FC<{ label: string, value: string, options: (string | { value: string, text: string })[], onChange: (v: string) => void }> = ({ label, value, options, onChange }) => {
     return (
         <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
@@ -222,4 +222,4 @@ const FilterSelect: React.FC<{label: string, value: string, options: (string | {
 }
 
 
-export default AccessProfiles;
+export default PerfisDeAcesso;

@@ -15,13 +15,13 @@ const DataField: React.FC<{ label: string; value: string }> = ({ label, value })
     </div>
 );
 
-const Profile: React.FC = () => {
+const Perfil: React.FC = () => {
     const { user, allEmployees, updateEmployee } = useAuth();
     const modal = useModal();
     const [showPasswordForm, setShowPasswordForm] = useState(false);
     const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
     const [passwordError, setPasswordError] = useState('');
-    
+
     const employee = allEmployees.find(e => e.id === user?.id);
 
     if (!employee) {
@@ -58,7 +58,7 @@ const Profile: React.FC = () => {
 
         const updatedEmployee = { ...employee, cpf: passwordData.newPassword };
         updateEmployee(updatedEmployee);
-        
+
         modal.alert({
             title: 'Sucesso!',
             message: 'Sua senha foi alterada com sucesso!',
@@ -130,4 +130,4 @@ const Profile: React.FC = () => {
     );
 };
 
-export default Profile;
+export default Perfil;

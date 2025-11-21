@@ -36,24 +36,24 @@ const RegistrationCard: React.FC<{
             </div>
         </div>
         <div className="mt-auto pt-4 flex items-center justify-end space-x-3">
-             {onManageClick && (
-                 <button 
+            {onManageClick && (
+                <button
                     onClick={onManageClick}
                     className="flex items-center px-4 py-2 text-sm font-semibold text-slate-700 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 transition">
                     <AdjustmentsHorizontalIcon className="h-4 w-4 mr-2" />
                     Gerenciar
                 </button>
             )}
-             {onConsultClick && (
-                <button 
+            {onConsultClick && (
+                <button
                     onClick={onConsultClick}
                     className="flex items-center px-4 py-2 text-sm font-semibold text-slate-700 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 transition">
                     <SearchIcon className="h-4 w-4 mr-2" />
                     Consultar
                 </button>
             )}
-             {onNewClick && (
-                <button 
+            {onNewClick && (
+                <button
                     onClick={onNewClick}
                     className="flex items-center px-4 py-2 text-sm font-semibold text-white bg-primary border border-transparent rounded-lg hover:bg-blue-600 transition">
                     <PlusCircleIcon className="h-4 w-4 mr-2" />
@@ -64,7 +64,7 @@ const RegistrationCard: React.FC<{
     </div>
 );
 
-const Registrations: React.FC<RegistrationsProps> = ({ setActiveView }) => {
+const Cadastros: React.FC<RegistrationsProps> = ({ setActiveView }) => {
     return (
         <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -94,19 +94,19 @@ const Registrations: React.FC<RegistrationsProps> = ({ setActiveView }) => {
                     description="Crie períodos em massa ou gerencie individualmente por colaborador."
                     onManageClick={() => setActiveView('gerenciar-periodos')}
                 />
-                 <RegistrationCard
+                <RegistrationCard
                     icon={<PencilSquareIcon className="h-6 w-6" />}
                     title="Lançamento Direto de Férias"
                     description="Lance férias diretamente para um colaborador, sem fluxo de aprovação."
                     onManageClick={() => setActiveView('lancamento-ferias')}
                 />
-                 <RegistrationCard
+                <RegistrationCard
                     icon={<PencilIcon className="h-6 w-6" />}
                     title="Gerenciamento de Férias"
                     description="Visualize e gerencie todos os registros de férias do sistema."
                     onManageClick={() => setActiveView('gerenciar-ferias')}
                 />
-                 <RegistrationCard
+                <RegistrationCard
                     icon={<SettingsIcon className="h-6 w-6" />}
                     title="Parâmetros do Sistema"
                     description="Ajuste as regras e parâmetros gerais do sistema de férias."
@@ -117,4 +117,4 @@ const Registrations: React.FC<RegistrationsProps> = ({ setActiveView }) => {
     );
 };
 
-export default Registrations;
+export default Cadastros;

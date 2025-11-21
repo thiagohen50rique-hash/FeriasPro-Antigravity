@@ -1,10 +1,10 @@
 
 import React, { useMemo, useState } from 'react';
-import { 
-    Funcionario, 
-    ConfiguracaoApp, 
-    PeriodoAquisitivo, 
-    PeriodoDeFerias 
+import {
+    Funcionario,
+    ConfiguracaoApp,
+    PeriodoAquisitivo,
+    PeriodoDeFerias
 } from '../tipos';
 import WarningTriangleIcon from './icons/WarningTriangleIcon';
 import CalendarDaysIcon from './icons/CalendarDaysIcon';
@@ -14,7 +14,7 @@ import { useAuth } from '../hooks/useAuth';
 import DatabaseIcon from './icons/DatabaseIcon';
 import UsersIcon from './icons/UsersIcon';
 import { getDynamicStatus, getStatusText, getDescendantUnitIds, getStatusBadge, canApprove, getDynamicAccrualPeriodStatus } from '../constants';
-import TeamVacationChart from './TeamVacationChart';
+import GraficoFeriasEquipe from './GraficoFeriasEquipe';
 import { formatDate } from '../utils/dateUtils';
 import CheckCircleIcon from './icons/CheckCircleIcon';
 
@@ -30,12 +30,12 @@ const AccrualPeriodContent: React.FC<{
     navigateToSchedule: (periodId: string) => void;
 
 }> = ({ period, config, setActiveView, navigateToSchedule }) => {
-    
-    const abonoDays = useMemo(() => 
+
+    const abonoDays = useMemo(() =>
         period.fracionamentos
             .filter(f => f.status !== 'canceled' && f.status !== 'rejected')
             .reduce((sum, frac) => sum + (frac.diasAbono || 0), 0),
-    [period.fracionamentos]);
+        [period.fracionamentos]);
 
 
     const usedDays = useMemo(() => {
@@ -43,12 +43,12 @@ const AccrualPeriodContent: React.FC<{
             .filter(f => f.status !== 'canceled' && f.status !== 'rejected')
             .reduce((acc, curr) => acc + curr.quantidadeDias, 0);
     }, [period.fracionamentos]);
-    
+
     const totalUsedOrAbono = usedDays + abonoDays;
 
     const remainingDays = period.saldoTotal - totalUsedOrAbono;
     const isFullyScheduled = remainingDays <= 0;
-    
+
     const isExpired = useMemo(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -79,21 +79,21 @@ const AccrualPeriodContent: React.FC<{
             <div className="mb-4">
                 <div className="flex justify-between items-center mb-1">
                     <span className="text-sm font-medium text-slate-600">
-                         {isFullyScheduled ? `${totalUsedOrAbono} de ${period.saldoTotal} dias utilizados` : `${totalUsedOrAbono} de ${period.saldoTotal} dias planejados`}
+                        {isFullyScheduled ? `${totalUsedOrAbono} de ${period.saldoTotal} dias utilizados` : `${totalUsedOrAbono} de ${period.saldoTotal} dias planejados`}
                     </span>
                     <span className="text-sm font-medium text-slate-600">{Math.max(0, remainingDays)} dias pendentes</span>
                 </div>
                 <div className="w-full bg-slate-200 rounded-full h-2.5">
-                    <div 
-                        className={`h-2.5 rounded-full ${isFullyScheduled ? 'bg-blue-600' : 'bg-green-500'}`} 
+                    <div
+                        className={`h-2.5 rounded-full ${isFullyScheduled ? 'bg-blue-600' : 'bg-green-500'}`}
                         style={{ width: `${Math.min(100, (totalUsedOrAbono / period.saldoTotal) * 100)}%` }}>
                     </div>
                 </div>
             </div>
-            
+
             {(dynamicPeriodStatus === 'planning' || dynamicPeriodStatus === 'rejected') && (
-                 <button onClick={() => navigateToSchedule(period.id)} className="w-full mt-6 py-2.5 px-4 border border-dashed border-slate-400 text-slate-600 rounded-lg hover:bg-slate-100 hover:text-slate-800 transition flex items-center justify-center font-semibold">
-                    <PlusIcon className="h-5 w-5 mr-2" /> 
+                <button onClick={() => navigateToSchedule(period.id)} className="w-full mt-6 py-2.5 px-4 border border-dashed border-slate-400 text-slate-600 rounded-lg hover:bg-slate-100 hover:text-slate-800 transition flex items-center justify-center font-semibold">
+                    <PlusIcon className="h-5 w-5 mr-2" />
                     {dynamicPeriodStatus === 'rejected' ? 'Refazer Planejamento' : 'Planejar Férias'}
                 </button>
             )}
@@ -136,7 +136,7 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
     const periodsToDisplay = useMemo(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-    
+
         return employee.periodosAquisitivos
             .filter(period => {
                 // Regra 1: Não exibir se data limite de concessão já foi atingida.
@@ -144,13 +144,13 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                 if (concessionLimitDate < today) {
                     return false;
                 }
-    
+
                 // Regra 2: Não exibir se já foi gozado (todas as frações gozadas).
                 const dynamicPeriodStatus = getDynamicAccrualPeriodStatus(period);
                 if (dynamicPeriodStatus === 'enjoyed') {
                     return false;
                 }
-    
+
                 // Filtro opcional de configuração do sistema para exibir apenas períodos até uma data.
                 if (config.displayDueDateLimit) {
                     const periodEndDate = new Date(`${period.terminoPa}T12:00:00Z`);
@@ -159,18 +159,18 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                         return false;
                     }
                 }
-                
+
                 // Se passou por todas as regras de exclusão, o período é exibido.
                 return true;
             })
-            .sort((a,b) => new Date(a.inicioPa).getTime() - new Date(b.inicioPa).getTime());
+            .sort((a, b) => new Date(a.inicioPa).getTime() - new Date(b.inicioPa).getTime());
     }, [employee.periodosAquisitivos, config.displayDueDateLimit]);
 
 
     const totalDaysToSchedule = useMemo(() => {
         return employee.periodosAquisitivos.reduce((total, period) => {
-            if(period.status !== 'planning' && period.status !== 'rejected') return total;
-            
+            if (period.status !== 'planning' && period.status !== 'rejected') return total;
+
             const usedInPeriod = period.fracionamentos
                 .filter(frac => frac.status !== 'canceled' && frac.status !== 'rejected')
                 .reduce((acc, frac) => acc + frac.quantidadeDias, 0);
@@ -180,7 +180,7 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
             const remainingInPeriod = period.saldoTotal - usedInPeriod - abonoInPeriod;
 
             if (new Date(period.limiteConcessao) > new Date() && remainingInPeriod > 0) {
-                 return total + remainingInPeriod;
+                return total + remainingInPeriod;
             }
             return total;
         }, 0);
@@ -189,7 +189,7 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
     const nextExpiringPeriod = useMemo(() => {
         return employee.periodosAquisitivos
             .filter(p => {
-                 if(p.status !== 'planning' && p.status !== 'rejected') return false;
+                if (p.status !== 'planning' && p.status !== 'rejected') return false;
 
                 const usedInPeriod = p.fracionamentos
                     .filter(frac => frac.status !== 'canceled' && frac.status !== 'rejected')
@@ -198,7 +198,7 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
             })
             .sort((a, b) => new Date(a.limiteConcessao).getTime() - new Date(b.limiteConcessao).getTime())[0];
     }, [employee.periodosAquisitivos]);
-    
+
     const nextVacation = useMemo(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -218,32 +218,32 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
         if (!hasTeamView || !user) {
             return [];
         }
-    
+
         // Find subordinates first
         let subordinates: Funcionario[] = [];
         if (user.role === 'admin' || user.role === 'rh') {
-          // Admins/RH manage everyone who is not them.
-          subordinates = activeEmployees.filter(e => e.id !== user.id);
+            // Admins/RH manage everyone who is not them.
+            subordinates = activeEmployees.filter(e => e.id !== user.id);
         } else if (user.role === 'manager') {
-          // Managers manage their hierarchy
-          const managedUnits = orgUnits.filter(u => u.name === user.departamento && u.type === 'Área');
-          const managedUnitIds = managedUnits.map(u => u.id);
-          const descendantUnitIds: string[] = [];
-          managedUnits.forEach(unit => {
-            descendantUnitIds.push(...getDescendantUnitIds(unit.id, orgUnits));
-          });
-          const allManagedUnitIds = [...new Set([...managedUnitIds, ...descendantUnitIds])];
-          
-          subordinates = activeEmployees.filter(emp => {
-            if (emp.id === user.id) return false;
-            const empUnit = orgUnits.find(u => (u.name === emp.departamento && u.type === 'Área'));
-            return empUnit && allManagedUnitIds.includes(empUnit.id);
-          });
+            // Managers manage their hierarchy
+            const managedUnits = orgUnits.filter(u => u.name === user.departamento && u.type === 'Área');
+            const managedUnitIds = managedUnits.map(u => u.id);
+            const descendantUnitIds: string[] = [];
+            managedUnits.forEach(unit => {
+                descendantUnitIds.push(...getDescendantUnitIds(unit.id, orgUnits));
+            });
+            const allManagedUnitIds = [...new Set([...managedUnitIds, ...descendantUnitIds])];
+
+            subordinates = activeEmployees.filter(emp => {
+                if (emp.id === user.id) return false;
+                const empUnit = orgUnits.find(u => (u.name === emp.departamento && u.type === 'Área'));
+                return empUnit && allManagedUnitIds.includes(empUnit.id);
+            });
         }
-    
+
         // Use a Map to ensure the current user is included and the list is unique.
         const teamMap = new Map<number, Funcionario>();
-        
+
         // Add subordinates first
         subordinates.forEach(emp => {
             teamMap.set(emp.id, emp);
@@ -254,7 +254,7 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
         if (self) {
             teamMap.set(self.id, self);
         }
-    
+
         return Array.from(teamMap.values());
     }, [user, activeEmployees, hasTeamView, orgUnits]);
 
@@ -265,28 +265,28 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
 
     const upcomingVacations = useMemo(() => {
         if (!hasTeamView) return [];
-        const today = new Date(); 
+        const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
-        const futureDate = new Date(today); 
+
+        const futureDate = new Date(today);
         futureDate.setUTCDate(futureDate.getUTCDate() + upcomingDays);
-    
+
         const vacationingEmployees = new Set<number>();
-    
+
         teamMembers.forEach(emp => {
             const hasUpcomingVacation = emp.periodosAquisitivos.some(pa =>
                 pa.fracionamentos.some(vac => {
                     const dynamicStatus = getDynamicStatus(vac);
-                    
+
                     if (dynamicStatus !== 'enjoying' && dynamicStatus !== 'scheduled') {
                         return false;
                     }
-    
+
                     const startDate = new Date(`${vac.inicioFerias}T12:00:00Z`);
                     const endDate = new Date(`${vac.terminoFerias}T12:00:00Z`);
-    
+
                     const overlaps = startDate <= futureDate && endDate >= today;
-                    
+
                     return overlaps;
                 })
             );
@@ -294,13 +294,13 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                 vacationingEmployees.add(emp.id);
             }
         });
-    
+
         return teamMembers.filter(emp => vacationingEmployees.has(emp.id));
     }, [teamMembers, upcomingDays, hasTeamView]);
 
     const pendingApprovalsCount = useMemo(() => {
         if (!hasTeamView || !user) return 0;
-        
+
         const otherEmployees = allEmployees.filter(e => e.id !== user.id);
 
         let count = 0;
@@ -315,14 +315,14 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
         return count;
     }, [allEmployees, hasTeamView, user, orgUnits]);
 
-    const pendingDaysSubtitle = totalDaysToSchedule > 0 
-        ? (nextExpiringPeriod ? `Próximo vencimento em: ${formatDate(nextExpiringPeriod.limiteConcessao)}` : 'Nenhum saldo a vencer.') 
+    const pendingDaysSubtitle = totalDaysToSchedule > 0
+        ? (nextExpiringPeriod ? `Próximo vencimento em: ${formatDate(nextExpiringPeriod.limiteConcessao)}` : 'Nenhum saldo a vencer.')
         : 'Você está em dia com seus agendamentos!';
 
     if (hasTeamView) {
         return (
             <div>
-                 <div className="mb-8">
+                <div className="mb-8">
                     <h3 className="text-2xl font-bold text-slate-800 mb-4">Minha Equipe</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="bg-white p-5 rounded-lg shadow border border-slate-200 flex flex-col justify-between min-h-[150px]">
@@ -344,23 +344,23 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                                 Ver calendário →
                             </button>
                         </div>
-                         <div className="bg-white p-5 rounded-lg shadow border border-slate-200 flex flex-col justify-between min-h-[150px]">
+                        <div className="bg-white p-5 rounded-lg shadow border border-slate-200 flex flex-col justify-between min-h-[150px]">
                             <div>
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <h4 className="text-lg font-bold text-slate-800 flex items-baseline flex-wrap">
                                             <span className="mr-2">Férias nos Próximos</span>
-                                            <input 
-                                                type="number" 
+                                            <input
+                                                type="number"
                                                 value={upcomingDays}
                                                 onChange={e => setUpcomingDays(parseInt(e.target.value) || 0)}
                                                 className="bg-blue-50 w-12 text-center font-semibold border-slate-300 rounded-md shadow-sm p-1 h-7"
-                                            /> 
+                                            />
                                             <span className="ml-2">dias</span>
                                         </h4>
                                         <p className="text-3xl font-bold text-slate-800 my-1">{upcomingVacations.length}</p>
                                         <div className="text-xs text-slate-500 h-8 overflow-y-auto pr-2">
-                                             {upcomingVacations.length > 0 ? upcomingVacations.map(e => e.nome).join(', ') : `Nenhuma férias agendada.`}
+                                            {upcomingVacations.length > 0 ? upcomingVacations.map(e => e.nome).join(', ') : `Nenhuma férias agendada.`}
                                         </div>
                                     </div>
                                     <div className="w-12 h-12 rounded-full flex items-center justify-center bg-cyan-100 flex-shrink-0">
@@ -372,7 +372,7 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                                 Ver calendário →
                             </button>
                         </div>
-                       <SummaryCard 
+                        <SummaryCard
                             title="Aprovações Pendentes"
                             value={pendingApprovalsCount}
                             subtitle={pendingApprovalsCount > 0 ? "Aguardando sua aprovação." : "Nenhuma solicitação pendente."}
@@ -380,26 +380,26 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                             action={() => setActiveView('aprovacoes')}
                             icon={<CubeIcon className="h-6 w-6 text-info" />}
                             bgColorClass="bg-info-light"
-                       />
+                        />
                     </div>
                 </div>
 
-                <TeamVacationChart teamMembers={teamMembers} />
+                <GraficoFeriasEquipe teamMembers={teamMembers} />
 
                 <div className="mb-10 mt-8">
                     <h3 className="text-2xl font-bold text-slate-800 mb-4">Minhas Férias</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <SummaryCard 
-                           title="Dias Pendentes"
-                           value={totalDaysToSchedule > 0 ? totalDaysToSchedule : '0'}
-                           subtitle={pendingDaysSubtitle}
-                           actionText="Agendar agora"
-                           action={() => setActiveView('agendar')}
-                           icon={totalDaysToSchedule > 0 ? <WarningTriangleIcon className="h-6 w-6 text-warning-dark" /> : <CheckCircleIcon className="h-6 w-6 text-success" />}
-                           bgColorClass={totalDaysToSchedule > 0 ? 'bg-warning-light' : 'bg-success-light'}
-                           containerClass={totalDaysToSchedule > 0 ? 'animate-pulse-warning' : ''}
+                        <SummaryCard
+                            title="Dias Pendentes"
+                            value={totalDaysToSchedule > 0 ? totalDaysToSchedule : '0'}
+                            subtitle={pendingDaysSubtitle}
+                            actionText="Agendar agora"
+                            action={() => setActiveView('agendar')}
+                            icon={totalDaysToSchedule > 0 ? <WarningTriangleIcon className="h-6 w-6 text-warning-dark" /> : <CheckCircleIcon className="h-6 w-6 text-success" />}
+                            bgColorClass={totalDaysToSchedule > 0 ? 'bg-warning-light' : 'bg-success-light'}
+                            containerClass={totalDaysToSchedule > 0 ? 'animate-pulse-warning' : ''}
                         />
-                       <SummaryCard 
+                        <SummaryCard
                             title="Próximas Férias"
                             value={nextVacation ? formatDate(nextVacation.inicioFerias) : 'N/A'}
                             subtitle={nextVacation ? `Período de ${nextVacation.quantidadeDias} dias (${getStatusText(getDynamicStatus(nextVacation as PeriodoDeFerias), config)})` : 'Nenhuma férias futura programada'}
@@ -407,8 +407,8 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                             action={() => setActiveView('agendar')}
                             icon={<CalendarDaysIcon className="h-6 w-6 text-blue-600" />}
                             bgColorClass="bg-blue-100"
-                       />
-                       <SummaryCard 
+                        />
+                        <SummaryCard
                             title="Solicitações Pendentes"
                             value={pendingRequestsCount}
                             subtitle={pendingRequestsCount > 0 ? "Aguardando aprovação." : "Nenhuma solicitação pendente."}
@@ -416,12 +416,12 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                             action={() => setActiveView('agendar')}
                             icon={<CubeIcon className="h-6 w-6 text-info" />}
                             bgColorClass="bg-info-light"
-                       />
+                        />
                     </div>
                 </div>
 
                 <div>
-                     {periodsToDisplay.map(period => (
+                    {periodsToDisplay.map(period => (
                         <AccrualPeriodContent
                             key={period.id}
                             period={period}
@@ -429,7 +429,7 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                             setActiveView={setActiveView}
                             navigateToSchedule={navigateToSchedule}
                         />
-                     ))}
+                    ))}
                 </div>
             </div>
         );
@@ -439,7 +439,7 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
         <div>
             {/* Standard User View */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-               <SummaryCard 
+                <SummaryCard
                     title="Dias Pendentes"
                     value={totalDaysToSchedule > 0 ? totalDaysToSchedule : '0'}
                     subtitle={pendingDaysSubtitle}
@@ -448,8 +448,8 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                     icon={totalDaysToSchedule > 0 ? <WarningTriangleIcon className="h-6 w-6 text-warning-dark" /> : <CheckCircleIcon className="h-6 w-6 text-success" />}
                     bgColorClass={totalDaysToSchedule > 0 ? 'bg-warning-light' : 'bg-success-light'}
                     containerClass={totalDaysToSchedule > 0 ? 'animate-pulse-warning' : ''}
-               />
-               <SummaryCard 
+                />
+                <SummaryCard
                     title="Próximas Férias"
                     value={nextVacation ? formatDate(nextVacation.inicioFerias) : 'N/A'}
                     subtitle={nextVacation ? `Período de ${nextVacation.quantidadeDias} dias (${getStatusText(getDynamicStatus(nextVacation as PeriodoDeFerias), config)})` : 'Nenhuma férias futura programada'}
@@ -457,8 +457,8 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                     action={() => setActiveView('agendar')}
                     icon={<CalendarDaysIcon className="h-6 w-6 text-blue-600" />}
                     bgColorClass="bg-blue-100"
-               />
-               <SummaryCard 
+                />
+                <SummaryCard
                     title="Solicitações Pendentes"
                     value={pendingRequestsCount}
                     subtitle={pendingRequestsCount > 0 ? "Aguardando aprovação." : "Nenhuma solicitação pendente."}
@@ -466,11 +466,11 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                     action={() => setActiveView('agendar')}
                     icon={<CubeIcon className="h-6 w-6 text-info" />}
                     bgColorClass="bg-info-light"
-               />
+                />
             </div>
-        
+
             <div>
-                 {periodsToDisplay.map(period => (
+                {periodsToDisplay.map(period => (
                     <AccrualPeriodContent
                         key={period.id}
                         period={period}
@@ -478,12 +478,12 @@ const PainelDeFerias: React.FC<PainelDeFeriasProps> = ({ setActiveView, navigate
                         setActiveView={setActiveView}
                         navigateToSchedule={navigateToSchedule}
                     />
-                 ))}
-                 {periodsToDisplay.length === 0 && (
+                ))}
+                {periodsToDisplay.length === 0 && (
                     <div className="text-center py-10 bg-slate-50 rounded-lg border border-dashed">
                         <p className="text-sm text-slate-500">Nenhum período com saldo disponível para agendamento.</p>
                     </div>
-                 )}
+                )}
             </div>
         </div>
     );

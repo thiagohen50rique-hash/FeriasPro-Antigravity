@@ -1,13 +1,13 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
-    ConfiguracaoApp, 
-    PeriodoAquisitivo, 
-    PeriodoDeFerias, 
-    Funcionario, 
-    RegraFeriasColetivas, 
-    ParticipanteAssinatura, 
-    InformacaoAssinatura 
+import {
+    ConfiguracaoApp,
+    PeriodoAquisitivo,
+    PeriodoDeFerias,
+    Funcionario,
+    RegraFeriasColetivas,
+    ParticipanteAssinatura,
+    InformacaoAssinatura
 } from '../tipos';
 import { generateVacationRequestPDF } from '../services/pdfGenerator';
 import PlusIcon from './icons/PlusIcon';
@@ -18,7 +18,7 @@ import { useModal } from '../hooks/useModal';
 import { getDynamicStatus, getStatusBadge, getStatusText, getDynamicAccrualPeriodStatus } from '../constants';
 import DocumentTextIcon from './icons/DocumentTextIcon';
 import { formatDate } from '../utils/dateUtils';
-import TeamSchedule from './TeamSchedule';
+import EscalaEquipe from './EscalaEquipe';
 import UsersIcon from './icons/UsersIcon';
 import CalendarIcon from './icons/CalendarIcon';
 import CheckCircleIcon from './icons/CheckCircleIcon';
@@ -49,7 +49,7 @@ const findApplicableCollectiveRule = (employee: Funcionario, rules: RegraFeriasC
 
 const createInitialSignatureParticipant = (employee: Funcionario): ParticipanteAssinatura => {
     const now = new Date();
-    const eventTime1 = new Date(now.getTime() - 5 * 60000); 
+    const eventTime1 = new Date(now.getTime() - 5 * 60000);
     const eventTime2 = new Date(now.getTime() - 2 * 60000);
     const eventTime3 = new Date(now.getTime() - 1 * 60000);
     const eventTime4 = new Date(now.getTime() - 30000);
@@ -57,18 +57,16 @@ const createInitialSignatureParticipant = (employee: Funcionario): ParticipanteA
     const geo = '-22.8805518-47.0376365';
 
     return {
-        signer: employee,
-        conclusionTime: now.toISOString(),
-        ipAddress: ip,
-        authenticationMethod: 'Não',
-        device: 'Windows NT 10.0; Win64; x64',
-        geolocation: 'Autorizado',
-        events: [
-            { name: 'Notificação enviada', timestamp: eventTime1.toISOString(), details: `Link de operação enviado para ${employee.email}` },
-            { name: 'Operação visualizada', timestamp: eventTime2.toISOString(), details: `Acessou o link da operação\nIP: ${ip}\nGEO: ${geo}` },
-            { name: 'Termos da assinatura eletrônica', timestamp: eventTime3.toISOString(), details: `Aceitou os termos da assinatura eletrônica\nIP: ${ip}\nGEO: ${geo}` },
-            { name: 'Assinatura efetuada', timestamp: eventTime4.toISOString(), details: `Realizou a assinatura com validade jurídica\nIP: ${ip}\nGEO: ${geo}` },
-            { name: 'Operação concluída', timestamp: eventTime4.toISOString(), details: `Operação concluída\nIP: ${ip}\nGEO: ${geo}` },
+        assinante: employee,
+        dataConclusao: now.toISOString(),
+        enderecoIP: ip,
+        metodoAutenticacao: 'Não',
+        dispositivo: 'Windows NT 10.0; Win64; x64',
+        geolocalizacao: 'Autorizado',
+        eventos: [
+            { name: 'Termos da assinatura eletrônica', timestamp: eventTime1.toISOString(), detalhes: `Aceitou os termos da assinatura eletrônica\nIP: ${ip}\nGEO: ${geo}` },
+            { name: 'Assinatura efetuada', timestamp: now.toISOString(), detalhes: `Realizou a assinatura com validade jurídica\nIP: ${ip}\nGEO: ${geo}` },
+            { name: 'Operação concluída', timestamp: now.toISOString(), detalhes: `Operação concluída\nIP: ${ip}\nGEO: ${geo}` },
         ]
     };
 };
@@ -79,7 +77,7 @@ const TabButton: React.FC<{
     isActive: boolean;
     onClick: () => void;
 }> = ({ icon, label, isActive, onClick }) => (
-     <button onClick={onClick} className={`flex items-center px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${isActive ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}>
+    <button onClick={onClick} className={`flex items-center px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${isActive ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}>
         {icon}
         {label}
     </button>
@@ -102,57 +100,57 @@ type NewVacationState = {
 };
 
 interface ExpandedContentProps {
-  activePeriod: PeriodoAquisitivo;
-  totalUtilizado: number;
-  remainingBalance: number;
-  isScheduling: boolean;
-  nonCanceledFractions: PeriodoDeFerias[];
-  isPlanInEditMode: boolean;
-  canModifySchedule: boolean;
-  handleGenerateOverallPDF: () => void;
-  setIsPlanInEditMode: React.Dispatch<React.SetStateAction<boolean>>;
-  handleDeleteEntirePlan: () => void;
-  editingVacationId: string | null;
-  newVacation: NewVacationState;
-  setNewVacation: React.Dispatch<React.SetStateAction<NewVacationState>>;
-  vacationDaysInputType: 'list' | 'input';
-  availableDaysForNewRequest: number[];
-  exactAbonoDays: number;
-  isAbonoDisabled: boolean;
-  error: string;
-  resetFormState: () => void;
-  handleSaveVacation: () => void;
-  handleStartAdding: () => void;
-  handleStartEditing: (vacation: PeriodoDeFerias) => void;
-  handleDeleteVacation: (vacationId: string) => void;
-  config: ConfiguracaoApp;
+    activePeriod: PeriodoAquisitivo;
+    totalUtilizado: number;
+    remainingBalance: number;
+    isScheduling: boolean;
+    nonCanceledFractions: PeriodoDeFerias[];
+    isPlanInEditMode: boolean;
+    canModifySchedule: boolean;
+    handleGenerateOverallPDF: () => void;
+    setIsPlanInEditMode: React.Dispatch<React.SetStateAction<boolean>>;
+    handleDeleteEntirePlan: () => void;
+    editingVacationId: string | null;
+    newVacation: NewVacationState;
+    setNewVacation: React.Dispatch<React.SetStateAction<NewVacationState>>;
+    tipoEntradaDiasFerias: 'list' | 'input';
+    availableDaysForNewRequest: number[];
+    exactAbonoDays: number;
+    isAbonoDisabled: boolean;
+    error: string;
+    resetFormState: () => void;
+    handleSaveVacation: () => void;
+    handleStartAdding: () => void;
+    handleStartEditing: (vacation: PeriodoDeFerias) => void;
+    handleDeleteVacation: (vacationId: string) => void;
+    config: ConfiguracaoApp;
 }
 
 const ExpandedContent: React.FC<ExpandedContentProps> = ({
-  activePeriod,
-  totalUtilizado,
-  remainingBalance,
-  isScheduling,
-  nonCanceledFractions,
-  isPlanInEditMode,
-  canModifySchedule,
-  handleGenerateOverallPDF,
-  setIsPlanInEditMode,
-  handleDeleteEntirePlan,
-  editingVacationId,
-  newVacation,
-  setNewVacation,
-  vacationDaysInputType,
-  availableDaysForNewRequest,
-  exactAbonoDays,
-  isAbonoDisabled,
-  error,
-  resetFormState,
-  handleSaveVacation,
-  handleStartAdding,
-  handleStartEditing,
-  handleDeleteVacation,
-  config
+    activePeriod,
+    totalUtilizado,
+    remainingBalance,
+    isScheduling,
+    nonCanceledFractions,
+    isPlanInEditMode,
+    canModifySchedule,
+    handleGenerateOverallPDF,
+    setIsPlanInEditMode,
+    handleDeleteEntirePlan,
+    editingVacationId,
+    newVacation,
+    setNewVacation,
+    tipoEntradaDiasFerias,
+    availableDaysForNewRequest,
+    exactAbonoDays,
+    isAbonoDisabled,
+    error,
+    resetFormState,
+    handleSaveVacation,
+    handleStartAdding,
+    handleStartEditing,
+    handleDeleteVacation,
+    config
 }) => {
     return (
         <div>
@@ -164,13 +162,13 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({
                 <div className="w-full bg-slate-200 rounded-full h-2.5">
                     <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${activePeriod.saldoTotal > 0 ? (totalUtilizado / activePeriod.saldoTotal) * 100 : 0}%` }}></div>
                 </div>
-                 {remainingBalance > 0 && !isScheduling && (
+                {remainingBalance > 0 && !isScheduling && (
                     <p className="text-xs text-amber-600 text-center mt-2 p-2 bg-amber-50 rounded border border-amber-200">
                         <strong>Alerta:</strong> Você ainda tem {remainingBalance} dias de saldo para programar neste período.
                     </p>
                 )}
             </div>
-            
+
             <div className="mb-6">
                 <h4 className="text-lg font-semibold text-slate-800 mb-3">Férias Programadas</h4>
                 {nonCanceledFractions.length > 0 ? (
@@ -178,32 +176,33 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({
                         {nonCanceledFractions.map(f => {
                             const dynamicStatus = getDynamicStatus(f);
                             return (
-                            <li key={f.id} className="flex flex-wrap justify-between items-center p-3 bg-slate-50 rounded-md border border-slate-200">
-                                <div className="font-medium text-slate-700"> {f.sequencia}º Período: {formatDate(f.inicioFerias)} a {formatDate(f.terminoFerias)} </div>
-                                <div className="flex items-center space-x-4">
-                                    <div className="flex items-center space-x-2">
-                                        <span className="text-sm text-slate-500">{f.quantidadeDias} dias</span>
-                                        {f.diasAbono > 0 && (
-                                            <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                                                Abono ({f.diasAbono}d)
-                                            </span>
-                                        )}
-                                        {f.adiantamento13 && (
-                                            <span className="text-xs font-semibold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full">
-                                                + 13º
-                                            </span>
+                                <li key={f.id} className="flex flex-wrap justify-between items-center p-3 bg-slate-50 rounded-md border border-slate-200">
+                                    <div className="font-medium text-slate-700"> {f.sequencia}º Período: {formatDate(f.inicioFerias)} a {formatDate(f.terminoFerias)} </div>
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex items-center space-x-2">
+                                            <span className="text-sm text-slate-500">{f.quantidadeDias} dias</span>
+                                            {f.diasAbono > 0 && (
+                                                <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                                                    Abono ({f.diasAbono}d)
+                                                </span>
+                                            )}
+                                            {f.adiantamento13 && (
+                                                <span className="text-xs font-semibold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full">
+                                                    + 13º
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className={getStatusBadge(dynamicStatus, config)}>{getStatusText(dynamicStatus, config)}</span>
+                                        {isPlanInEditMode && (
+                                            <div className="flex items-center border-l pl-2 ml-2 space-x-1">
+                                                <button onClick={() => handleStartEditing(f)} className="p-1 text-slate-400 hover:text-info rounded-full hover:bg-info/10 transition-colors" title="Alterar solicitação"><PencilIcon className="h-4 w-4" /></button>
+                                                <button onClick={() => handleDeleteVacation(f.id)} className="p-1 text-slate-400 hover:text-danger rounded-full hover:bg-danger/10 transition-colors" title="Excluir solicitação"><TrashIcon className="h-4 w-4" /></button>
+                                            </div>
                                         )}
                                     </div>
-                                    <span className={getStatusBadge(dynamicStatus, config)}>{getStatusText(dynamicStatus, config)}</span>
-                                     {isPlanInEditMode && (
-                                        <div className="flex items-center border-l pl-2 ml-2 space-x-1">
-                                            <button onClick={() => handleStartEditing(f)} className="p-1 text-slate-400 hover:text-info rounded-full hover:bg-info/10 transition-colors" title="Alterar solicitação"><PencilIcon className="h-4 w-4" /></button>
-                                            <button onClick={() => handleDeleteVacation(f.id)} className="p-1 text-slate-400 hover:text-danger rounded-full hover:bg-danger/10 transition-colors" title="Excluir solicitação"><TrashIcon className="h-4 w-4" /></button>
-                                        </div>
-                                     )}
-                                </div>
-                            </li>
-                        )})}
+                                </li>
+                            )
+                        })}
                     </ul>
                 ) : (
                     <div className="text-center py-6 bg-slate-50 rounded-lg border border-dashed"><p className="text-sm text-slate-500">Nenhuma férias programada para este período.</p></div>
@@ -221,7 +220,7 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({
                         <DocumentTextIcon className="h-4 w-4 mr-2" />
                         Gerar Requerimento
                     </button>
-            
+
                     {canModifySchedule && (
                         <>
                             {!isPlanInEditMode ? (
@@ -244,23 +243,23 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({
                 </div>
             )}
 
-            
+
             {isScheduling ? (
                 <div className="p-4 border-t border-slate-200 mt-6 bg-slate-50 rounded-lg">
-                     <h5 className="font-semibold text-slate-800 mb-4">{editingVacationId ? 'Alterar Solicitação de Férias' : 'Nova Solicitação de Férias'}</h5>
+                    <h5 className="font-semibold text-slate-800 mb-4">{editingVacationId ? 'Alterar Solicitação de Férias' : 'Nova Solicitação de Férias'}</h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label htmlFor="start-date" className="block text-sm font-medium text-slate-700 mb-1">Data de Início</label>
-                            <input type="date" id="start-date" value={newVacation.startDate} onChange={e => setNewVacation({...newVacation, startDate: e.target.value})} className="w-full border-gray-300 rounded-md shadow-sm bg-white" />
+                            <input type="date" id="start-date" value={newVacation.startDate} onChange={e => setNewVacation({ ...newVacation, startDate: e.target.value })} className="w-full border-gray-300 rounded-md shadow-sm bg-white" />
                         </div>
                         <div>
                             <label htmlFor="days" className="block text-sm font-medium text-slate-700 mb-1">Dias de Férias</label>
-                            {vacationDaysInputType === 'list' ? (
-                                <select id="days" value={newVacation.days} onChange={e => setNewVacation({...newVacation, days: parseInt(e.target.value)})} className="bg-white w-full border-gray-300 rounded-md shadow-sm" disabled={availableDaysForNewRequest.length === 0}>
+                            {tipoEntradaDiasFerias === 'list' ? (
+                                <select id="days" value={newVacation.days} onChange={e => setNewVacation({ ...newVacation, days: parseInt(e.target.value) })} className="bg-white w-full border-gray-300 rounded-md shadow-sm" disabled={availableDaysForNewRequest.length === 0}>
                                     {availableDaysForNewRequest.map(d => <option key={d} value={d}>{d} dias</option>)}
                                 </select>
                             ) : (
-                                <input type="number" id="days" value={newVacation.days} onChange={e => setNewVacation({...newVacation, days: parseInt(e.target.value) || 0})} min="1" max={remainingBalance} className="bg-white w-full border-gray-300 rounded-md shadow-sm" />
+                                <input type="number" id="days" value={newVacation.days} onChange={e => setNewVacation({ ...newVacation, days: parseInt(e.target.value) || 0 })} min="1" max={remainingBalance} className="bg-white w-full border-gray-300 rounded-md shadow-sm" />
                             )}
                         </div>
                     </div>
@@ -281,12 +280,12 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({
                             </div>
                         )}
                         <div className="flex items-center">
-                            <input id="adiantamento13" type="checkbox" checked={newVacation.adiantamento13} onChange={e => setNewVacation({...newVacation, adiantamento13: e.target.checked})} className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                            <input id="adiantamento13" type="checkbox" checked={newVacation.adiantamento13} onChange={e => setNewVacation({ ...newVacation, adiantamento13: e.target.checked })} className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
                             <label htmlFor="adiantamento13" className="ml-2 block text-sm text-slate-800">Solicitar adiantamento do 13º</label>
                         </div>
                     </div>
-                    
-                     {error && <p className="text-sm text-center text-danger bg-danger/10 p-2 rounded border border-danger/20">{error}</p>}
+
+                    {error && <p className="text-sm text-center text-danger bg-danger/10 p-2 rounded border border-danger/20">{error}</p>}
                     <div className="flex justify-end space-x-3">
                         <button type="button" onClick={resetFormState} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50">Cancelar</button>
                         <button onClick={handleSaveVacation} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">{editingVacationId ? 'Salvar Alterações' : 'Solicitar Agendamento'}</button>
@@ -294,7 +293,7 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({
                 </div>
             ) : (
                 <button onClick={handleStartAdding} disabled={remainingBalance <= 0 || nonCanceledFractions.length >= config.maxFracionamentos} className="w-full mt-4 py-2.5 px-4 border border-dashed border-slate-400 text-slate-600 rounded-lg hover:bg-slate-100 hover:text-slate-800 transition flex items-center justify-center font-semibold disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400">
-                    <PlusIcon className="h-5 w-5 mr-2" /> 
+                    <PlusIcon className="h-5 w-5 mr-2" />
                     {nonCanceledFractions.length >= config.maxFracionamentos ? 'Limite de 3 períodos atingido' : remainingBalance > 0 ? 'Adicionar Período de Férias' : 'Saldo de dias esgotado'}
                 </button>
             )}
@@ -303,8 +302,8 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({
 };
 
 
-const AgendarFerias: React.FC<AgendarFeriasProps> = ({ 
-    initialPeriodId, 
+const AgendarFerias: React.FC<AgendarFeriasProps> = ({
+    initialPeriodId,
     resetInitialPeriod,
     initialVacationId,
     resetInitialVacation
@@ -314,7 +313,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
     const [expandedPeriodId, setExpandedPeriodId] = useState<string | null>(initialPeriodId);
     const [activeTab, setActiveTab] = useState('minha-programacao');
     const [isPlanInEditMode, setIsPlanInEditMode] = useState(false);
-    
+
     const [isScheduling, setIsScheduling] = useState(false);
     const [editingVacationId, setEditingVacationId] = useState<string | null>(null);
     const [newVacation, setNewVacation] = useState<NewVacationState>({
@@ -328,7 +327,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
 
     const employee = allEmployees.find(e => e.id === user?.id);
     const hasTeamView = user?.role === 'admin' || user?.role === 'manager' || user?.role === 'rh';
-    
+
     useEffect(() => {
         if (error) {
             setError('');
@@ -346,10 +345,10 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
         if (!employee || !expandedPeriodId) return null;
         return employee.periodosAquisitivos.find(p => p.id === expandedPeriodId);
     }, [expandedPeriodId, employee]);
-    
+
     const periodStats = useMemo(() => {
         if (!activePeriod) return { usedDays: 0, abonoDays: 0, remainingBalance: 0 };
-        
+
         const usedDays = activePeriod.fracionamentos
             .filter(f => f.id !== editingVacationId && f.status !== 'canceled' && f.status !== 'rejected')
             .reduce((sum, frac) => sum + frac.quantidadeDias, 0);
@@ -359,41 +358,41 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             .reduce((sum, frac) => sum + (frac.diasAbono || 0), 0);
 
         const remainingBalance = activePeriod.saldoTotal - usedDays - abonoDays;
-        
+
         return { usedDays, abonoDays, remainingBalance };
     }, [activePeriod, editingVacationId]);
 
 
-    const abonoCalculationBasis = useMemo(() => {
+    const baseCalculoAbono = useMemo(() => {
         if (!activePeriod || !config) return 'initial_balance';
-        return activePeriod.abonoCalculationBasis === 'system' 
-            ? config.abonoCalculationBasis 
-            : activePeriod.abonoCalculationBasis;
+        return activePeriod.baseCalculoAbono === 'system'
+            ? config.baseCalculoAbono
+            : activePeriod.baseCalculoAbono;
     }, [activePeriod, config]);
-    
+
     const exactAbonoDays = useMemo(() => {
         if (!activePeriod) return 0;
-    
-        const basis = abonoCalculationBasis === 'current_balance' 
-            ? periodStats.remainingBalance 
+
+        const basis = baseCalculoAbono === 'current_balance'
+            ? periodStats.remainingBalance
             : activePeriod.saldoTotal;
-            
+
         const totalAbonoAllowed = Math.floor(basis / 3);
-    
-        if (abonoCalculationBasis === 'initial_balance') {
+
+        if (baseCalculoAbono === 'initial_balance') {
             return periodStats.abonoDays > 0 ? 0 : totalAbonoAllowed;
         }
-    
+
         return totalAbonoAllowed;
-    
-    }, [activePeriod, abonoCalculationBasis, periodStats.remainingBalance, periodStats.abonoDays]);
+
+    }, [activePeriod, baseCalculoAbono, periodStats.remainingBalance, periodStats.abonoDays]);
 
 
     useEffect(() => {
         setNewVacation(prev => {
             let newDiasAbono = prev.diasAbono;
             let newSolicitarAbono = prev.solicitarAbono;
-    
+
             if (exactAbonoDays === 0) {
                 newDiasAbono = 0;
                 newSolicitarAbono = false;
@@ -402,19 +401,19 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
                     newDiasAbono = exactAbonoDays;
                 }
             }
-            
+
             if (newDiasAbono === 0 && newSolicitarAbono) {
                 newSolicitarAbono = false;
             }
-            
+
             if (!newSolicitarAbono && newDiasAbono > 0) {
                 newDiasAbono = 0;
             }
-            
+
             if (newDiasAbono !== prev.diasAbono || newSolicitarAbono !== prev.solicitarAbono) {
                 return { ...prev, diasAbono: newDiasAbono, solicitarAbono: newSolicitarAbono };
             }
-            
+
             return prev;
         });
     }, [exactAbonoDays]);
@@ -423,7 +422,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
         if (exactAbonoDays <= 0) return true;
         return newVacation.days + exactAbonoDays > periodStats.remainingBalance;
     }, [newVacation.days, exactAbonoDays, periodStats.remainingBalance]);
-    
+
     useEffect(() => {
         if (isAbonoDisabled && newVacation.solicitarAbono) {
             setNewVacation(prev => ({ ...prev, solicitarAbono: false, diasAbono: 0 }));
@@ -446,25 +445,25 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
                 }
                 resetInitialVacation?.();
             } else if (!isScheduling) {
-                 resetFormState();
+                resetFormState();
             }
         }
     }, [expandedPeriodId, initialVacationId, activePeriod]);
-    
-    
+
+
     const { remainingBalance, usedDays, abonoDays } = periodStats;
     const totalUtilizado = usedDays + abonoDays;
-    
+
     const availableDaysForNewRequest = useMemo(() => {
-        if(!activePeriod || !config) return [];
+        if (!activePeriod || !config) return [];
         return config.diasFeriasOptions.filter(d => d <= remainingBalance);
     }, [remainingBalance, activePeriod, config?.diasFeriasOptions]);
 
-    const vacationDaysInputType = useMemo(() => {
+    const tipoEntradaDiasFerias = useMemo(() => {
         if (!activePeriod || !config) return 'list';
-        return activePeriod.vacationDaysInputType === 'system' 
-            ? config.vacationDaysInputType 
-            : activePeriod.vacationDaysInputType;
+        return activePeriod.tipoEntradaDiasFerias === 'system'
+            ? config.tipoEntradaDiasFerias
+            : activePeriod.tipoEntradaDiasFerias;
     }, [activePeriod, config]);
 
     const handleToggleExpand = (periodId: string) => {
@@ -474,9 +473,9 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
     const resetFormState = () => {
         setIsScheduling(false);
         setEditingVacationId(null);
-        setNewVacation({ 
-            startDate: '', 
-            days: availableDaysForNewRequest[0] || (config?.diasFeriasOptions.includes(15) ? 15 : config?.diasFeriasOptions[0] || 10), 
+        setNewVacation({
+            startDate: '',
+            days: availableDaysForNewRequest[0] || (config?.diasFeriasOptions.includes(15) ? 15 : config?.diasFeriasOptions[0] || 10),
             adiantamento13: false,
             diasAbono: 0,
             solicitarAbono: false,
@@ -509,7 +508,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
 
         const { startDate, days, adiantamento13, diasAbono, solicitarAbono } = newVacation;
         const effectiveDiasAbono = solicitarAbono ? diasAbono : 0;
-        
+
         if (!startDate) {
             setError('Por favor, selecione uma data de início.'); return;
         }
@@ -517,7 +516,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
         const startDateObj = new Date(`${startDate}T12:00:00Z`);
         const dayOfWeek = startDateObj.getUTCDay();
 
-        if (dayOfWeek === 5 || dayOfWeek === 6) { 
+        if (dayOfWeek === 5 || dayOfWeek === 6) {
             setError('É vedado o início das férias em sextas-feiras e sábados, pois antecedem o repouso semanal.');
             return;
         }
@@ -530,13 +529,13 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
         const oneDayAfterStr = oneDayAfterStart.toISOString().split('T')[0];
         const twoDaysAfterStr = twoDaysAfterStart.toISOString().split('T')[0];
 
-        const isHolidayNextDay = holidays.some(h => 
-            h.data === oneDayAfterStr && 
+        const isHolidayNextDay = holidays.some(h =>
+            h.data === oneDayAfterStr &&
             (h.tipo === 'feriado' || h.tipo === 'ponto_facultativo') &&
             (!h.unidade || h.unidade === employee.unidade)
         );
-        const isHolidayInTwoDays = holidays.some(h => 
-            h.data === twoDaysAfterStr && 
+        const isHolidayInTwoDays = holidays.some(h =>
+            h.data === twoDaysAfterStr &&
             (h.tipo === 'feriado' || h.tipo === 'ponto_facultativo') &&
             (!h.unidade || h.unidade === employee.unidade)
         );
@@ -547,7 +546,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
         }
 
         const accrualPeriodEndDate = new Date(`${activePeriod.terminoPa}T12:00:00Z`);
-        
+
         if (startDateObj < accrualPeriodEndDate) {
             const applicableRule = findApplicableCollectiveRule(employee, collectiveVacationRules);
             if (applicableRule) {
@@ -576,7 +575,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             const limiteConcessaoDate = new Date(`${activePeriod.limiteConcessao}T12:00:00Z`);
             const minRequestDateForAbono = new Date(limiteConcessaoDate);
             minRequestDateForAbono.setDate(minRequestDateForAbono.getDate() - config.antecedenciaMinimaAbonoDias);
-    
+
             if (today > minRequestDateForAbono) {
                 setError(`A solicitação de abono deve ser feita com no mínimo ${config.antecedenciaMinimaAbonoDias} dias de antecedência do vencimento do período (${formatDate(activePeriod.limiteConcessao)}).`);
                 return;
@@ -606,7 +605,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             const [endDay, endMonth] = fimAdiantamento13.split('/');
             const endValue = parseInt(endMonth) * 100 + parseInt(endDay);
             let isWithinPeriod = endValue < startValue ? (vacationValue >= startValue || vacationValue <= endValue) : (vacationValue >= startValue && vacationValue <= endValue);
-        
+
             if (!isWithinPeriod) {
                 setError(`O adiantamento do 13º só pode ser solicitado para férias com início entre ${inicioAdiantamento13} e ${fimAdiantamento13}.`);
                 return;
@@ -622,7 +621,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             });
             return;
         }
-        
+
         const otherFractions = activePeriod.fracionamentos.filter(f => f.id !== editingVacationId && f.status !== 'canceled' && f.status !== 'rejected');
         const endDateObj = new Date(calculateEndDate(startDate, days));
         for (const existing of otherFractions) {
@@ -632,7 +631,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
                 setError(`As datas deste período estão sobrepondo um período já agendado (${formatDate(existing.inicioFerias)} a ${formatDate(existing.terminoFerias)}).`); return;
             }
         }
-        
+
         const tempVacation = {
             inicioFerias: startDate,
             quantidadeDias: days,
@@ -640,14 +639,14 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             adiantamento13: adiantamento13,
             diasAbono: effectiveDiasAbono,
         };
-        
+
         if (days + effectiveDiasAbono > remainingBalance) {
             setError(`O total de dias de férias e abono (${days + effectiveDiasAbono}) excede o saldo disponível de ${remainingBalance} dias.`);
             return;
         }
-        
+
         if (!editingVacationId && otherFractions.length >= config.maxFracionamentos) {
-             setError(`Não é permitido mais de ${config.maxFracionamentos} períodos de férias.`); return;
+            setError(`Não é permitido mais de ${config.maxFracionamentos} períodos de férias.`); return;
         }
 
         const allProposedFractions = [...otherFractions, tempVacation];
@@ -658,31 +657,31 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
                 return;
             }
         }
-        
+
         const remainingBalanceAfterRequest = remainingBalance - days - effectiveDiasAbono;
-        
+
         if (remainingBalanceAfterRequest > 0 && remainingBalanceAfterRequest < 5) {
             setError(`Esta solicitação deixaria um saldo residual de ${remainingBalanceAfterRequest} dias. O saldo restante deve ser de no mínimo 5 dias ou zerado.`);
             return;
         }
-    
+
         const has14DayPeriodAlready = allProposedFractions.some(f => f.quantidadeDias >= 14);
         if (!has14DayPeriodAlready) {
-            if(remainingBalanceAfterRequest === 0 && allProposedFractions.length > 0) {
+            if (remainingBalanceAfterRequest === 0 && allProposedFractions.length > 0) {
                 setError('Ao utilizar todo o saldo em períodos fracionados, um deles deve ser de no mínimo 14 dias.');
                 return;
             }
             if (remainingBalanceAfterRequest > 0 && remainingBalanceAfterRequest < 14) {
-                 setError(`Esta solicitação deixaria um saldo residual de ${remainingBalanceAfterRequest} dias, impossibilitando a programação do período obrigatório de 14 dias.`);
-                 return;
+                setError(`Esta solicitação deixaria um saldo residual de ${remainingBalanceAfterRequest} dias, impossibilitando a programação do período obrigatório de 14 dias.`);
+                return;
             }
         }
-        
+
         const signatureParticipant = createInitialSignatureParticipant(employee);
-        const signatureInfo: InformacaoAssinatura = {
+        const infoAssinatura: InformacaoAssinatura = {
             documentId: `doc-${Date.now()}`,
             operationId: `${Math.floor(1000000 + Math.random() * 9000000)}`,
-            participants: [signatureParticipant],
+            participantes: [signatureParticipant],
         };
 
         let updatedFractions: PeriodoDeFerias[];
@@ -704,11 +703,11 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             ...activePeriod,
             fracionamentos: updatedFractions,
             status: 'pending_manager',
-            managerApproverId: undefined,
-            hrApproverId: undefined,
-            signatureInfo: signatureInfo,
+            idAprovadorGestor: undefined,
+            idAprovadorRH: undefined,
+            infoAssinatura: infoAssinatura,
         };
-        
+
         const updatedEmployee = {
             ...employee,
             periodosAquisitivos: employee.periodosAquisitivos.map(p => p.id === updatedActivePeriod.id ? updatedActivePeriod : p)
@@ -723,7 +722,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
                 message: `${employee.nome} solicitou um novo período de férias.`
             });
         }
-        
+
         resetFormState();
     };
 
@@ -752,9 +751,9 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
 
         if (confirmed) {
             const updatedFractions = activePeriod.fracionamentos.filter((frac) => frac.id !== vacationId)
-                .sort((a,b) => new Date(a.inicioFerias).getTime() - new Date(b.inicioFerias).getTime())
+                .sort((a, b) => new Date(a.inicioFerias).getTime() - new Date(b.inicioFerias).getTime())
                 .map((frac, index) => ({ ...frac, sequencia: (index + 1) as 1 | 2 | 3 }));
-            
+
             const updatedActivePeriod = { ...activePeriod, fracionamentos: updatedFractions };
             const updatedEmployee = {
                 ...employee,
@@ -763,15 +762,15 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             updateEmployee(updatedEmployee);
         }
     };
-    
+
     const handleDeleteEntirePlan = async () => {
         if (!activePeriod || !employee) return;
-    
+
         const hasStartedVacations = activePeriod.fracionamentos.some(f => {
             const status = getDynamicStatus(f);
             return status === 'enjoying' || status === 'enjoyed';
         });
-    
+
         if (hasStartedVacations) {
             modal.alert({
                 title: 'Ação Bloqueada',
@@ -780,14 +779,14 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             });
             return;
         }
-    
+
         const confirmed = await modal.confirm({
             title: 'Confirmar Exclusão do Planejamento',
             message: 'Tem certeza que deseja excluir todas as férias programadas para este período aquisitivo?',
             confirmText: 'Excluir Tudo',
             confirmVariant: 'danger'
         });
-    
+
         if (confirmed) {
             const updatedActivePeriod = { ...activePeriod, fracionamentos: [] };
             const updatedEmployee = {
@@ -810,22 +809,22 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
 
     const canModifySchedule = useMemo(() => {
         if (!activePeriod) return false;
-        
+
         const today = new Date();
         today.setUTCHours(0, 0, 0, 0);
         const concessionDate = new Date(`${activePeriod.limiteConcessao}T12:00:00Z`);
         if (concessionDate < today) {
             return false;
         }
-    
+
         const hasStartedVacations = activePeriod.fracionamentos.some(f => {
             const status = getDynamicStatus(f);
             return status === 'enjoying' || status === 'enjoyed';
         });
-        
+
         return !hasStartedVacations;
     }, [activePeriod]);
-    
+
 
     if (!employee || !config) return null;
 
@@ -839,9 +838,9 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
     return (
         <div>
             {hasTeamView && (
-                 <div className="flex border-b mb-6 bg-white rounded-t-lg shadow-lg border-x border-t border-slate-200">
-                    <TabButton icon={<CalendarIcon className="h-5 w-5 mr-2"/>} label="Minha Programação" isActive={activeTab === 'minha-programacao'} onClick={() => setActiveTab('minha-programacao')} />
-                    <TabButton icon={<UsersIcon className="h-5 w-5 mr-2"/>} label="Programação da Equipe" isActive={activeTab === 'programacao-equipe'} onClick={() => setActiveTab('programacao-equipe')} />
+                <div className="flex border-b mb-6 bg-white rounded-t-lg shadow-lg border-x border-t border-slate-200">
+                    <TabButton icon={<CalendarIcon className="h-5 w-5 mr-2" />} label="Minha Programação" isActive={activeTab === 'minha-programacao'} onClick={() => setActiveTab('minha-programacao')} />
+                    <TabButton icon={<UsersIcon className="h-5 w-5 mr-2" />} label="Programação da Equipe" isActive={activeTab === 'programacao-equipe'} onClick={() => setActiveTab('programacao-equipe')} />
                 </div>
             )}
 
@@ -873,7 +872,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
                                                 <td className="px-4 py-4 text-center font-bold text-lg text-blue-800">{remainingDays}</td>
                                                 <td className="px-4 py-4 text-center"><span className={getStatusBadge(dynamicStatus, config)}>{getStatusText(dynamicStatus, config)}</span></td>
                                                 <td className="px-4 py-4 text-center">
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleToggleExpand(period.id)}
                                                         className="px-4 py-2 text-sm font-semibold text-primary bg-blue-25 border border-primary/20 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
                                                     >
@@ -885,7 +884,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
                                                 <tr>
                                                     <td colSpan={6} className="p-0 bg-slate-50 border-b-4 border-primary">
                                                         <div className="p-4 md:p-6">
-                                                             <ExpandedContent
+                                                            <ExpandedContent
                                                                 activePeriod={activePeriod}
                                                                 totalUtilizado={totalUtilizado}
                                                                 remainingBalance={remainingBalance}
@@ -899,7 +898,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
                                                                 editingVacationId={editingVacationId}
                                                                 newVacation={newVacation}
                                                                 setNewVacation={setNewVacation}
-                                                                vacationDaysInputType={vacationDaysInputType}
+                                                                tipoEntradaDiasFerias={tipoEntradaDiasFerias}
                                                                 availableDaysForNewRequest={availableDaysForNewRequest}
                                                                 exactAbonoDays={exactAbonoDays}
                                                                 isAbonoDisabled={isAbonoDisabled}
@@ -928,7 +927,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
                     </div>
                 </div>
             ) : (
-                <TeamSchedule />
+                <EscalaEquipe />
             )}
         </div>
     );

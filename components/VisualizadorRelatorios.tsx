@@ -12,7 +12,7 @@ import ChevronDownIcon from './icons/ChevronDownIcon';
 import AdjustmentsHorizontalIcon from './icons/AdjustmentsHorizontalIcon';
 
 // Helper Components
-const SelectInput: React.FC<{ label: string, name: string, value: string, onChange: any, options: (string | {value: string, label: string})[] }> = ({ label, name, value, onChange, options }) => (
+const SelectInput: React.FC<{ label: string, name: string, value: string, onChange: any, options: (string | { value: string, label: string })[] }> = ({ label, name, value, onChange, options }) => (
     <div>
         <label className="text-xs font-medium text-slate-600 mb-1 block">{label}</label>
         <select name={name} value={value} onChange={onChange} className="bg-white w-full border-gray-300 rounded-lg shadow-sm text-sm p-2">
@@ -110,9 +110,9 @@ interface ReportViewerProps {
     setActiveView: (view: string) => void;
 }
 
-const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }) => {
+const VisualizadorRelatorios: React.FC<ReportViewerProps> = ({ reportType, setActiveView }) => {
     const { allEmployees, companyUnits, companyManagements, companyAreas, hierarchyLevels, config } = useAuth();
-    
+
     const [filters, setFilters] = useState({
         unidade: '',
         gerencia: '',
@@ -139,7 +139,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
 
     const reportConfig = useMemo(() => {
         if (!reportType) return null;
-        switch(reportType) {
+        switch (reportType) {
             case 'scheduled_chrono': return { title: 'Relatório de Férias Programadas', code: 'RH.REP.FER.001' };
             case 'balance_summary': return { title: 'Relatório Consolidado de Saldos', code: 'RH.REP.SAL.001' };
             default: return { title: 'Relatório', code: 'GEN.REP.000' };
@@ -155,14 +155,14 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
         }, {} as Record<string, boolean>);
         setVisibleColumns(initialVisible);
     }, [availableColumns]);
-    
+
     const data = useMemo(() => {
         if (!reportType) return [];
         let resultData: any[] = [];
-        
+
         if (reportType === 'scheduled_chrono') {
-             const allVacations = allEmployees.flatMap(emp => 
-                emp.periodosAquisitivos.flatMap(pa => 
+            const allVacations = allEmployees.flatMap(emp =>
+                emp.periodosAquisitivos.flatMap(pa =>
                     pa.fracionamentos
                         .filter(f => {
                             const status = getDynamicStatus(f);
@@ -225,7 +225,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
 
             if (filters.limiteConcessaoDe && item.concessionLimit < filters.limiteConcessaoDe) return false;
             if (filters.limiteConcessaoAte && item.concessionLimit > filters.limiteConcessaoAte) return false;
-            
+
             if (reportType === 'scheduled_chrono') {
                 if (filters.inicioFeriasDe && item.inicioFerias < filters.inicioFeriasDe) return false;
                 if (filters.inicioFeriasAte && item.inicioFerias > filters.inicioFeriasAte) return false;
@@ -249,7 +249,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
                     valB = getNestedValue(b, sort.key);
                 } else {
                     // Map sort keys to actual data properties if needed
-                    switch(sort.key) {
+                    switch (sort.key) {
                         case 'colaborador': valA = a.employee.nome; valB = b.employee.nome; break;
                         case 'matricula': valA = a.employee.matricula; valB = b.employee.matricula; break;
                         case 'cargo': valA = a.employee.cargo; valB = b.employee.cargo; break;
@@ -270,7 +270,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
             }
             return 0;
         });
-        
+
         return resultData;
     }, [reportType, allEmployees, filters, sorts]);
 
@@ -281,7 +281,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
             .map(e => ({ value: e.id.toString(), label: e.nome }))
             .sort((a, b) => a.label.localeCompare(b.label));
     }, [allEmployees]);
-    
+
     const statusOptions = useMemo(() => {
         if (!config?.vacationStatuses) return [];
         return config.vacationStatuses.filter(s => s.active).map(s => ({ value: s.id, label: s.label }));
@@ -290,7 +290,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
     const sortOptions = [
         { value: 'none', label: 'Nenhuma' }, { value: 'colaborador', label: 'Colaborador' }, { value: 'matricula', label: 'Matrícula' },
         { value: 'cargo', label: 'Cargo' }, { value: 'dataAdmissao', label: 'Data de Admissão' }, { value: 'periodoAquisitivo', label: 'Período Aquisitivo' },
-        { value: 'limiteConcessao', label: 'Limite Concessão' }, 
+        { value: 'limiteConcessao', label: 'Limite Concessão' },
         ...(reportType === 'scheduled_chrono' ? [
             { value: 'periodoGozo', label: 'Período de Gozo' }, { value: 'quantidadeDias', label: 'Dias Férias' },
             { value: 'diasAbono', label: 'Dias Abono' }, { value: 'status', label: 'Status' }
@@ -307,7 +307,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
     const handleColumnChange = (key: string, visible: boolean) => {
         setVisibleColumns(prev => ({ ...prev, [key]: visible }));
     };
-    
+
     const handleSortKeyChange = (index: number, key: string) => {
         setSorts(prev => {
             const newSorts = [...prev];
@@ -325,7 +325,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
     };
 
     const clearFilters = () => {
-         setFilters({
+        setFilters({
             unidade: '', gerencia: '', area: '', colaborador: '', gestor: '',
             limiteConcessaoDe: '', limiteConcessaoAte: '', inicioFeriasDe: '', inicioFeriasAte: '',
             mesAnoInicio: '', status: '',
@@ -348,7 +348,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
         const pageWidth = doc.internal.pageSize.getWidth();
 
         const head = [availableColumns.filter(c => visibleColumns[c.key]).map(c => c.label)];
-        
+
         const body = data.map(row => {
             return availableColumns.filter(c => visibleColumns[c.key]).map(col => {
                 let value = getNestedValue(row, col.key);
@@ -363,7 +363,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
                     const manager = allEmployees.find(e => e.id === value);
                     return manager ? manager.nome : 'N/A';
                 }
-                 if (col.key === 'employee.nivelHierarquico') {
+                if (col.key === 'employee.nivelHierarquico') {
                     const level = hierarchyLevels.find(h => h.level === value);
                     return level ? `${level.level} - ${level.description}` : value;
                 }
@@ -384,13 +384,13 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
             theme: 'grid',
             headStyles: { fillColor: '#1E293B' },
             didDrawPage: (data) => {
-                 doc.setFontSize(8);
-                 doc.setTextColor(100);
-                 const footerText = `${reportConfig.code} | ${reportConfig.title} | Versão 1.0`;
-                 doc.text(footerText, data.settings.margin.left, doc.internal.pageSize.getHeight() - 10);
+                doc.setFontSize(8);
+                doc.setTextColor(100);
+                const footerText = `${reportConfig.code} | ${reportConfig.title} | Versão 1.0`;
+                doc.text(footerText, data.settings.margin.left, doc.internal.pageSize.getHeight() - 10);
             }
         });
-        
+
         doc.save(`${reportConfig.title}.pdf`);
     };
 
@@ -402,11 +402,11 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
             </div>
         );
     }
-    
+
     const finalColumns = availableColumns.filter(c => visibleColumns[c.key]);
 
     return (
-         <div>
+        <div>
             <button onClick={() => setActiveView('relatorios')} className="flex items-center text-sm font-semibold text-slate-600 hover:text-slate-800 mb-6 group">
                 <ArrowLeftIcon className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
                 Voltar para Relatórios
@@ -417,7 +417,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
                         <h3 className="text-xl font-bold text-blue-900">{reportConfig.title}</h3>
                         <p className="text-slate-500 text-sm mt-1">{reportConfig.code}</p>
                     </div>
-                     <button onClick={generatePDF} className="px-4 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-blue-600">
+                    <button onClick={generatePDF} className="px-4 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-blue-600">
                         Exportar PDF
                     </button>
                 </div>
@@ -427,10 +427,10 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
                         Filtros e Ordenação
                         <ChevronDownIcon className="h-5 w-5 transition-transform group-open:rotate-180" />
                     </summary>
-                     <div className="p-4 border-t border-slate-200 space-y-4">
+                    <div className="p-4 border-t border-slate-200 space-y-4">
                         <div>
-                             <h5 className="font-semibold text-slate-700 mb-2">Filtros</h5>
-                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <h5 className="font-semibold text-slate-700 mb-2">Filtros</h5>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 <SelectInput label="Unidade" name="unidade" value={filters.unidade} onChange={handleFilterChange} options={companyUnits} />
                                 <SelectInput label="Gerência" name="gerencia" value={filters.gerencia} onChange={handleFilterChange} options={companyManagements} />
                                 <SelectInput label="Área" name="area" value={filters.area} onChange={handleFilterChange} options={companyAreas} />
@@ -438,7 +438,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
                                 <SelectInput label="Gestor" name="gestor" value={filters.gestor} onChange={handleFilterChange} options={gestorOptions} />
                                 <DateInput label="Limite Concessão (De)" name="limiteConcessaoDe" value={filters.limiteConcessaoDe} onChange={handleFilterChange} />
                                 <DateInput label="Limite Concessão (Até)" name="limiteConcessaoAte" value={filters.limiteConcessaoAte} onChange={handleFilterChange} />
-                                
+
                                 {reportType === 'scheduled_chrono' && (
                                     <>
                                         <DateInput label="Início Férias (De)" name="inicioFeriasDe" value={filters.inicioFeriasDe} onChange={handleFilterChange} />
@@ -452,14 +452,14 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
                                 )}
                             </div>
                         </div>
-                         <div className="border-t pt-4">
-                             <h5 className="font-semibold text-slate-700 mb-2 flex items-center justify-between">
-                                 Ordenação e Visualização
-                                 <div className="w-56">
-                                     <ColumnSelector columns={availableColumns} visibleColumns={visibleColumns} onChange={handleColumnChange} />
-                                 </div>
-                             </h5>
-                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="border-t pt-4">
+                            <h5 className="font-semibold text-slate-700 mb-2 flex items-center justify-between">
+                                Ordenação e Visualização
+                                <div className="w-56">
+                                    <ColumnSelector columns={availableColumns} visibleColumns={visibleColumns} onChange={handleColumnChange} />
+                                </div>
+                            </h5>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {sorts.map((sort, i) => (
                                     <div key={i}>
                                         <label className="text-xs font-medium text-slate-600 mb-1 block">Ordenar por {i + 1}</label>
@@ -481,7 +481,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
                         </div>
                     </div>
                 </details>
-                
+
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead className="bg-gray-800 text-xs text-white uppercase">
@@ -489,8 +489,8 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
                                 {finalColumns.map(col => <th key={col.key} className="p-3 text-left font-semibold">{col.label}</th>)}
                             </tr>
                         </thead>
-                         <tbody className="divide-y divide-slate-200">
-                             {data.map((row: any, index) => (
+                        <tbody className="divide-y divide-slate-200">
+                            {data.map((row: any, index) => (
                                 <tr key={row.id || index} className="hover:bg-slate-50">
                                     {finalColumns.map(col => {
                                         let value = getNestedValue(row, col.key);
@@ -512,7 +512,7 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
                                         return <td key={col.key} className="p-3 text-slate-700">{value}</td>
                                     })}
                                 </tr>
-                             ))}
+                            ))}
                         </tbody>
                     </table>
                     {data.length === 0 && <p className="text-center py-8 text-slate-500">Nenhum dado encontrado para os filtros selecionados.</p>}
@@ -522,4 +522,4 @@ const ReportViewer: React.FC<ReportViewerProps> = ({ reportType, setActiveView }
     );
 };
 
-export default ReportViewer;
+export default VisualizadorRelatorios;

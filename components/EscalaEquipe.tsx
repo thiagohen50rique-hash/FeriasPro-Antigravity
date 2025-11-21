@@ -18,7 +18,7 @@ type DadosFeriasEquipe = PeriodoDeFerias & {
 };
 
 // Helper Components defined locally as they are simple wrappers
-const SelectInput: React.FC<{ label: string, name: string, value: string, onChange: any, options: (string | {value: string, label: string})[] }> = ({ label, name, value, onChange, options }) => (
+const SelectInput: React.FC<{ label: string, name: string, value: string, onChange: any, options: (string | { value: string, label: string })[] }> = ({ label, name, value, onChange, options }) => (
     <div>
         <label className="text-xs font-medium text-slate-600 mb-1 block">{label}</label>
         <select name={name} value={value} onChange={onChange} className="bg-white w-full border-gray-300 rounded-lg shadow-sm text-sm p-2">
@@ -40,9 +40,9 @@ const DateInput: React.FC<{ label: string, name: string, value: string, onChange
 );
 
 
-const TeamSchedule: React.FC = () => {
+const EscalaEquipe: React.FC = () => {
     const { user: currentUser, allEmployees, orgUnits, companyUnits, companyManagements, companyAreas, config } = useAuth();
-    
+
     // Filters State
     const [filters, setFilters] = useState({
         unidade: '',
@@ -79,7 +79,7 @@ const TeamSchedule: React.FC = () => {
                 descendantUnitIds.push(...getDescendantUnitIds(unit.id, orgUnits));
             });
             const allManagedUnitIds = [...new Set([...managedUnitIds, ...descendantUnitIds])];
-            
+
             const team = allEmployees.filter(emp => {
                 const empUnit = orgUnits.find(u => u.name === emp.departamento && u.type === 'Área');
                 return empUnit && allManagedUnitIds.includes(empUnit.id);
@@ -88,7 +88,7 @@ const TeamSchedule: React.FC = () => {
             // Explicitly ensure the manager is in the list if not already added by unit logic
             if (!team.some(e => e.id === currentUser.id)) {
                 const currentUserFull = allEmployees.find(e => e.id === currentUser.id);
-                if(currentUserFull) team.push(currentUserFull);
+                if (currentUserFull) team.push(currentUserFull);
             }
             return team;
         }
@@ -129,17 +129,17 @@ const TeamSchedule: React.FC = () => {
                 if (itemMonthYear !== filters.mesAnoInicio) return false;
             }
             if (filters.status && getDynamicStatus(item) !== filters.status) return false;
-            
+
             return true;
         });
-        
+
         // Sorting logic
         data.sort((a, b) => {
             for (const sort of sorts) {
                 if (sort.key === 'none') continue;
 
                 let valA, valB;
-                switch(sort.key) {
+                switch (sort.key) {
                     case 'colaborador': valA = a.employee.nome; valB = b.employee.nome; break;
                     case 'matricula': valA = a.employee.matricula; valB = b.employee.matricula; break;
                     case 'cargo': valA = a.employee.cargo; valB = b.employee.cargo; break;
@@ -178,7 +178,7 @@ const TeamSchedule: React.FC = () => {
             return newSorts;
         });
     };
-    
+
     const clearFilters = () => {
         setFilters({
             unidade: '', gerencia: '', area: '', colaborador: '', gestor: '',
@@ -225,7 +225,7 @@ const TeamSchedule: React.FC = () => {
 
     return (
         <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg border border-slate-200">
-             <h3 className="text-xl font-bold text-blue-900 mb-6">Programação de Férias da Equipe</h3>
+            <h3 className="text-xl font-bold text-blue-900 mb-6">Programação de Férias da Equipe</h3>
 
             <details className="bg-slate-50 border border-slate-200 rounded-lg mb-6 group">
                 <summary className="p-4 font-semibold cursor-pointer flex justify-between items-center">
@@ -254,8 +254,8 @@ const TeamSchedule: React.FC = () => {
                             </div>
                         </div>
                         <div className="border-t pt-4">
-                             <h5 className="font-semibold text-slate-700 mb-2">Ordenação</h5>
-                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <h5 className="font-semibold text-slate-700 mb-2">Ordenação</h5>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {sorts.map((sort, i) => (
                                     <div key={i}>
                                         <label className="text-xs font-medium text-slate-600 mb-1 block">Ordenar por {i + 1}</label>
@@ -336,7 +336,7 @@ const TeamSchedule: React.FC = () => {
                             <span className={getStatusBadge(getDynamicStatus(item), config)}>{getStatusText(getDynamicStatus(item), config)}</span>
                         </div>
                         <div className="space-y-1 text-sm text-slate-600 mb-3">
-                             <div className="flex justify-between">
+                            <div className="flex justify-between">
                                 <span className="font-medium">P.A.:</span>
                                 <span>{formatDate(item.periodStartDate)} a {formatDate(item.periodEndDate)}</span>
                             </div>
@@ -344,14 +344,14 @@ const TeamSchedule: React.FC = () => {
                                 <span className="font-medium">Gozo:</span>
                                 <span>{formatDate(item.inicioFerias)} a {formatDate(item.terminoFerias)}</span>
                             </div>
-                             <div className="flex justify-between">
+                            <div className="flex justify-between">
                                 <span className="font-medium">Dias:</span>
                                 <span>{item.quantidadeDias} {item.diasAbono > 0 ? `(+${item.diasAbono} abono)` : ''}</span>
                             </div>
                         </div>
                         <div className="pt-3 border-t border-slate-100 flex justify-end">
-                            <button 
-                                onClick={() => handleGeneratePDF(item)} 
+                            <button
+                                onClick={() => handleGeneratePDF(item)}
                                 className="flex items-center px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 rounded-md hover:bg-green-100"
                             >
                                 <DocumentTextIcon className="h-4 w-4 mr-1.5" />
@@ -370,4 +370,4 @@ const TeamSchedule: React.FC = () => {
     );
 };
 
-export default TeamSchedule;
+export default EscalaEquipe;

@@ -24,7 +24,7 @@ const ReportCard: React.FC<{
             </div>
         </div>
         <div className="mt-auto pt-4 flex items-center justify-end">
-             <button 
+            <button
                 onClick={onClick}
                 className="flex items-center px-4 py-2 text-sm font-semibold text-white bg-primary border border-transparent rounded-lg hover:bg-blue-600 transition">
                 Gerar Relatório
@@ -34,7 +34,7 @@ const ReportCard: React.FC<{
     </div>
 );
 
-const Reports: React.FC<ReportsProps> = ({ onSelectReport }) => {
+const Relatorios: React.FC<ReportsProps> = ({ onSelectReport }) => {
     return (
         <div className="space-y-8">
             <div>
@@ -50,7 +50,7 @@ const Reports: React.FC<ReportsProps> = ({ onSelectReport }) => {
                     description="Lista todas as férias programadas."
                     onClick={() => onSelectReport('scheduled_chrono')}
                 />
-                 <ReportCard
+                <ReportCard
                     title="Consolidado de Saldos"
                     description="Apresenta o saldo de férias atual de todos os colaboradores."
                     onClick={() => onSelectReport('balance_summary')}
@@ -60,4 +60,4 @@ const Reports: React.FC<ReportsProps> = ({ onSelectReport }) => {
     );
 };
 
-export default Reports;
+export default Relatorios;

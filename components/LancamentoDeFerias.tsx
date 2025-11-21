@@ -4,10 +4,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useModal } from '../hooks/useModal';
-import { 
-    PeriodoAquisitivo, 
-    Funcionario, 
-    PeriodoDeFerias, 
+import {
+    PeriodoAquisitivo,
+    Funcionario,
+    PeriodoDeFerias,
     RegraFeriasColetivas,
     Afastamento
 } from '../tipos';
@@ -90,25 +90,25 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
         const remainingBalance = period.saldoTotal - usedDays - abonoDays;
         return { usedDays, abonoDays, remainingBalance };
     }, [period, editingVacationId]);
-    
-    const abonoCalculationBasis = useMemo(() => {
+
+    const baseCalculoAbono = useMemo(() => {
         if (!config) return 'initial_balance';
-        return period.abonoCalculationBasis === 'system' 
-            ? config.abonoCalculationBasis 
-            : period.abonoCalculationBasis;
+        return period.baseCalculoAbono === 'system'
+            ? config.baseCalculoAbono
+            : period.baseCalculoAbono;
     }, [period, config]);
 
     const exactAbonoDays = useMemo(() => {
         if (!period) return 0;
-        const basis = abonoCalculationBasis === 'current_balance' 
-            ? periodStats.remainingBalance 
+        const basis = baseCalculoAbono === 'current_balance'
+            ? periodStats.remainingBalance
             : period.saldoTotal;
         const totalAbonoAllowed = Math.floor(basis / 3);
-        if (abonoCalculationBasis === 'initial_balance') {
+        if (baseCalculoAbono === 'initial_balance') {
             return periodStats.abonoDays > 0 ? 0 : totalAbonoAllowed;
         }
         return totalAbonoAllowed;
-    }, [period, abonoCalculationBasis, periodStats.remainingBalance, periodStats.abonoDays]);
+    }, [period, baseCalculoAbono, periodStats.remainingBalance, periodStats.abonoDays]);
 
     const isAbonoDisabled = useMemo(() => {
         if (exactAbonoDays <= 0) return true;
@@ -167,10 +167,10 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
 
         const { startDate, days, adiantamento13, diasAbono, solicitarAbono } = newVacation;
         const effectiveDiasAbono = solicitarAbono ? diasAbono : 0;
-        
+
         if (!startDate) { setError('Por favor, selecione uma data de início.'); return; }
         if (days <= 0) { setError('A quantidade de dias deve ser maior que zero.'); return; }
-        
+
         const today = new Date(); today.setHours(0, 0, 0, 0);
         const startDateObj = new Date(`${startDate}T12:00:00Z`);
         const dayOfWeek = startDateObj.getUTCDay();
@@ -219,18 +219,18 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
                 setError(`Não é permitido agendar férias com início antes do término do P.A. (${formatDate(period.terminoPa)}).`); return;
             }
         }
-        
+
         const minDate = new Date(today); minDate.setDate(minDate.getDate() + config.antecedenciaMinimaDias);
         if (startDateObj < minDate && !isAdmin) { setError(`A solicitação deve ser feita com no mínimo ${config.antecedenciaMinimaDias} dias de antecedência.`); return; }
         if (startDateObj < minDate && isAdmin) {
-             if (!await modal.confirm({ title: 'Alerta de Antecedência', message: `A data de início não respeita a antecedência mínima de ${config.antecedenciaMinimaDias} dias. Deseja continuar?`, confirmVariant: 'warning', confirmText: 'Continuar' })) return;
+            if (!await modal.confirm({ title: 'Alerta de Antecedência', message: `A data de início não respeita a antecedência mínima de ${config.antecedenciaMinimaDias} dias. Deseja continuar?`, confirmVariant: 'warning', confirmText: 'Continuar' })) return;
         }
 
         if (effectiveDiasAbono > 0) {
             const limiteConcessaoDateAbono = new Date(`${period.limiteConcessao}T12:00:00Z`);
             const minRequestDateForAbono = new Date(limiteConcessaoDateAbono);
             minRequestDateForAbono.setDate(minRequestDateForAbono.getDate() - config.antecedenciaMinimaAbonoDias);
-    
+
             if (today > minRequestDateForAbono && !isAdmin) {
                 setError(`A solicitação de abono deve ser feita com no mínimo ${config.antecedenciaMinimaAbonoDias} dias de antecedência do vencimento do período (${formatDate(period.limiteConcessao)}).`); return;
             }
@@ -244,15 +244,15 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
             if (isAdmin) {
                 if (!await modal.confirm({ title: 'Alerta de Vencimento', message: `A data de início é posterior ao limite de concessão (${formatDate(period.limiteConcessao)}). Deseja continuar?`, confirmVariant: 'warning', confirmText: 'Continuar' })) return;
             } else {
-                 modal.alert({
+                modal.alert({
                     title: 'Data de Início Inválida',
                     message: `A data de início não pode ser no dia ou após o limite de concessão (${formatDate(period.limiteConcessao)}).`,
                     confirmVariant: 'warning',
-                 });
-                 return;
+                });
+                return;
             }
         }
-        
+
         const otherFractions = period.fracionamentos.filter(f => f.id !== editingVacationId && f.status !== 'canceled' && f.status !== 'rejected');
         const endDateObj = new Date(calculateEndDate(startDate, days));
         for (const existing of otherFractions) {
@@ -262,7 +262,7 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
                 setError(`As datas deste período estão sobrepondo um período já agendado (${formatDate(existing.inicioFerias)} a ${formatDate(existing.terminoFerias)}).`); return;
             }
         }
-        
+
         const tempVacation = { inicioFerias: startDate, quantidadeDias: days, terminoFerias: calculateEndDate(startDate, days), adiantamento13, diasAbono: effectiveDiasAbono };
         if (days + effectiveDiasAbono > remainingBalance) { setError(`O total de dias de férias e abono (${days + effectiveDiasAbono}) excede o saldo disponível de ${remainingBalance} dias.`); return; }
         if (!editingVacationId && otherFractions.length >= config.maxFracionamentos) { setError(`Não é permitido mais de ${config.maxFracionamentos} períodos de férias.`); return; }
@@ -271,12 +271,12 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
         const remainingBalanceAfterRequest = remainingBalance - days - effectiveDiasAbono;
         if (remainingBalanceAfterRequest > 0 && remainingBalanceAfterRequest < 5) { setError(`Esta solicitação deixaria um saldo residual de ${remainingBalanceAfterRequest} dias. O saldo restante deve ser de no mínimo 5 dias ou zerado.`); return; }
         if (!allProposedFractions.some(f => f.quantidadeDias >= 14)) {
-            if(remainingBalanceAfterRequest === 0 && allProposedFractions.length > 0) { setError('Ao utilizar todo o saldo, um dos períodos fracionados deve ser de no mínimo 14 dias.'); return; }
+            if (remainingBalanceAfterRequest === 0 && allProposedFractions.length > 0) { setError('Ao utilizar todo o saldo, um dos períodos fracionados deve ser de no mínimo 14 dias.'); return; }
             if (remainingBalanceAfterRequest > 0 && remainingBalanceAfterRequest < 14) { setError(`Esta solicitação deixaria um saldo de ${remainingBalanceAfterRequest} dias, impossibilitando a programação do período obrigatório de 14 dias.`); return; }
         }
 
         const vacationData = { inicioFerias: startDate, terminoFerias: calculateEndDate(startDate, days), quantidadeDias: days, diasAbono: effectiveDiasAbono, adiantamento13 };
-        
+
         if (editingVacationId) {
             updateVacationPeriod(employee.id, period.id, editingVacationId, { ...vacationData, status: 'scheduled' });
             modal.alert({ title: 'Sucesso!', message: `Férias de ${employee.nome} alteradas com sucesso.` });
@@ -288,18 +288,18 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
     };
 
     const handleDeleteVacation = async (vacationId: string) => {
-        const confirmed = await modal.confirm({ 
-            title: 'Confirmar Exclusão', 
-            message: 'Tem certeza que deseja excluir esta programação de férias?', 
-            confirmText: 'Excluir', 
-            confirmVariant: 'danger' 
+        const confirmed = await modal.confirm({
+            title: 'Confirmar Exclusão',
+            message: 'Tem certeza que deseja excluir esta programação de férias?',
+            confirmText: 'Excluir',
+            confirmVariant: 'danger'
         });
         if (confirmed) {
             deleteVacation(employee.id, period.id, vacationId);
             modal.alert({ title: 'Sucesso', message: 'Férias excluídas com sucesso.' });
         }
     };
-    
+
     const nonCanceledFractions = useMemo(() => period.fracionamentos.filter(f => f.status !== 'canceled' && f.status !== 'rejected'), [period]);
     const canAddFraction = remainingBalance > 0 && nonCanceledFractions.length < (config?.maxFracionamentos || 3);
 
@@ -314,7 +314,7 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
                     <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${period.saldoTotal > 0 ? (totalUtilizado / period.saldoTotal) * 100 : 0}%` }}></div>
                 </div>
             </div>
-            
+
             <div className="mb-6">
                 <h4 className="text-lg font-semibold text-slate-800 mb-3">Férias Programadas</h4>
                 {nonCanceledFractions.length > 0 ? (
@@ -332,14 +332,14 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
                                         </div>
                                         <span className={getStatusBadge(dynamicStatus)}>{getStatusText(dynamicStatus)}</span>
                                         <div className="flex items-center border-l border-slate-300 pl-3 ml-2 space-x-2">
-                                            <button 
+                                            <button
                                                 onClick={() => handleStartEditing(f)}
                                                 className="p-1.5 text-slate-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"
                                                 title="Editar"
                                             >
                                                 <PencilIcon className="h-4 w-4" />
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => handleDeleteVacation(f.id)}
                                                 className="p-1.5 text-slate-400 hover:text-danger rounded-full hover:bg-red-50 transition-colors"
                                                 title="Excluir"
@@ -356,18 +356,18 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
                     <div className="text-center py-6 bg-slate-100 rounded-lg border border-dashed"><p className="text-sm text-slate-500">Nenhuma férias programada para este período.</p></div>
                 )}
             </div>
-            
+
             {isScheduling ? (
                 <div className="p-4 border-t border-slate-200 mt-6 bg-slate-100 rounded-lg">
-                     <h5 className="font-semibold text-slate-800 mb-4">{editingVacationId ? 'Alterar Programação' : 'Lançar Nova Programação'}</h5>
+                    <h5 className="font-semibold text-slate-800 mb-4">{editingVacationId ? 'Alterar Programação' : 'Lançar Nova Programação'}</h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Data de Início</label>
-                            <input type="date" value={newVacation.startDate} onChange={e => setNewVacation({...newVacation, startDate: e.target.value})} className="w-full border-gray-300 rounded-md shadow-sm bg-white" />
+                            <input type="date" value={newVacation.startDate} onChange={e => setNewVacation({ ...newVacation, startDate: e.target.value })} className="w-full border-gray-300 rounded-md shadow-sm bg-white" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Dias de Férias</label>
-                            <input type="number" value={newVacation.days} onChange={e => setNewVacation({...newVacation, days: parseInt(e.target.value) || 0})} min="1" max={remainingBalance} className="bg-white w-full border-gray-300 rounded-md shadow-sm" />
+                            <input type="number" value={newVacation.days} onChange={e => setNewVacation({ ...newVacation, days: parseInt(e.target.value) || 0 })} min="1" max={remainingBalance} className="bg-white w-full border-gray-300 rounded-md shadow-sm" />
                         </div>
                     </div>
                     <div className="flex items-center space-x-6 mb-4">
@@ -387,7 +387,7 @@ const ExpandedContentForEntry: React.FC<{ employee: Funcionario; period: Periodo
                             </div>
                         )}
                         <div className="flex items-center">
-                            <input id={`adiantamento13-${period.id}`} type="checkbox" checked={newVacation.adiantamento13} onChange={e => setNewVacation({...newVacation, adiantamento13: e.target.checked})} className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                            <input id={`adiantamento13-${period.id}`} type="checkbox" checked={newVacation.adiantamento13} onChange={e => setNewVacation({ ...newVacation, adiantamento13: e.target.checked })} className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
                             <label htmlFor={`adiantamento13-${period.id}`} className="ml-2 block text-sm text-slate-800">Solicitar adiantamento do 13º</label>
                         </div>
                     </div>
@@ -509,7 +509,7 @@ const CollectiveEntry: React.FC = () => {
     const modal = useModal();
     const [step, setStep] = useState<'configure' | 'preview'>('configure');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [result, setResult] = useState<{ success: boolean; message: string; details?: string[]} | null>(null);
+    const [result, setResult] = useState<{ success: boolean; message: string; details?: string[] } | null>(null);
 
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -567,7 +567,7 @@ const CollectiveEntry: React.FC = () => {
             const admissionDate = new Date(`${emp.dataAdmissao}T12:00:00Z`);
             const oneYearFromAdmission = new Date(admissionDate);
             oneYearFromAdmission.setFullYear(oneYearFromAdmission.getFullYear() + 1);
-            
+
             if (oneYearFromAdmission > start) {
                 status = 'warning';
                 messages.push('Menos de 1 ano de casa (Férias proporcionais).');
@@ -587,24 +587,24 @@ const CollectiveEntry: React.FC = () => {
             // Assuming we take min(totalDays, totalBalance)
             const daysToTake = Math.min(totalDays, totalBalance);
             const residual = totalBalance - daysToTake;
-            
+
             if (residual > 0 && residual < 5) {
                 status = 'warning';
                 messages.push(`Saldo residual de ${residual} dias (inferior a 5 dias). Considere zerar o saldo.`);
             }
-            
+
             // 5. Check 14-Day Rule Compatibility
             // Heuristic: If they haven't taken 14 days yet, and this operation leaves them with < 14 days total capacity in any single period, flag it.
             // This is complex to simulate perfectly across multiple periods, simplified check:
             const hasTaken14Days = emp.periodosAquisitivos.some(p => p.fracionamentos.some(f => f.quantidadeDias >= 14 && f.status !== 'canceled' && f.status !== 'rejected'));
-            
+
             if (!hasTaken14Days) {
-                 // If taking this vacation splits their biggest chunk such that they can't take 14 days later
-                 // For simplicity in this simulation, we warn if the current proposed vacation is < 14 AND remaining balance < 14
-                 if (daysToTake < 14 && residual < 14 && residual > 0) {
-                     status = 'warning';
-                     messages.push('Risco: Pode impossibilitar o gozo de 14 dias ininterruptos.');
-                 }
+                // If taking this vacation splits their biggest chunk such that they can't take 14 days later
+                // For simplicity in this simulation, we warn if the current proposed vacation is < 14 AND remaining balance < 14
+                if (daysToTake < 14 && residual < 14 && residual > 0) {
+                    status = 'warning';
+                    messages.push('Risco: Pode impossibilitar o gozo de 14 dias ininterruptos.');
+                }
             }
 
             return {
@@ -639,8 +639,8 @@ const CollectiveEntry: React.FC = () => {
         const res = await addCollectiveVacation(proposals);
         setResult(res);
         setIsSubmitting(false);
-        if(res.success) {
-             // Optional: Navigate away or reset
+        if (res.success) {
+            // Optional: Navigate away or reset
         }
     };
 
@@ -661,11 +661,11 @@ const CollectiveEntry: React.FC = () => {
     const renderStatusBadge = (status: CandidateStatus, messages: string[]) => {
         let color = '';
         let icon = null;
-        
-        switch(status) {
-            case 'eligible': color = 'bg-green-100 text-green-800 border-green-200'; icon = <CheckCircleIcon className="w-4 h-4 mr-1"/>; break;
-            case 'warning': color = 'bg-yellow-100 text-yellow-800 border-yellow-200'; icon = <WarningTriangleIcon className="w-4 h-4 mr-1"/>; break;
-            case 'error': color = 'bg-red-100 text-red-800 border-red-200'; icon = <XCircleIcon className="w-4 h-4 mr-1"/>; break;
+
+        switch (status) {
+            case 'eligible': color = 'bg-green-100 text-green-800 border-green-200'; icon = <CheckCircleIcon className="w-4 h-4 mr-1" />; break;
+            case 'warning': color = 'bg-yellow-100 text-yellow-800 border-yellow-200'; icon = <WarningTriangleIcon className="w-4 h-4 mr-1" />; break;
+            case 'error': color = 'bg-red-100 text-red-800 border-red-200'; icon = <XCircleIcon className="w-4 h-4 mr-1" />; break;
         }
 
         return (
@@ -707,9 +707,9 @@ const CollectiveEntry: React.FC = () => {
                     <h4 className="font-semibold text-slate-700">Filtros de Colaboradores</h4>
                     <p className="text-sm text-slate-500 mb-4">Se nenhum filtro for aplicado, todos os colaboradores ativos serão considerados.</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <MultiSelect label="Unidade(s)" options={companyUnits} selected={filters.unidade} onChange={s => setFilters(f => ({...f, unidade: s}))} />
-                        <MultiSelect label="Gerência(s)" options={companyManagements} selected={filters.gerencia} onChange={s => setFilters(f => ({...f, gerencia: s}))} />
-                        <MultiSelect label="Área(s)" options={companyAreas} selected={filters.area} onChange={s => setFilters(f => ({...f, area: s}))} />
+                        <MultiSelect label="Unidade(s)" options={companyUnits} selected={filters.unidade} onChange={s => setFilters(f => ({ ...f, unidade: s }))} />
+                        <MultiSelect label="Gerência(s)" options={companyManagements} selected={filters.gerencia} onChange={s => setFilters(f => ({ ...f, gerencia: s }))} />
+                        <MultiSelect label="Área(s)" options={companyAreas} selected={filters.area} onChange={s => setFilters(f => ({ ...f, area: s }))} />
                     </div>
                     <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800 flex items-center">
                         <InformationCircleIcon className="h-5 w-5 mr-2 flex-shrink-0" />
@@ -719,7 +719,7 @@ const CollectiveEntry: React.FC = () => {
 
                 <div className="flex justify-end pt-6 border-t border-slate-200">
                     <button type="submit" className="px-6 py-2.5 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-blue-600 flex items-center">
-                        Avaliar Elegibilidade <ChevronDownIcon className="h-4 w-4 ml-2 -rotate-90"/>
+                        Avaliar Elegibilidade <ChevronDownIcon className="h-4 w-4 ml-2 -rotate-90" />
                     </button>
                 </div>
             </form>
@@ -751,25 +751,25 @@ const CollectiveEntry: React.FC = () => {
                     <span className="block text-xs font-bold text-yellow-600 uppercase">Atenção</span>
                     <span className="text-xl font-bold text-yellow-800">{summary.warnings}</span>
                 </div>
-                 <div className="bg-red-50 p-3 rounded border border-red-200 text-center">
+                <div className="bg-red-50 p-3 rounded border border-red-200 text-center">
                     <span className="block text-xs font-bold text-red-600 uppercase">Inaptos</span>
                     <span className="text-xl font-bold text-red-800">{summary.errors}</span>
                 </div>
             </div>
 
-             {/* Warning Summary */}
-             {(summary.warnings > 0 || summary.errors > 0) && (
+            {/* Warning Summary */}
+            {(summary.warnings > 0 || summary.errors > 0) && (
                 <div className="p-3 bg-orange-50 border border-orange-200 rounded-md text-sm text-orange-800">
-                    <p className="font-semibold flex items-center"><WarningTriangleIcon className="h-4 w-4 mr-2"/> Relatório de Pré-Avaliação</p>
+                    <p className="font-semibold flex items-center"><WarningTriangleIcon className="h-4 w-4 mr-2" /> Relatório de Pré-Avaliação</p>
                     <p className="mt-1">
-                        Foram detectados {summary.errors} colaboradores com impedimentos e {summary.warnings} com alertas. 
+                        Foram detectados {summary.errors} colaboradores com impedimentos e {summary.warnings} com alertas.
                         Verifique a tabela abaixo. Passe o mouse sobre as etiquetas para ver os detalhes.
                     </p>
                 </div>
             )}
-            
-             {/* Result Message */}
-             {result && (
+
+            {/* Result Message */}
+            {result && (
                 <div className={`p-4 rounded-md border text-sm ${result.success ? 'bg-success-light border-success text-success-dark' : 'bg-danger-light border-danger text-danger-dark'}`}>
                     <div className="flex items-center font-bold text-base mb-2">
                         {result.success ? <CheckCircleIcon className="h-6 w-6 mr-2" /> : <XCircleIcon className="h-6 w-6 mr-2" />}
@@ -780,92 +780,92 @@ const CollectiveEntry: React.FC = () => {
                             {result.details.map((d, i) => <li key={i}>{d}</li>)}
                         </ul>
                     )}
-                     {result.success && (
-                         <button onClick={() => { setResult(null); setStep('configure'); }} className="mt-4 underline text-sm hover:text-green-900">
-                             Realizar novo lançamento
-                         </button>
-                     )}
+                    {result.success && (
+                        <button onClick={() => { setResult(null); setStep('configure'); }} className="mt-4 underline text-sm hover:text-green-900">
+                            Realizar novo lançamento
+                        </button>
+                    )}
                 </div>
             )}
 
             {/* Candidates Table */}
             {!result?.success && (
-            <>
-                <div className="overflow-x-auto border border-slate-200 rounded-lg max-h-[500px]">
-                    <table className="w-full text-sm text-left bg-white">
-                        <thead className="text-xs text-slate-700 uppercase bg-slate-100 sticky top-0 z-10">
-                            <tr>
-                                <th className="px-4 py-3 w-10 text-center">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={candidates.every(c => c.isSelected)}
-                                        onChange={(e) => setCandidates(prev => prev.map(c => ({...c, isSelected: e.target.checked})))}
-                                        className="rounded border-gray-300 text-primary focus:ring-primary"
-                                    />
-                                </th>
-                                <th className="px-4 py-3">Colaborador</th>
-                                <th className="px-4 py-3">Admissão</th>
-                                <th className="px-4 py-3 text-center">Saldo Total</th>
-                                <th className="px-4 py-3 text-center">Dias Propostos</th>
-                                <th className="px-4 py-3">Avaliação</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {candidates.map((c) => (
-                                <tr key={c.employee.id} className={`hover:bg-slate-50 ${!c.isSelected ? 'opacity-50 bg-slate-50' : ''}`}>
-                                    <td className="px-4 py-3 text-center">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={c.isSelected}
-                                            onChange={(e) => handleCandidateChange(c.employee.id, 'isSelected', e.target.checked)}
+                <>
+                    <div className="overflow-x-auto border border-slate-200 rounded-lg max-h-[500px]">
+                        <table className="w-full text-sm text-left bg-white">
+                            <thead className="text-xs text-slate-700 uppercase bg-slate-100 sticky top-0 z-10">
+                                <tr>
+                                    <th className="px-4 py-3 w-10 text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={candidates.every(c => c.isSelected)}
+                                            onChange={(e) => setCandidates(prev => prev.map(c => ({ ...c, isSelected: e.target.checked })))}
                                             className="rounded border-gray-300 text-primary focus:ring-primary"
                                         />
-                                    </td>
-                                    <td className="px-4 py-3 font-medium text-slate-800">
-                                        <div>{c.employee.nome}</div>
-                                        <div className="text-xs text-slate-500">{c.employee.cargo}</div>
-                                    </td>
-                                    <td className="px-4 py-3 text-slate-600">{formatDate(c.employee.dataAdmissao)}</td>
-                                    <td className="px-4 py-3 text-center font-mono font-semibold text-slate-700">{c.availableBalance}</td>
-                                    <td className="px-4 py-3 text-center">
-                                        <input 
-                                            type="number" 
-                                            value={c.proposedDays}
-                                            min={1}
-                                            max={c.availableBalance}
-                                            disabled={!c.isSelected}
-                                            onChange={(e) => handleCandidateChange(c.employee.id, 'proposedDays', e.target.value)}
-                                            className="w-16 text-center border-gray-300 rounded shadow-sm text-sm p-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-slate-100"
-                                        />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {renderStatusBadge(c.status, c.messages)}
-                                    </td>
+                                    </th>
+                                    <th className="px-4 py-3">Colaborador</th>
+                                    <th className="px-4 py-3">Admissão</th>
+                                    <th className="px-4 py-3 text-center">Saldo Total</th>
+                                    <th className="px-4 py-3 text-center">Dias Propostos</th>
+                                    <th className="px-4 py-3">Avaliação</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {candidates.map((c) => (
+                                    <tr key={c.employee.id} className={`hover:bg-slate-50 ${!c.isSelected ? 'opacity-50 bg-slate-50' : ''}`}>
+                                        <td className="px-4 py-3 text-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={c.isSelected}
+                                                onChange={(e) => handleCandidateChange(c.employee.id, 'isSelected', e.target.checked)}
+                                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3 font-medium text-slate-800">
+                                            <div>{c.employee.nome}</div>
+                                            <div className="text-xs text-slate-500">{c.employee.cargo}</div>
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-600">{formatDate(c.employee.dataAdmissao)}</td>
+                                        <td className="px-4 py-3 text-center font-mono font-semibold text-slate-700">{c.availableBalance}</td>
+                                        <td className="px-4 py-3 text-center">
+                                            <input
+                                                type="number"
+                                                value={c.proposedDays}
+                                                min={1}
+                                                max={c.availableBalance}
+                                                disabled={!c.isSelected}
+                                                onChange={(e) => handleCandidateChange(c.employee.id, 'proposedDays', e.target.value)}
+                                                className="w-16 text-center border-gray-300 rounded shadow-sm text-sm p-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-slate-100"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {renderStatusBadge(c.status, c.messages)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                <div className="flex justify-between pt-6 border-t border-slate-200">
-                    <button 
-                        type="button" 
-                        onClick={() => setStep('configure')} 
-                        className="px-6 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
-                    >
-                        Voltar e Reconfigurar
-                    </button>
-                    <button 
-                        type="button" 
-                        onClick={handleConfirm} 
-                        disabled={isSubmitting || summary.selected === 0}
-                        className="px-6 py-2.5 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-blue-600 flex items-center disabled:bg-slate-400 disabled:cursor-not-allowed"
-                    >
-                        {isSubmitting && <SpinnerIcon className="h-5 w-5 mr-2" />}
-                        Confirmar Lançamento ({summary.selected})
-                    </button>
-                </div>
-            </>
+                    <div className="flex justify-between pt-6 border-t border-slate-200">
+                        <button
+                            type="button"
+                            onClick={() => setStep('configure')}
+                            className="px-6 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                        >
+                            Voltar e Reconfigurar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleConfirm}
+                            disabled={isSubmitting || summary.selected === 0}
+                            className="px-6 py-2.5 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-blue-600 flex items-center disabled:bg-slate-400 disabled:cursor-not-allowed"
+                        >
+                            {isSubmitting && <SpinnerIcon className="h-5 w-5 mr-2" />}
+                            Confirmar Lançamento ({summary.selected})
+                        </button>
+                    </div>
+                </>
             )}
         </div>
     );
@@ -901,7 +901,7 @@ const LancamentoDeFerias: React.FC<LancamentoDeFeriasProps> = ({ setActiveView }
                             onClick={() => setActiveTab('individual')}
                             className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'individual' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                         >
-                           <UserIcon className="h-5 w-5 mr-2" />
+                            <UserIcon className="h-5 w-5 mr-2" />
                             Lançamento Individual
                         </button>
                         <button

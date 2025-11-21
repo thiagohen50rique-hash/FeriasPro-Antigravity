@@ -29,20 +29,20 @@ const OptionsManagement: React.FC<{
     const handleAddItem = () => {
         const numValue = parseInt(newItem, 10);
         if (isNaN(numValue) || numValue <= 0 || numValue > 30) {
-             setError('Insira um valor válido entre 1 e 30 dias.');
-             return;
+            setError('Insira um valor válido entre 1 e 30 dias.');
+            return;
         }
         if (items.includes(numValue)) {
-             setError('Esta opção já existe.');
-             return;
+            setError('Esta opção já existe.');
+            return;
         }
-        
+
         const newOptions = [...items, numValue].sort((a, b) => a - b);
         onItemsChange(newOptions);
         setNewItem('');
         setError('');
     };
-    
+
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -51,8 +51,8 @@ const OptionsManagement: React.FC<{
     };
 
     const handleDeleteItem = async (itemToDelete: number) => {
-         setError('');
-         if (items.length <= 1) {
+        setError('');
+        if (items.length <= 1) {
             setError(`É necessário manter pelo menos uma opção de dias de ${itemTypeLabel}.`);
             setTimeout(() => setError(''), 5000);
             return;
@@ -70,7 +70,7 @@ const OptionsManagement: React.FC<{
             onItemsChange(newOptions);
         }
     };
-    
+
     return (
         <div className="p-6 bg-white rounded-lg border border-slate-200">
             <h4 className="text-lg font-bold text-slate-800 mb-4">{title}</h4>
@@ -111,7 +111,7 @@ const OptionsManagement: React.FC<{
                         </button>
                     </li>
                 ))}
-                 {items.length === 0 && <p className="text-sm text-center text-slate-500 py-4">Nenhum item cadastrado.</p>}
+                {items.length === 0 && <p className="text-sm text-center text-slate-500 py-4">Nenhum item cadastrado.</p>}
             </ul>
         </div>
     );
@@ -134,17 +134,17 @@ const StatusTable: React.FC<{
     const handleAdd = () => {
         setAddError('');
         const cleanId = newId.trim().toLowerCase().replace(/\s+/g, '_');
-        
+
         if (!cleanId || !newLabel.trim()) {
             setAddError('ID e Rótulo são obrigatórios.');
             return;
         }
-        
+
         if (statuses.some(s => s.id === cleanId)) {
-             setAddError('Este ID de status já existe.');
-             return;
+            setAddError('Este ID de status já existe.');
+            return;
         }
-        
+
         // Simple regex for valid ID (alphanumeric and underscore)
         if (!/^[a-z0-9_]+$/.test(cleanId)) {
             setAddError('O ID deve conter apenas letras minúsculas, números e underline.');
@@ -159,7 +159,7 @@ const StatusTable: React.FC<{
             category: category,
             isSystem: false,
         });
-        
+
         setNewId('');
         setNewLabel('');
         setNewStyle('neutral');
@@ -169,7 +169,7 @@ const StatusTable: React.FC<{
         <div className="p-6 bg-white rounded-lg border border-slate-200 mb-6">
             <h4 className="text-lg font-bold text-slate-800 mb-1">{title}</h4>
             <p className="text-sm text-slate-600 mb-4">{description}</p>
-            
+
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                     <thead className="text-xs text-gray-700 uppercase bg-slate-50 border-b border-slate-200">
@@ -190,16 +190,16 @@ const StatusTable: React.FC<{
                                     {status.category === 'both' && <span className="ml-1 text-[10px] bg-blue-100 px-1.5 py-0.5 rounded text-blue-600" title="Compartilhado">AMBOS</span>}
                                 </td>
                                 <td className="px-4 py-3">
-                                    <input 
-                                        type="text" 
-                                        value={status.label} 
+                                    <input
+                                        type="text"
+                                        value={status.label}
                                         onChange={(e) => onStatusChange(status.id, 'label', e.target.value)}
                                         className="bg-white border-gray-300 rounded-md shadow-sm text-sm w-full py-1.5"
                                     />
                                 </td>
                                 <td className="px-4 py-3">
-                                    <select 
-                                        value={status.style} 
+                                    <select
+                                        value={status.style}
                                         onChange={(e) => onStatusChange(status.id, 'style', e.target.value)}
                                         className="bg-white border-gray-300 rounded-md shadow-sm text-sm w-full py-1.5"
                                     >
@@ -211,17 +211,17 @@ const StatusTable: React.FC<{
                                     </select>
                                 </td>
                                 <td className="px-4 py-3 text-center">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={status.active} 
+                                    <input
+                                        type="checkbox"
+                                        checked={status.active}
                                         onChange={(e) => onStatusChange(status.id, 'active', e.target.checked)}
                                         className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
                                     />
                                 </td>
                                 <td className="px-4 py-3 text-center">
                                     {!status.isSystem && (
-                                        <button 
-                                            onClick={() => onDeleteStatus(status.id)} 
+                                        <button
+                                            onClick={() => onDeleteStatus(status.id)}
                                             className="text-slate-400 hover:text-danger transition-colors"
                                             title="Excluir Status"
                                         >
@@ -231,30 +231,30 @@ const StatusTable: React.FC<{
                                 </td>
                             </tr>
                         ))}
-                        
+
                         {/* Add Row */}
                         <tr className="bg-blue-50/30">
                             <td className="px-4 py-3">
-                                <input 
-                                    type="text" 
-                                    placeholder="novo_status_id" 
+                                <input
+                                    type="text"
+                                    placeholder="novo_status_id"
                                     value={newId}
                                     onChange={(e) => setNewId(e.target.value)}
                                     className="bg-white border-gray-300 rounded-md shadow-sm text-xs w-full py-1.5 font-mono"
                                 />
                             </td>
                             <td className="px-4 py-3">
-                                <input 
-                                    type="text" 
-                                    placeholder="Rótulo" 
+                                <input
+                                    type="text"
+                                    placeholder="Rótulo"
                                     value={newLabel}
                                     onChange={(e) => setNewLabel(e.target.value)}
                                     className="bg-white border-gray-300 rounded-md shadow-sm text-sm w-full py-1.5"
                                 />
                             </td>
                             <td className="px-4 py-3">
-                                <select 
-                                    value={newStyle} 
+                                <select
+                                    value={newStyle}
                                     onChange={(e) => setNewStyle(e.target.value as any)}
                                     className="bg-white border-gray-300 rounded-md shadow-sm text-sm w-full py-1.5"
                                 >
@@ -269,8 +269,8 @@ const StatusTable: React.FC<{
                                 <span className="text-xs text-slate-400">Ativo</span>
                             </td>
                             <td className="px-4 py-3 text-center">
-                                <button 
-                                    onClick={handleAdd} 
+                                <button
+                                    onClick={handleAdd}
                                     className="text-primary hover:text-blue-700 transition-colors"
                                     title="Adicionar"
                                 >
@@ -287,7 +287,7 @@ const StatusTable: React.FC<{
 }
 
 
-const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
+const ConfiguracoesGerais: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
     const { config, updateConfig, holidayTypes, setHolidayTypes, holidays } = useAuth();
     const modal = useModal();
     const [formData, setFormData] = useState<Partial<ConfiguracaoApp>>({});
@@ -303,15 +303,15 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         if (type === 'radio') {
-             setFormData(prev => ({ ...prev, [name]: value }));
+            setFormData(prev => ({ ...prev, [name]: value }));
         } else {
-            setFormData(prev => ({ 
-                ...prev, 
-                [name]: type === 'number' ? parseInt(value, 10) || 0 : value 
+            setFormData(prev => ({
+                ...prev,
+                [name]: type === 'number' ? parseInt(value, 10) || 0 : value
             }));
         }
     };
-    
+
     const handleVacationOptionsChange = (newItems: number[]) => {
         setFormData(prev => ({ ...prev, diasFeriasOptions: newItems }));
         if (config) {
@@ -320,36 +320,40 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
     };
 
     const handleStatusChange = (id: string, field: keyof StatusFeriasConfig, value: any) => {
-        const updatedStatuses = formData.vacationStatuses?.map(s => s.id === id ? { ...s, [field]: value } : s);
-        setFormData(prev => ({ ...prev, vacationStatuses: updatedStatuses }));
+        setFormData(prev => {
+            if (!prev || !prev.statusFerias) return prev;
+            const newStatuses = prev.statusFerias.map(s =>
+                s.id === id ? { ...s, [field]: value } : s
+            );
+            return { ...prev, statusFerias: newStatuses };
+        });
     };
-
     const handleAddStatus = (newStatus: StatusFeriasConfig) => {
-        const currentStatuses = formData.vacationStatuses || [];
+        const currentStatuses = formData.statusFerias || [];
         if (currentStatuses.some(s => s.id === newStatus.id)) return;
-        setFormData(prev => ({ ...prev, vacationStatuses: [...currentStatuses, newStatus] }));
+        setFormData(prev => ({ ...prev, statusFerias: [...currentStatuses, newStatus] }));
     };
 
     const handleDeleteStatus = async (id: string) => {
-         const confirmed = await modal.confirm({
+        const confirmed = await modal.confirm({
             title: 'Excluir Status',
             message: `Tem certeza que deseja excluir o status "${id}"?`,
             confirmVariant: 'danger',
             confirmText: 'Excluir'
         });
         if (confirmed) {
-            setFormData(prev => ({ ...prev, vacationStatuses: prev.vacationStatuses?.filter(s => s.id !== id) }));
+            setFormData(prev => ({ ...prev, statusFerias: prev.statusFerias?.filter(s => s.id !== id) }));
         }
     };
-    
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (config) {
             updateConfig({ ...config, ...formData });
-            modal.alert({title: 'Sucesso', message: 'Configurações salvas com sucesso!', confirmVariant: 'success'});
+            modal.alert({ title: 'Sucesso', message: 'Configurações salvas com sucesso!', confirmVariant: 'success' });
         }
     };
-    
+
     const handleDeleteHolidayType = async (typeToDelete: string) => {
         const isUsed = holidays.some(h => h && h.tipo === typeToDelete as any);
         if (isUsed) {
@@ -360,7 +364,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
             });
             return;
         }
-         const confirmed = await modal.confirm({
+        const confirmed = await modal.confirm({
             title: 'Confirmar Exclusão',
             message: `Tem certeza que deseja excluir o tipo "${typeToDelete.replace(/_/g, ' ')}"?`,
             confirmText: 'Excluir',
@@ -377,20 +381,20 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
             setNewHolidayType('');
         }
     };
-    
+
     const handleHolidayTypeKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             handleAddHolidayType();
         }
     }
-    
+
     if (!config || !formData.diasFeriasOptions) {
         return <div>Carregando configurações...</div>;
     }
 
-    const periodStatuses = formData.vacationStatuses?.filter(s => s.category === 'period' || s.category === 'both') || [];
-    const fractionStatuses = formData.vacationStatuses?.filter(s => s.category === 'fraction' || s.category === 'both') || [];
+    const periodStatuses = formData.statusFerias?.filter(s => s.category === 'period' || s.category === 'both') || [];
+    const fractionStatuses = formData.statusFerias?.filter(s => s.category === 'fraction' || s.category === 'both') || [];
 
     return (
         <div>
@@ -449,6 +453,15 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
                                         <label htmlFor="fimAdiantamento13" className="block text-sm font-medium text-slate-700 mb-1">Fim Adiantamento 13º (DD/MM)</label>
                                         <input type="text" placeholder="DD/MM" maxLength={5} id="fimAdiantamento13" name="fimAdiantamento13" value={formData.fimAdiantamento13 || ''} onChange={handleInputChange} required className="bg-white w-full border-gray-300 rounded-lg shadow-sm text-base py-2.5 px-3" />
                                     </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Exibir Limite de Prazo</label>
+                                        <input
+                                            type="date"
+                                            value={formData.exibirLimitePrazo || ''}
+                                            onChange={e => setFormData({ ...formData, exibirLimitePrazo: e.target.value || null })}
+                                            className="bg-white w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 px-3"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -503,11 +516,11 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
                                     <p className="text-sm text-slate-600 mb-4">Defina como os usuários selecionarão a quantidade de dias ao agendar férias.</p>
                                     <fieldset className="space-y-3">
                                         <div className="flex items-center">
-                                            <input id="list-ferias" name="vacationDaysInputType" type="radio" value="list" checked={formData.vacationDaysInputType === 'list'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300" />
+                                            <input id="list-ferias" name="tipoEntradaDiasFerias" type="radio" value="list" checked={formData.tipoEntradaDiasFerias === 'list'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300" />
                                             <label htmlFor="list-ferias" className="ml-3 block text-sm font-medium text-slate-700">Lista Suspensa (dias pré-definidos)</label>
                                         </div>
                                         <div className="flex items-center">
-                                            <input id="input-ferias" name="vacationDaysInputType" type="radio" value="input" checked={formData.vacationDaysInputType === 'input'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300" />
+                                            <input id="input-ferias" name="tipoEntradaDiasFerias" type="radio" value="input" checked={formData.tipoEntradaDiasFerias === 'input'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300" />
                                             <label htmlFor="input-ferias" className="ml-3 block text-sm font-medium text-slate-700">Campo de Input (livre)</label>
                                         </div>
                                     </fieldset>
@@ -517,11 +530,11 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
                                     <p className="text-sm text-slate-600 mb-4">Defina a base de cálculo para o abono pecuniário.</p>
                                     <fieldset className="space-y-3">
                                         <div className="flex items-center">
-                                            <input id="initial_balance" name="abonoCalculationBasis" type="radio" value="initial_balance" checked={formData.abonoCalculationBasis === 'initial_balance'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300" />
+                                            <input id="initial_balance" name="baseCalculoAbono" type="radio" value="initial_balance" checked={formData.baseCalculoAbono === 'initial_balance'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300" />
                                             <label htmlFor="initial_balance" className="ml-3 block text-sm font-medium text-slate-700">Cálculo sobre dias de direito no vencimento do P.A.</label>
                                         </div>
                                         <div className="flex items-center">
-                                            <input id="current_balance" name="abonoCalculationBasis" type="radio" value="current_balance" checked={formData.abonoCalculationBasis === 'current_balance'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300" />
+                                            <input id="current_balance" name="baseCalculoAbono" type="radio" value="current_balance" checked={formData.baseCalculoAbono === 'current_balance'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300" />
                                             <label htmlFor="current_balance" className="ml-3 block text-sm font-medium text-slate-700">Cálculo sobre saldo na programação das férias</label>
                                         </div>
                                     </fieldset>
@@ -532,7 +545,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
 
                     {activeTab === 'status' && (
                         <>
-                            <StatusTable 
+                            <StatusTable
                                 title="Status de Fluxo e Requerimento (Período)"
                                 description="Status relacionados ao ciclo de vida do período aquisitivo e fluxo de aprovação (workflow)."
                                 category="period"
@@ -541,7 +554,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
                                 onAddStatus={handleAddStatus}
                                 onDeleteStatus={handleDeleteStatus}
                             />
-                            <StatusTable 
+                            <StatusTable
                                 title="Status de Execução (Fração)"
                                 description="Status relacionados ao agendamento e gozo efetivo das datas de férias."
                                 category="fraction"
@@ -552,7 +565,7 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
                             />
                         </>
                     )}
-                                        
+
                     <div className="flex justify-end space-x-4 pt-6 border-t border-slate-200 mt-8">
                         <button type="button" onClick={() => setActiveView('cadastros')} className="px-6 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
                             Cancelar
@@ -567,4 +580,4 @@ const GeneralSettings: React.FC<GeneralSettingsProps> = ({ setActiveView }) => {
     );
 };
 
-export default GeneralSettings;
+export default ConfiguracoesGerais;

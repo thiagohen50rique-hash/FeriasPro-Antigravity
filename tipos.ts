@@ -1,14 +1,15 @@
 
+
 export type PapelUsuario = 'user' | 'admin' | 'manager' | 'rh';
 
 export interface EventoAssinatura {
   name: 'Notificação enviada' | 'Operação visualizada' | 'Termos da assinatura eletrônica' | 'Assinatura efetuada' | 'Operação concluída';
   timestamp: string;
-  details: string;
+  detalhes: string;
 }
 
 export interface PeriodoDeFerias {
-  id: number;
+  id: string;
   sequencia: 1 | 2 | 3;
   inicioFerias: string;
   terminoFerias: string;
@@ -21,9 +22,9 @@ export interface PeriodoDeFerias {
 export interface Afastamento {
   id: string;
   type: 'licenca_medica' | 'licenca_maternidade' | 'outro';
-  startDate: string;
-  endDate: string;
-  description: string;
+  dataInicio: string;
+  dataFim: string;
+  descricao: string;
 }
 
 // Interfaces base para evitar dependência circular direta
@@ -46,23 +47,23 @@ export interface FuncionarioBase {
 }
 
 export interface ParticipanteAssinatura {
-  signer: FuncionarioBase; // Usa a base para evitar ciclo
-  conclusionTime: string | null;
-  ipAddress: string;
-  authenticationMethod: string;
-  device: string;
-  geolocation: string;
-  events: EventoAssinatura[];
+  assinante: FuncionarioBase; // Usa a base para evitar ciclo
+  dataConclusao: string | null;
+  enderecoIP: string;
+  metodoAutenticacao: string;
+  dispositivo: string;
+  geolocalizacao: string;
+  eventos: EventoAssinatura[];
 }
 
 export interface InformacaoAssinatura {
   documentId: string;
   operationId: string;
-  participants: ParticipanteAssinatura[];
+  participantes: ParticipanteAssinatura[];
 }
 
 export interface PeriodoAquisitivo {
-  id: number;
+  id: string;
   rotulo_periodo: string;
   inicioPa: string;
   terminoPa: string;
@@ -70,11 +71,11 @@ export interface PeriodoAquisitivo {
   saldoTotal: number;
   status: 'planning' | 'pending_manager' | 'pending_rh' | 'scheduled' | 'rejected' | 'enjoyed';
   fracionamentos: PeriodoDeFerias[];
-  vacationDaysInputType: 'system' | 'list' | 'input';
-  abonoCalculationBasis: 'system' | 'initial_balance' | 'current_balance';
-  managerApproverId?: number;
-  hrApproverId?: number;
-  signatureInfo?: InformacaoAssinatura;
+  tipoEntradaDiasFerias: 'system' | 'list' | 'input';
+  baseCalculoAbono: 'system' | 'initial_balance' | 'current_balance';
+  idAprovadorGestor?: number;
+  idAprovadorRH?: number;
+  infoAssinatura?: InformacaoAssinatura;
 }
 
 // Funcionario completo estende a base e adiciona a propriedade complexa
@@ -82,17 +83,19 @@ export interface Funcionario extends FuncionarioBase {
   periodosAquisitivos: PeriodoAquisitivo[];
 }
 
+export type NovosDadosFuncionario = Omit<Funcionario, 'id' | 'periodosAquisitivos' | 'afastamentos'>;
+
 export interface UnidadeOrganizacional {
   id: string;
-  name: string;
-  type: 'Área';
-  parentId: string | null;
+  nome: string;
+  tipo: 'Área';
+  idPai: string | null;
 }
 
 export interface NivelHierarquico {
   id: number;
-  level: number;
-  description: string;
+  nivel: number;
+  descricao: string;
 }
 
 export interface FeriadoEmpresa {
@@ -120,18 +123,18 @@ export interface RegraFeriasColetivas {
 export type NovaRegraFeriasColetivas = Omit<RegraFeriasColetivas, 'id'>;
 
 export interface StatusFeriasConfig {
-    id: string;
-    label: string;
-    style: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
-    active: boolean;
-    category: 'period' | 'fraction' | 'both'; // 'period' = Workflow status, 'fraction' = Execution status, 'both' = Shared
-    isSystem: boolean; // If true, ID cannot be changed/deleted
+  id: string;
+  label: string;
+  style: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+  active: boolean;
+  category: 'period' | 'fraction' | 'both'; // 'period' = Workflow status, 'fraction' = Execution status, 'both' = Shared
+  isSystem: boolean; // If true, ID cannot be changed/deleted
 }
 
 export interface ConfiguracaoApp {
   diasFeriasOptions: number[];
-  vacationDaysInputType: 'list' | 'input';
-  abonoCalculationBasis: 'initial_balance' | 'current_balance';
+  tipoEntradaDiasFerias: 'list' | 'input';
+  baseCalculoAbono: 'initial_balance' | 'current_balance';
   antecedenciaMinimaDias: number;
   antecedenciaMinimaAbonoDias: number;
   maxFracionamentos: number;
@@ -142,8 +145,8 @@ export interface ConfiguracaoApp {
     inicio: string;
     fim: string;
   } | null;
-  displayDueDateLimit: string | null;
-  vacationStatuses: StatusFeriasConfig[];
+  exibirLimitePrazo: string | null;
+  statusFerias: StatusFeriasConfig[];
 }
 
 export interface Notificacao {
@@ -154,3 +157,5 @@ export interface Notificacao {
   read: boolean;
   link?: string;
 }
+
+

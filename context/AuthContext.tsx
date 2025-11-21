@@ -1,13 +1,11 @@
 import { createContext, Dispatch, SetStateAction, useCallback, useEffect, useState, ReactNode } from 'react';
-import { Funcionario, Notificacao, FeriadoEmpresa, ConfiguracaoApp, NovoFeriadoEmpresa, PeriodoAquisitivo, PeriodoDeFerias, Afastamento, RegraFeriasColetivas, NovaRegraFeriasColetivas, UnidadeOrganizacional, NivelHierarquico } from '../tipos';
+import { Funcionario, Notificacao, FeriadoEmpresa, ConfiguracaoApp, NovoFeriadoEmpresa, PeriodoAquisitivo, PeriodoDeFerias, Afastamento, RegraFeriasColetivas, NovaRegraFeriasColetivas, UnidadeOrganizacional, NivelHierarquico, NovosDadosFuncionario } from '../tipos';
 import { supabase } from '../services/supabaseClient';
 
-export type NovosDadosFuncionario = Omit<Funcionario, 'id' | 'periodosAquisitivos' | 'afastamentos'>;
-
 export interface CollectiveVacationProposal {
-    employeeId: number;
-    startDate: string;
-    days: number;
+  employeeId: number;
+  startDate: string;
+  days: number;
 }
 
 interface AuthContextType {
@@ -61,62 +59,62 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   login: () => false,
-  logout: () => {},
+  logout: () => { },
   allEmployees: [],
   activeEmployees: [],
-  updateEmployee: () => {},
-  addEmployee: () => {},
-  deleteEmployee: () => {},
-  toggleEmployeeStatus: () => {},
+  updateEmployee: () => { },
+  addEmployee: () => { },
+  deleteEmployee: () => { },
+  toggleEmployeeStatus: () => { },
   notifications: [],
-  addNotification: () => {},
-  markNotificationsAsRead: () => {},
+  addNotification: () => { },
+  markNotificationsAsRead: () => { },
   holidays: [],
-  addHoliday: () => {},
-  updateHoliday: () => {},
-  deleteHoliday: () => {},
+  addHoliday: () => { },
+  updateHoliday: () => { },
+  deleteHoliday: () => { },
   config: null,
-  updateConfig: () => {},
+  updateConfig: () => { },
   addAccrualPeriodsByDueDate: () => Promise.resolve(0),
-  addAccrualPeriodToEmployee: async () => {},
-  updateAccrualPeriod: () => {},
-  deleteAccrualPeriod: () => {},
-  addDirectVacation: () => {},
-  updateVacationPeriod: () => {},
-  deleteVacation: () => {},
+  addAccrualPeriodToEmployee: async () => { },
+  updateAccrualPeriod: () => { },
+  deleteAccrualPeriod: () => { },
+  addDirectVacation: () => { },
+  updateVacationPeriod: () => { },
+  deleteVacation: () => { },
   addCollectiveVacation: () => Promise.resolve({ success: false, message: 'Não implementado' }),
-  addLeaveToEmployee: () => {},
-  updateLeave: () => {},
-  deleteLeave: () => {},
+  addLeaveToEmployee: () => { },
+  updateLeave: () => { },
+  deleteLeave: () => { },
   companyAreas: [],
   companyManagements: [],
   companyUnits: [],
-  setCompanyUnits: () => {},
+  setCompanyUnits: () => { },
   holidayTypes: [],
-  setHolidayTypes: () => {},
+  setHolidayTypes: () => { },
   collectiveVacationRules: [],
-  addCollectiveVacationRule: () => {},
-  updateCollectiveVacationRule: () => {},
-  deleteCollectiveVacationRule: () => {},
+  addCollectiveVacationRule: () => { },
+  updateCollectiveVacationRule: () => { },
+  deleteCollectiveVacationRule: () => { },
   orgUnits: [],
-  updateOrgUnits: () => {},
+  updateOrgUnits: () => { },
   hierarchyLevels: [],
-  updateHierarchyLevels: () => {},
+  updateHierarchyLevels: () => { },
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ESTADO: Dados principais
   const [allEmployees, setAllEmployees] = useState<Funcionario[]>([]);
   const [currentUser, setCurrentUser] = useState<Funcionario | null>(null);
-  
+
   // ESTADO: Auxiliares
   const [notifications, setNotifications] = useState<Notificacao[]>([]);
-  const [holidays, setHolidays] = useState<FeriadoEmpresa[]>([]); 
+  const [holidays, setHolidays] = useState<FeriadoEmpresa[]>([]);
   const [config, setConfig] = useState<ConfiguracaoApp | null>(null);
   const [collectiveVacationRules, setCollectiveVacationRules] = useState<RegraFeriasColetivas[]>([]);
   const [orgUnits, setOrgUnits] = useState<UnidadeOrganizacional[]>([]);
   const [hierarchyLevels, setHierarchyLevels] = useState<NivelHierarquico[]>([]);
-  
+
   // ESTADO: Listas de opções
   const [companyUnits, setCompanyUnits] = useState<string[]>([]);
   const [holidayTypes, setHolidayTypes] = useState<string[]>(['feriado', 'ponto_facultativo', 'recesso']);
@@ -126,9 +124,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // --- FETCH DATA (Supabase) ---
   const fetchEmployees = useCallback(async () => {
     setIsLoading(true);
-    
+
     const { data, error } = await supabase
-      .from('perfis') 
+      .from('perfis')
       .select(`
         *,
         periodos_aquisitivos (
@@ -153,40 +151,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         id: emp.id, // ID Numérico
         nome: emp.nome,
         matricula: emp.matricula,
-        dataAdmissao: emp.data_admissao, 
+        dataAdmissao: emp.data_admissao,
         cargo: emp.cargo,
         departamento: emp.departamento,
         area: emp.area,
         unidade: emp.unidade,
-        gestor: emp.gestor_id, 
+        gestor: emp.gestor_id,
         email: emp.email,
         cpf: emp.cpf,
         role: emp.role,
         status: emp.status,
         nivelHierarquico: emp.nivel_hierarquico,
-        
+
         afastamentos: emp.afastamentos?.map((af: any) => ({
           id: af.id,
           type: af.type,
-          startDate: af.start_date,
-          endDate: af.end_date,
-          description: af.description
+          dataInicio: af.start_date,
+          dataFim: af.end_date,
+          descricao: af.description
         })) || [],
 
         periodosAquisitivos: emp.periodos_aquisitivos?.map((pa: any) => ({
-          id: pa.id, 
+          id: pa.id,
           rotulo_periodo: pa.rotulo_periodo,
           inicioPa: pa.inicio_pa,
           terminoPa: pa.termino_pa,
           limiteConcessao: pa.limite_concessao,
           saldoTotal: pa.saldo_total,
           status: pa.status,
-          managerApproverId: pa.manager_approver_id,
-          hrApproverId: pa.hr_approver_id,
-          vacationDaysInputType: pa.vacation_days_input_type,
-          abonoCalculationBasis: pa.abono_calculation_basis,
-          signatureInfo: pa.signature_info,
-          
+          idAprovadorGestor: pa.manager_approver_id,
+          idAprovadorRH: pa.hr_approver_id,
+          tipoEntradaDiasFerias: pa.vacation_days_input_type,
+          baseCalculoAbono: pa.abono_calculation_basis,
+          infoAssinatura: pa.signature_info,
+
           fracionamentos: pa.fracionamentos?.map((fr: any) => ({
             id: fr.id,
             sequencia: fr.sequencia,
@@ -201,7 +199,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }));
 
       setAllEmployees(formattedData);
-      
+
       const units = [...new Set(formattedData.map(e => e.unidade))].sort();
       setCompanyUnits(units);
 
@@ -223,32 +221,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // --- AUTENTICAÇÃO (Lógica implantada) ---
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-try {
-        // O Supabase verifica a senha criptografada internamente
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password, 
-        });
+    try {
+      // O Supabase verifica a senha criptografada internamente
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
 
-        if (error) {
-            console.error("Erro de autenticação:", error.message);
-            return false;
-        }
+      if (error) {
+        console.error("Erro de autenticação:", error.message);
+        return false;
+      }
 
-        // Se o login no Supabase passar, buscamos os dados do perfil
-        const userProfile = allEmployees.find(emp => emp.email.toLowerCase() === email.toLowerCase());
-        
-        if (userProfile) {
-            setCurrentUser(userProfile);
-            return true;
-        } else {
-            console.error("Usuário autenticado mas sem perfil na tabela 'perfis'");
-            return false;
-        }
+      // Se o login no Supabase passar, buscamos os dados do perfil
+      const userProfile = allEmployees.find(emp => emp.email.toLowerCase() === email.toLowerCase());
+
+      if (userProfile) {
+        setCurrentUser(userProfile);
+        return true;
+      } else {
+        console.error("Usuário autenticado mas sem perfil na tabela 'perfis'");
+        return false;
+      }
 
     } catch (error) {
-        console.error("Erro inesperado no login:", error);
-        return false;
+      console.error("Erro inesperado no login:", error);
+      return false;
     }
   }, [allEmployees]);
 
@@ -258,25 +256,25 @@ try {
 
 
   // --- AÇÕES DE ESCRITA (Placeholders e Implementações Iniciais) ---
-  
+
   const addNotification = useCallback((notificationData: Omit<Notificacao, 'id' | 'timestamp' | 'read'>) => {
     const newNotification: Notificacao = {
-        ...notificationData,
-        id: `notif-${Date.now()}`,
-        timestamp: new Date().toISOString(),
-        read: false,
+      ...notificationData,
+      id: `notif-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      read: false,
     };
     setNotifications(prev => [newNotification, ...prev]);
   }, []);
 
   const markNotificationsAsRead = useCallback(() => {
     if (currentUser) {
-        setNotifications(prev => prev.map(n => (n.userId === currentUser.id ? { ...n, read: true } : n)));
+      setNotifications(prev => prev.map(n => (n.userId === currentUser.id ? { ...n, read: true } : n)));
     }
   }, [currentUser]);
 
   const addHoliday = useCallback((holidayData: NovoFeriadoEmpresa) => {
-      setHolidays(prev => [...prev, { ...holidayData, id: `h-${Date.now()}` }]);
+    setHolidays(prev => [...prev, { ...holidayData, id: `h-${Date.now()}` }]);
   }, []);
   const updateHoliday = useCallback((h: FeriadoEmpresa) => setHolidays(p => p.map(x => x.id === h.id ? h : x)), []);
   const deleteHoliday = useCallback((id: string) => setHolidays(p => p.filter(x => x.id !== id)), []);
@@ -284,21 +282,21 @@ try {
 
 
   const addEmployee = useCallback((employeeData: NovosDadosFuncionario) => {
-      console.log("Adicionar funcionário: implementar INSERT no Supabase", employeeData);
+    console.log("Adicionar funcionário: implementar INSERT no Supabase", employeeData);
   }, []);
 
   const deleteEmployee = useCallback((employeeId: number) => {
-      setAllEmployees(prev => prev.filter(emp => emp.id !== employeeId));
+    setAllEmployees(prev => prev.filter(emp => emp.id !== employeeId));
   }, []);
 
   const toggleEmployeeStatus = useCallback((employeeId: number) => {
-      setAllEmployees(prev => prev.map(emp => emp.id === employeeId ? { ...emp, status: emp.status === 'active' ? 'inactive' : 'active' } : emp));
+    setAllEmployees(prev => prev.map(emp => emp.id === employeeId ? { ...emp, status: emp.status === 'active' ? 'inactive' : 'active' } : emp));
   }, []);
 
 
   // --- AÇÕES DE ESCRITA (Placeholders e Implementações concluídas) ---
-    
-const updateEmployee = useCallback(async (updatedEmployee: Funcionario) => {
+
+  const updateEmployee = useCallback(async (updatedEmployee: Funcionario) => {
     try {
       const { error } = await supabase
         .from('perfis')
@@ -319,25 +317,25 @@ const updateEmployee = useCallback(async (updatedEmployee: Funcionario) => {
 
       // Atualiza estado local
       setAllEmployees(prev => prev.map(emp => (emp.id === updatedEmployee.id ? updatedEmployee : emp)));
-      
+
       if (currentUser && currentUser.id === updatedEmployee.id) {
         setCurrentUser(updatedEmployee);
       }
-      
+
     } catch (error: any) {
       console.error('Erro ao atualizar funcionário:', error.message);
     }
   }, [currentUser]);
-//--------------------------------------------
+  //--------------------------------------------
 
 
 
-  
+
   // --- GESTÃO DE FÉRIAS (Comunicação Real com Supabase) ---
 
   const addAccrualPeriodsByDueDate = useCallback(async (dueDateLimit: string): Promise<number> => {
-        // TODO: Implementar RPC: await supabase.rpc('criar_pa_em_massa', { p_due_date_limit: dueDateLimit })
-        return 0; 
+    // TODO: Implementar RPC: await supabase.rpc('criar_pa_em_massa', { p_due_date_limit: dueDateLimit })
+    return 0;
   }, []);
 
   const addAccrualPeriodToEmployee = useCallback(async (employeeId: number, periodData: any) => {
@@ -353,7 +351,7 @@ const updateEmployee = useCallback(async (updatedEmployee: Funcionario) => {
           status: periodData.status,
           vacation_days_input_type: periodData.vacation_days_input_type,
           abono_calculation_basis: periodData.abono_calculation_basis,
-          saldo_total: 30, 
+          saldo_total: 30,
         })
         .select()
         .single();
@@ -371,8 +369,8 @@ const updateEmployee = useCallback(async (updatedEmployee: Funcionario) => {
           saldoTotal: data.saldo_total,
           status: data.status,
           fracionamentos: [],
-          vacationDaysInputType: data.vacation_days_input_type,
-          abonoCalculationBasis: data.abono_calculation_basis
+          tipoEntradaDiasFerias: data.vacation_days_input_type,
+          baseCalculoAbono: data.abono_calculation_basis
         };
 
         setAllEmployees(prev => prev.map(emp => {
@@ -388,12 +386,12 @@ const updateEmployee = useCallback(async (updatedEmployee: Funcionario) => {
       }
     } catch (error: any) {
       console.error('Erro ao adicionar período:', error.message);
-      throw error; 
+      throw error;
     }
   }, []);
 
   // Placeholders para as outras funções (funções implmementadas)
-const addDirectVacation = useCallback(async (employeeId: number, periodId: string | number, vacationData: any) => {
+  const addDirectVacation = useCallback(async (employeeId: number, periodId: string | number, vacationData: any) => {
     try {
       const { data, error } = await supabase
         .from('fracionamentos')
@@ -444,7 +442,7 @@ const addDirectVacation = useCallback(async (employeeId: number, periodId: strin
           }
           return emp;
         }));
-        
+
         // Feedback visual (opcional: useModal().alert(...) se tiver acesso ao modal aqui)
         console.log("Férias lançadas com sucesso!");
       }
@@ -455,22 +453,22 @@ const addDirectVacation = useCallback(async (employeeId: number, periodId: strin
 
 
   // Placeholders para as outras funções (funções ainda não implmementadas)
-  const updateAccrualPeriod = useCallback(() => {}, []);
-  const deleteAccrualPeriod = useCallback(() => {}, []);
-  
-  const updateVacationPeriod = useCallback(() => {}, []);
-  const deleteVacation = useCallback(() => {}, []);
-  const addCollectiveVacation = useCallback(async () => ({ success: false, message: 'Não implementado' }), []);
-  
-  const addLeaveToEmployee = useCallback(() => {}, []);
-  const updateLeave = useCallback(() => {}, []);
-  const deleteLeave = useCallback(() => {}, []);
+  const updateAccrualPeriod = useCallback(() => { }, []);
+  const deleteAccrualPeriod = useCallback(() => { }, []);
 
-  const addCollectiveVacationRule = useCallback(() => {}, []);
-  const updateCollectiveVacationRule = useCallback(() => {}, []);
-  const deleteCollectiveVacationRule = useCallback(() => {}, []);
-  const updateOrgUnits = useCallback(() => {}, []);
-  const updateHierarchyLevels = useCallback(() => {}, []);
+  const updateVacationPeriod = useCallback(() => { }, []);
+  const deleteVacation = useCallback(() => { }, []);
+  const addCollectiveVacation = useCallback(async () => ({ success: false, message: 'Não implementado' }), []);
+
+  const addLeaveToEmployee = useCallback(() => { }, []);
+  const updateLeave = useCallback(() => { }, []);
+  const deleteLeave = useCallback(() => { }, []);
+
+  const addCollectiveVacationRule = useCallback(() => { }, []);
+  const updateCollectiveVacationRule = useCallback(() => { }, []);
+  const deleteCollectiveVacationRule = useCallback(() => { }, []);
+  const updateOrgUnits = useCallback(() => { }, []);
+  const updateHierarchyLevels = useCallback(() => { }, []);
 
   // Valores derivados
   const activeEmployees = allEmployees.filter(e => e.status === 'active');

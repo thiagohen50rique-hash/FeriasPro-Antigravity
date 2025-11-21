@@ -7,7 +7,7 @@ import { getDynamicStatus, getStatusText } from '../constants';
 
 const formatDate = (dateStr: string | null, withTime = false) => {
     if (!dateStr) return 'N/A';
-    
+
     // CORREÇÃO BUG-02: Tratamento direto de strings YYYY-MM-DD
     // Evita a criação de objeto Date para datas puras, prevenindo
     // deslocamento de dia devido a diferenças de fuso horário (UTC vs Local).
@@ -20,18 +20,18 @@ const formatDate = (dateStr: string | null, withTime = false) => {
         // Use UTC date parts to avoid timezone issues when formatting timestamps
         const date = new Date(dateStr);
         if (isNaN(date.getTime())) return 'N/A';
-        
+
         const day = String(date.getUTCDate()).padStart(2, '0');
         const month = String(date.getUTCMonth() + 1).padStart(2, '0');
         const year = date.getUTCFullYear();
-        
+
         if (withTime) {
             const hours = String(date.getUTCHours()).padStart(2, '0');
             const minutes = String(date.getUTCMinutes()).padStart(2, '0');
             const seconds = String(date.getUTCSeconds()).padStart(2, '0');
             return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
         }
-        
+
         return `${day}/${month}/${year}`;
     } catch (e) {
         return 'N/A';
@@ -48,10 +48,10 @@ const addPageFooters = (doc: jsPDF, isSigned: boolean) => {
         doc.setPage(i);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor('#6B7280'); // gray-500
-        
+
         if (i === 1) { // First page footer
-             doc.setFontSize(6);
-             doc.text(footerText, leftMargin, doc.internal.pageSize.height - 10, { align: 'left' });
+            doc.setFontSize(6);
+            doc.text(footerText, leftMargin, doc.internal.pageSize.height - 10, { align: 'left' });
         } else if (isSigned) { // Certificate pages footer
             const pageNumText = `Página ${i} de ${pageCount}`;
             doc.setFontSize(8);
@@ -84,20 +84,20 @@ export const generateVacationRequestPDF = async (employee: Funcionario, period: 
     } catch (e) {
         console.error("Error loading logo for PDF:", e);
     }
-    
+
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor('#0F172A'); // slate-900
     doc.text('REQUERIMENTO DE FÉRIAS', leftMargin, currentY + 5);
-    
+
     currentY += 25;
 
     // === DADOS DO COLABORADOR ===
     doc.setFillColor('#EBF2FF'); // blue-25
     doc.setDrawColor('#B3C0D7'); // blue-200
-    
+
     doc.rect(leftMargin, currentY, contentWidth, 32, 'FD');
-    
+
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor('#002C78'); // primary
@@ -112,8 +112,8 @@ export const generateVacationRequestPDF = async (employee: Funcionario, period: 
         ],
         theme: 'plain',
         styles: { fontSize: 9, cellPadding: 1.5 },
-        columnStyles: { 
-            0: { fontStyle: 'bold', cellWidth: 35, textColor: '#475569'},
+        columnStyles: {
+            0: { fontStyle: 'bold', cellWidth: 35, textColor: '#475569' },
             1: { cellWidth: 'auto', textColor: '#1E293B' },
             2: { fontStyle: 'bold', cellWidth: 25, textColor: '#475569' },
             3: { cellWidth: 40, textColor: '#1E293B' },
@@ -121,7 +121,7 @@ export const generateVacationRequestPDF = async (employee: Funcionario, period: 
         margin: { left: leftMargin + 4 },
     });
     currentY = (doc as any).lastAutoTable.finalY + 4; // Add padding
-    
+
     // === DECLARAÇÃO INICIAL ===
     currentY += sectionSpacing;
     doc.setFontSize(11);
@@ -154,7 +154,7 @@ export const generateVacationRequestPDF = async (employee: Funcionario, period: 
             ['Período Aquisitivo:', `${formatDate(period.inicioPa)} a ${formatDate(period.terminoPa)}`],
             ['Limite para Concessão:', formatDate(period.limiteConcessao)],
         ],
-        columnStyles: { 
+        columnStyles: {
             0: { fontStyle: 'bold', textColor: '#475569', cellWidth: 45 },
             1: { textColor: '#1E293B' },
         },
@@ -246,7 +246,7 @@ export const generateVacationRequestPDF = async (employee: Funcionario, period: 
     doc.text(commitmentText, leftMargin, currentY, { maxWidth: contentWidth, align: 'justify' });
     const commitDimensions = doc.getTextDimensions(commitmentText, { maxWidth: contentWidth });
     currentY += commitDimensions.h;
-    
+
     // === DATE LINE ===
     currentY = Math.max(currentY, 210);
     const today = new Date();
@@ -273,20 +273,20 @@ export const generateVacationRequestPDF = async (employee: Funcionario, period: 
         doc.setFont('helvetica', 'italic');
         doc.setTextColor('#1F2937'); // black
         doc.text('(assinado digitalmente)', x, y, { align: 'center', maxWidth: width - 4 });
-        doc.setFontSize(9); 
+        doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
     };
-    
+
     const signaturesToRender: { name: string; role: string }[] = [];
-    const signatureInfo = period.signatureInfo;
+    const infoAssinatura = period.infoAssinatura;
 
 
     // 1. Employee (always present)
     signaturesToRender.push({ name: employee.nome, role: 'Funcionário(a)' });
-    
+
     // 2. Approvers
-    const managerApprover = allEmployees.find(e => e.id === period.managerApproverId);
-    const hrApprover = allEmployees.find(e => e.id === period.hrApproverId);
+    const managerApprover = allEmployees.find(e => e.id === period.idAprovadorGestor);
+    const hrApprover = allEmployees.find(e => e.id === period.idAprovadorRH);
 
     if (managerApprover && hrApprover && managerApprover.id === hrApprover.id) {
         // Same person is manager and HR, show them once with their actual title
@@ -310,20 +310,32 @@ export const generateVacationRequestPDF = async (employee: Funcionario, period: 
 
     currentY = signatureY + 15;
 
-    if (signatureInfo) {
+    if (infoAssinatura) {
         doc.setFontSize(7);
         doc.setTextColor('#1F2937');
         doc.text('Documento assinado digitalmente. Veja o Certificado de Operação nas páginas seguintes.', page_width / 2, currentY, { align: 'center' });
     }
 
     // =========== CERTIFICATE PAGES (if signed) ===========
-    if (signatureInfo) {
-        const signedParticipants = signatureInfo.participants.filter(p => p.conclusionTime);
+    if (infoAssinatura) {
+        const signedParticipants = infoAssinatura.participantes.filter(p => p.dataConclusao);
         doc.addPage();
         let certY = 20;
 
         signedParticipants.forEach((p, index) => {
-            if (certY > 210) { 
+            const signerName = p.assinante.nome;
+            const signerRole = p.assinante.cargo;
+            const signerCpf = p.assinante.cpf;
+            const signerEmail = p.assinante.email;
+
+            const signatureDate = p.dataConclusao ? new Date(p.dataConclusao).toLocaleString('pt-BR') : 'N/A';
+
+            const ip = p.enderecoIP;
+            const authMethod = p.metodoAutenticacao;
+            const device = p.dispositivo;
+            const geo = p.geolocalizacao;
+
+            if (certY > 210) {
                 doc.addPage();
                 certY = 20;
             }
@@ -332,24 +344,24 @@ export const generateVacationRequestPDF = async (employee: Funcionario, period: 
             doc.setTextColor('#1E293B');
             doc.setFontSize(12);
             doc.text('✓', 14, certY);
-            doc.text(p.signer.nome, 20, certY);
+            doc.text(signerName, 20, certY);
 
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.setTextColor('#334155');
             const summaryStartY = certY;
             certY += 6;
-            doc.text(`Função: ${p.signer.cargo}`, 20, certY);
+            doc.text(`Função: ${signerRole}`, 20, certY);
             certY += 5;
-            doc.text(`Concluído em: ${formatDate(p.conclusionTime, true)}`, 20, certY);
+            doc.text(`Concluído em: ${signatureDate}`, 20, certY);
             certY += 5;
-            doc.text(`IP: ${p.ipAddress}`, 20, certY);
+            doc.text(`IP: ${ip}`, 20, certY);
             certY += 5;
-            doc.text(`Houve dupla autenticação: ${p.authenticationMethod}`, 20, certY);
+            doc.text(`Houve dupla autenticação: ${authMethod}`, 20, certY);
             certY += 5;
-            doc.text(`Dispositivo utilizado: ${p.device}`, 20, certY);
+            doc.text(`Dispositivo utilizado: ${device}`, 20, certY);
             certY += 5;
-            doc.text(`Geolocalização: ${p.geolocation}`, 20, certY);
+            doc.text(`Geolocalização: ${geo}`, 20, certY);
 
             const signatureBoxX = 130;
             const signatureBoxY = summaryStartY - 2;
@@ -362,23 +374,23 @@ export const generateVacationRequestPDF = async (employee: Funcionario, period: 
             doc.setFont('helvetica', 'normal');
             doc.setTextColor('#6B7280');
             doc.text('Assinatura efetuada por clique', signatureBoxX + 22, signatureBoxY + 14);
-            doc.text(formatDate(p.conclusionTime, true), signatureBoxX + 22, signatureBoxY + 18);
+            doc.text(signatureDate, signatureBoxX + 22, signatureBoxY + 18);
             doc.setTextColor('#1F2937');
             doc.setFont('helvetica', 'bold');
-            doc.text(p.signer.nome, signatureBoxX + 22, signatureBoxY + 25, { maxWidth: 40 });
-            
+            doc.text(signerName, signatureBoxX + 22, signatureBoxY + 25, { maxWidth: 40 });
+
             certY += 8;
 
-            const tableBody = p.events.map(event => [
+            const tableBody = p.eventos.map(event => [
                 { content: event.name, styles: { fontStyle: 'bold' as 'bold' } },
                 { content: `${formatDate(event.timestamp, true)}\n(GMT -3:00)`, styles: { fontStyle: 'bold' as 'bold' } },
-                event.details,
+                event.detalhes,
             ]);
 
             autoTable(doc, {
                 startY: certY,
                 head: [
-                    [{ content: `Histórico de ação de: ${p.signer.nome}`, colSpan: 3, styles: { fontStyle: 'bold', fontSize: 11, fillColor: '#F3F4F6', textColor: '#1F2937' } }],
+                    [{ content: `Histórico de ação de: ${signerName}`, colSpan: 3, styles: { fontStyle: 'bold', fontSize: 11, fillColor: '#F3F4F6', textColor: '#1F2937' } }],
                     ['', 'Data e Hora', 'Histórico de eventos']
                 ],
                 body: tableBody,
@@ -403,7 +415,7 @@ export const generateVacationRequestPDF = async (employee: Funcionario, period: 
         });
     }
 
-    addPageFooters(doc, !!signatureInfo);
+    addPageFooters(doc, !!infoAssinatura);
 
     if (outputType === 'blob') {
         return doc.output('blob');

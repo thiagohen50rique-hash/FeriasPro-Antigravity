@@ -15,19 +15,19 @@ import { formatDate } from '../utils/dateUtils';
 import ArrowPathIcon from './icons/ArrowPathIcon';
 
 
-const NewPeriodForm: React.FC<{ 
-    employeeId: number; 
-    onSave: () => void; 
-    onCancel: () => void; 
-    suggestedStartDate?: string; 
+const NewPeriodForm: React.FC<{
+    employeeId: number;
+    onSave: () => void;
+    onCancel: () => void;
+    suggestedStartDate?: string;
     suggestedEndDate?: string;
 }> = ({ employeeId, onSave, onCancel, suggestedStartDate, suggestedEndDate }) => {
     const { addAccrualPeriodToEmployee, allEmployees, config } = useAuth();
     const modal = useModal();
     const [startDate, setStartDate] = useState(suggestedStartDate || '');
     const [endDate, setEndDate] = useState(suggestedEndDate || '');
-    const [vacationDaysInputType, setVacationDaysInputType] = useState<'system' | 'list' | 'input'>('system');
-    const [abonoCalculationBasis, setAbonoCalculationBasis] = useState<'system' | 'initial_balance' | 'current_balance'>('system');
+    const [tipoEntradaDiasFerias, setTipoEntradaDiasFerias] = useState<'system' | 'list' | 'input'>('system');
+    const [baseCalculoAbono, setBaseCalculoAbono] = useState<'system' | 'initial_balance' | 'current_balance'>('system');
     const [error, setError] = useState('');
 
     const concessionLimit = useMemo(() => {
@@ -48,37 +48,37 @@ const NewPeriodForm: React.FC<{
             setError('A data de início deve ser anterior à data de fim.');
             return;
         }
-        
+
         const startYear = new Date(`${startDate}T12:00:00Z`).getUTCFullYear();
         const endYear = new Date(`${endDate}T12:00:00Z`).getUTCFullYear();
         const rotuloPeriodo = `${startYear}-${endYear}`;
 
         const employee = allEmployees.find(e => e.id === employeeId);
         const periodExists = employee?.periodosAquisitivos.some(p => p.rotulo_periodo === rotuloPeriodo);
-        if(periodExists) {
+        if (periodExists) {
             setError(`Erro: O colaborador já possui o período aquisitivo ${rotuloPeriodo}.`);
             return;
         }
-        
+
         const newPeriodPayload = {
             rotulo_periodo: rotuloPeriodo,
             inicioPa: startDate,
             terminoPa: endDate,
             limiteConcessao: concessionLimit,
             status: 'planning',
-            vacation_days_input_type: vacationDaysInputType,
-            abono_calculation_basis: abonoCalculationBasis,
+            vacation_days_input_type: tipoEntradaDiasFerias,
+            abono_calculation_basis: baseCalculoAbono,
         };
 
         await addAccrualPeriodToEmployee(employeeId, newPeriodPayload);
-        modal.alert({title: "Sucesso", message: `Novo período ${rotuloPeriodo.replace('-', '/')} adicionado.`, confirmVariant: 'success'});
+        modal.alert({ title: "Sucesso", message: `Novo período ${rotuloPeriodo.replace('-', '/')} adicionado.`, confirmVariant: 'success' });
         onSave();
     };
 
     return (
         <div className="p-4 bg-slate-100 border-t border-slate-200 space-y-4 mt-4 rounded-b-lg">
-             <h6 className="font-semibold text-slate-800">Adicionar Novo Período Aquisitivo</h6>
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h6 className="font-semibold text-slate-800">Adicionar Novo Período Aquisitivo</h6>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Data de Início</label>
                     <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="bg-white w-full border-gray-300 rounded-md shadow-sm" />
@@ -91,13 +91,13 @@ const NewPeriodForm: React.FC<{
                     <label className="block text-sm font-medium text-slate-700 mb-1">Limite Concessão (Automático)</label>
                     <input type="date" value={concessionLimit} disabled className="bg-slate-200/60 w-full border-gray-300 rounded-md shadow-sm cursor-not-allowed" />
                 </div>
-             </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
-                 <div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Modo de Seleção de Dias de Férias</label>
                     <select
-                        value={vacationDaysInputType}
-                        onChange={e => setVacationDaysInputType(e.target.value as any)}
+                        value={tipoEntradaDiasFerias}
+                        onChange={e => setTipoEntradaDiasFerias(e.target.value as any)}
                         className="bg-white w-full border-gray-300 rounded-md shadow-sm"
                     >
                         <option value="system">Padrão do Sistema</option>
@@ -108,8 +108,8 @@ const NewPeriodForm: React.FC<{
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Modo de Cálculo de Abono</label>
                     <select
-                        value={abonoCalculationBasis}
-                        onChange={e => setAbonoCalculationBasis(e.target.value as any)}
+                        value={baseCalculoAbono}
+                        onChange={e => setBaseCalculoAbono(e.target.value as any)}
                         className="bg-white w-full border-gray-300 rounded-md shadow-sm"
                     >
                         <option value="system">Padrão do Sistema</option>
@@ -117,9 +117,9 @@ const NewPeriodForm: React.FC<{
                         <option value="current_balance">Sobre saldo na programação</option>
                     </select>
                 </div>
-             </div>
-             {error && <p className="text-sm text-danger">{error}</p>}
-             <div className="flex justify-end space-x-3 pt-4 border-t">
+            </div>
+            {error && <p className="text-sm text-danger">{error}</p>}
+            <div className="flex justify-end space-x-3 pt-4 border-t">
                 <button onClick={onCancel} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50">Cancelar</button>
                 <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-blue-600">Salvar Período</button>
             </div>
@@ -137,8 +137,8 @@ const EditPeriodForm: React.FC<{
     const [startDate, setStartDate] = useState(period.inicioPa);
     const [endDate, setEndDate] = useState(period.terminoPa);
     const [concessionLimit, setConcessionLimit] = useState(period.limiteConcessao);
-    const [vacationOverride, setVacationOverride] = useState(period.vacationDaysInputType || 'system');
-    const [abonoBasisOverride, setAbonoBasisOverride] = useState(period.abonoCalculationBasis || 'system');
+    const [tipoEntradaDiasFerias, setTipoEntradaDiasFerias] = useState(period.tipoEntradaDiasFerias || 'system');
+    const [baseCalculoAbono, setBaseCalculoAbono] = useState(period.baseCalculoAbono || 'system');
     const [error, setError] = useState('');
 
     const globalConcessionLimit = useMemo(() => {
@@ -165,8 +165,8 @@ const EditPeriodForm: React.FC<{
             inicioPa: startDate,
             terminoPa: endDate,
             limiteConcessao: concessionLimit,
-            vacationDaysInputType: vacationOverride,
-            abonoCalculationBasis: abonoBasisOverride,
+            tipoEntradaDiasFerias: tipoEntradaDiasFerias,
+            baseCalculoAbono: baseCalculoAbono,
         };
 
         updateAccrualPeriod(employee.id, period.id, updatedData);
@@ -188,37 +188,37 @@ const EditPeriodForm: React.FC<{
                     </div>
                 </div>
                 <div className="border-t border-slate-200/80 pt-4 space-y-4">
-                     <div>
+                    <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Limite de Concessão</label>
                         <div className="flex items-center space-x-2">
-                           <input type="date" value={concessionLimit} onChange={e => setConcessionLimit(e.target.value)} className="bg-white w-full md:w-1/2 border-gray-300 rounded-md shadow-sm" />
-                           <button onClick={handleResetConcessionLimit} title="Recalcular com base na Regra Global" className="p-2 text-slate-500 hover:text-blue-600 rounded-full hover:bg-blue-100 transition"><ArrowPathIcon className="h-4 w-4"/></button>
+                            <input type="date" value={concessionLimit} onChange={e => setConcessionLimit(e.target.value)} className="bg-white w-full md:w-1/2 border-gray-300 rounded-md shadow-sm" />
+                            <button onClick={handleResetConcessionLimit} title="Recalcular com base na Regra Global" className="p-2 text-slate-500 hover:text-blue-600 rounded-full hover:bg-blue-100 transition"><ArrowPathIcon className="h-4 w-4" /></button>
                         </div>
                         <p className="text-xs text-slate-500 mt-1">A data pode ser alterada manualmente (Regra Local).</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Modo de Seleção de Dias de Férias</label>
+                            <label className="block text-sm font-medium text-gray-700">Tipo de Entrada de Dias</label>
                             <select
-                                value={vacationOverride}
-                                onChange={e => setVacationOverride(e.target.value as any)}
-                                className="bg-white w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 px-3"
+                                value={tipoEntradaDiasFerias}
+                                onChange={e => setTipoEntradaDiasFerias(e.target.value as 'system' | 'list' | 'input')}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                             >
                                 <option value="system">Padrão do Sistema</option>
-                                <option value="list">Lista Suspensa (dias pré-definidos)</option>
-                                <option value="input">Campo de Input (livre)</option>
+                                <option value="list">Lista de Opções</option>
+                                <option value="input">Entrada Livre</option>
                             </select>
                         </div>
-                         <div>
-                             <label className="block text-sm font-medium text-slate-700 mb-1">Modo de Cálculo de Abono</label>
-                             <select
-                                value={abonoBasisOverride}
-                                onChange={e => setAbonoBasisOverride(e.target.value as any)}
-                                className="bg-white w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 px-3"
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Base de Cálculo do Abono</label>
+                            <select
+                                value={baseCalculoAbono}
+                                onChange={e => setBaseCalculoAbono(e.target.value as 'system' | 'initial_balance' | 'current_balance')}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                             >
                                 <option value="system">Padrão do Sistema</option>
-                                <option value="initial_balance">Sobre dias de direito no vencimento</option>
-                                <option value="current_balance">Sobre saldo na programação</option>
+                                <option value="initial_balance">Saldo Inicial</option>
+                                <option value="current_balance">Saldo Atual</option>
                             </select>
                         </div>
                     </div>
@@ -251,7 +251,7 @@ const ExpandedEmployeeDetails: React.FC<{ employee: Funcionario }> = ({ employee
             });
             return;
         }
-        
+
 
         // usar propriedade existente no objeto period e garantir string antes de usar replace()
         const periodLabel = String(period.rotulo_periodo ?? period.id ?? `${period.inicioPa}-${period.terminoPa}`);
@@ -260,7 +260,7 @@ const ExpandedEmployeeDetails: React.FC<{ employee: Funcionario }> = ({ employee
             message: `Tem certeza que deseja excluir o período aquisitivo ${periodLabel.replace('-', '/')}?`,
             confirmText: 'Excluir',
             confirmVariant: 'danger'
-        });    
+        });
 
         if (confirmed) {
             deleteAccrualPeriod(employee.id, period.id);
@@ -271,7 +271,7 @@ const ExpandedEmployeeDetails: React.FC<{ employee: Funcionario }> = ({ employee
         if (employee.periodosAquisitivos.length > 0) {
             const lastPeriod = employee.periodosAquisitivos[employee.periodosAquisitivos.length - 1];
             const lastEndDate = new Date(`${lastPeriod.terminoPa}T12:00:00Z`);
-            
+
             const newStartDate = new Date(lastEndDate);
             newStartDate.setUTCDate(newStartDate.getUTCDate() + 1);
 
@@ -285,11 +285,11 @@ const ExpandedEmployeeDetails: React.FC<{ employee: Funcionario }> = ({ employee
             };
         } else {
             const admissionDate = new Date(`${employee.dataAdmissao}T12:00:00Z`);
-            
+
             const newEndDate = new Date(admissionDate);
             newEndDate.setUTCFullYear(newEndDate.getUTCFullYear() + 1);
             newEndDate.setUTCDate(newEndDate.getUTCDate() - 1);
-            
+
             return {
                 startDate: employee.dataAdmissao,
                 endDate: newEndDate.toISOString().split('T')[0],
@@ -299,18 +299,18 @@ const ExpandedEmployeeDetails: React.FC<{ employee: Funcionario }> = ({ employee
 
     return (
         <div className="p-6 bg-slate-50">
-             <h5 className="font-semibold text-slate-700 mb-3">Períodos Registrados</h5>
-            
+            <h5 className="font-semibold text-slate-700 mb-3">Períodos Registrados</h5>
+
             {employee.periodosAquisitivos.length > 0 ? (
-                 <ul className="space-y-2 mb-4">
+                <ul className="space-y-2 mb-4">
                     {employee.periodosAquisitivos.slice().reverse().map(period => (
                         editingPeriodId === period.id ? (
                             <li key={period.id}>
-                                <EditPeriodForm 
+                                <EditPeriodForm
                                     employee={employee}
-                                    period={period} 
-                                    onSave={() => setEditingPeriodId(null)} 
-                                    onCancel={() => setEditingPeriodId(null)} 
+                                    period={period}
+                                    onSave={() => setEditingPeriodId(null)}
+                                    onCancel={() => setEditingPeriodId(null)}
                                 />
                             </li>
                         ) : (
@@ -330,7 +330,7 @@ const ExpandedEmployeeDetails: React.FC<{ employee: Funcionario }> = ({ employee
                             </li>
                         )
                     ))}
-                 </ul>
+                </ul>
             ) : (
                 <p className="text-sm text-slate-500 text-center mb-4 py-4 border border-dashed rounded-md">Nenhum período aquisitivo registrado.</p>
             )}
@@ -346,11 +346,11 @@ const ExpandedEmployeeDetails: React.FC<{ employee: Funcionario }> = ({ employee
                     </button>
                 </div>
             )}
-            
+
             {isAdding && (
-                <NewPeriodForm 
-                    employeeId={employee.id} 
-                    onSave={() => setIsAdding(false)} 
+                <NewPeriodForm
+                    employeeId={employee.id}
+                    onSave={() => setIsAdding(false)}
                     onCancel={() => setIsAdding(false)}
                     suggestedStartDate={suggestedDates.startDate}
                     suggestedEndDate={suggestedDates.endDate}
@@ -384,11 +384,11 @@ const GerenciarPeriodosAquisitivos: React.FC<{ setActiveView: (view: string) => 
     const handleSaveDisplayLimit = () => {
         if (config) {
             updateConfig({ ...config, displayDueDateLimit: displayDueDateLimit || null });
-            modal.alert({title: 'Sucesso', message: 'Limite de exibição salvo com sucesso!', confirmVariant: 'success'});
+            modal.alert({ title: 'Sucesso', message: 'Limite de exibição salvo com sucesso!', confirmVariant: 'success' });
             setIsDisplayLimitDirty(false);
         }
     };
-    
+
     const handleMassCreateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setMassCreateData(prev => ({ ...prev, [name]: value }));
@@ -443,22 +443,22 @@ const GerenciarPeriodosAquisitivos: React.FC<{ setActiveView: (view: string) => 
                 Voltar para Cadastros
             </button>
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg border border-slate-200">
-                 <h3 className="text-xl font-bold text-slate-800 mb-2">Gerenciamento de Períodos Aquisitivos</h3>
-                 <p className="text-slate-500 mb-6">Utilize as ferramentas abaixo para criar períodos em massa ou gerenciar individualmente cada colaborador.</p>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Gerenciamento de Períodos Aquisitivos</h3>
+                <p className="text-slate-500 mb-6">Utilize as ferramentas abaixo para criar períodos em massa ou gerenciar individualmente cada colaborador.</p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <div className="p-6 bg-slate-50 rounded-lg border border-slate-200">
                         <h4 className="font-semibold text-slate-700 text-lg mb-2">Criação de P.A. em Massa (Inteligente)</h4>
                         <p className="text-sm text-slate-500 mb-4">Adiciona um novo período para todos os colaboradores cujo último P.A. venceu até a data limite informada. O sistema não criará períodos duplicados.</p>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                             <div>
                                 <label htmlFor="due-date-limit" className="block text-sm font-medium text-slate-700 mb-1">Data Limite do Vencimento</label>
                                 <input type="date" id="due-date-limit" name="dueDateLimit" value={massCreateData.dueDateLimit} onChange={handleMassCreateInputChange} className="bg-white w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 px-3" />
                             </div>
                             <div className="md:col-span-2">
-                                    <button 
-                                    type="button" 
-                                    onClick={handleMassCreate} 
+                                <button
+                                    type="button"
+                                    onClick={handleMassCreate}
                                     disabled={!massCreateData.dueDateLimit || isLoading}
                                     className="w-full md:w-auto px-4 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-md hover:bg-green-700 disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center justify-center">
                                     {isLoading ? (<><SpinnerIcon className="h-5 w-5 mr-2" />Processando...</>) : ('Criar Períodos para Elegíveis')}
@@ -467,14 +467,14 @@ const GerenciarPeriodosAquisitivos: React.FC<{ setActiveView: (view: string) => 
                         </div>
                     </div>
                     <div className="p-6 bg-slate-50 rounded-lg border border-slate-200">
-                            <h4 className="font-semibold text-slate-700 text-lg mb-2">Limite de Exibição de P.A.</h4>
+                        <h4 className="font-semibold text-slate-700 text-lg mb-2">Limite de Exibição de P.A.</h4>
                         <p className="text-sm text-slate-500 mb-4">Defina até qual data de vencimento do P.A. será exibido no painel do funcionário. Deixe em branco para mostrar todos.</p>
                         <div className="flex items-end gap-4">
-                             <div className="flex-grow">
+                            <div className="flex-grow">
                                 <label htmlFor="displayDueDateLimit" className="block text-sm font-medium text-slate-700 mb-1">Exibir P.A. com vencimento até:</label>
                                 <input type="date" id="displayDueDateLimit" name="displayDueDateLimit" value={displayDueDateLimit} onChange={handleDisplayLimitChange} className="bg-white w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 px-3" />
                             </div>
-                             <button 
+                            <button
                                 onClick={handleSaveDisplayLimit}
                                 disabled={!isDisplayLimitDirty}
                                 className="px-4 py-2.5 text-sm font-semibold text-white bg-primary rounded-md hover:bg-blue-600 disabled:bg-slate-400 disabled:cursor-not-allowed flex-shrink-0">

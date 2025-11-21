@@ -5,9 +5,9 @@ import ArrowLeftIcon from './icons/ArrowLeftIcon';
 import PlusIcon from './icons/PlusIcon';
 import TrashIcon from './icons/TrashIcon';
 import PencilIcon from './icons/PencilIcon';
-import { 
-    Funcionario, 
-    UnidadeOrganizacional, 
+import {
+    Funcionario,
+    UnidadeOrganizacional,
     NivelHierarquico
 } from '../tipos';
 import { useModal } from '../hooks/useModal';
@@ -27,27 +27,27 @@ const AreasSection: React.FC<{
     const [editedItem, setEditedItem] = useState<UnidadeOrganizacional | null>(null);
     const modal = useModal();
 
-    const areas = localUnits.filter(u => u.type === 'Área').sort((a, b) => a.name.localeCompare(b.name));
+    const areas = localUnits.filter(u => u.tipo === 'Área').sort((a, b) => a.nome.localeCompare(b.nome));
 
     const handleAdd = () => {
         if (!newItemName.trim()) return;
         const newUnit: UnidadeOrganizacional = {
             id: `area_${Date.now()}`,
-            name: newItemName.trim(),
-            type: 'Área',
-            parentId: null,
+            nome: newItemName.trim(),
+            tipo: 'Área',
+            idPai: null,
         };
         setLocalUnits(prev => [...prev, newUnit]);
         setNewItemName('');
         setIsDirty(true);
     };
-    
+
     const handleStartEdit = (unit: UnidadeOrganizacional) => {
         setEditingId(unit.id);
         setEditedItem({ ...unit });
     };
 
-    const handleEditChange = (field: 'name' | 'parentId', value: string | null) => {
+    const handleEditChange = (field: 'nome' | 'idPai', value: string | null) => {
         if (editedItem) {
             setEditedItem(prev => (prev ? { ...prev, [field]: value } : null));
         }
@@ -57,13 +57,13 @@ const AreasSection: React.FC<{
         if (!editedItem || !editingId) return;
 
         const oldUnit = localUnits.find(u => u.id === editingId);
-        if (oldUnit && oldUnit.name !== editedItem.name) {
+        if (oldUnit && oldUnit.nome !== editedItem.nome) {
             setUpdatedEmployees(prev => {
                 const currentEmployees = prev || allEmployees;
-                return currentEmployees.map(emp => emp.departamento === oldUnit.name ? { ...emp, departamento: editedItem.name } : emp);
+                return currentEmployees.map(emp => emp.departamento === oldUnit.nome ? { ...emp, departamento: editedItem.nome } : emp);
             });
         }
-        
+
         setLocalUnits(prev => prev.map(u => (u.id === editingId ? editedItem : u)));
         setEditingId(null);
         setEditedItem(null);
@@ -76,15 +76,15 @@ const AreasSection: React.FC<{
     };
 
     const handleDelete = async (unitToDelete: UnidadeOrganizacional) => {
-        if (localUnits.some(u => u.parentId === unitToDelete.id)) {
-            modal.alert({ title: "Ação Bloqueada", message: `Não é possível excluir "${unitToDelete.name}" pois outras áreas são subordinadas a ela.`, confirmVariant: 'warning' });
+        if (localUnits.some(u => u.idPai === unitToDelete.id)) {
+            modal.alert({ title: "Ação Bloqueada", message: `Não é possível excluir "${unitToDelete.nome}" pois outras áreas são subordinadas a ela.`, confirmVariant: 'warning' });
             return;
         }
-        if (allEmployees.some(emp => emp.departamento === unitToDelete.name)) {
-            modal.alert({ title: "Ação Bloqueada", message: `Não é possível excluir "${unitToDelete.name}" pois há colaboradores associados a ela.`, confirmVariant: 'warning' });
+        if (allEmployees.some(emp => emp.departamento === unitToDelete.nome)) {
+            modal.alert({ title: "Ação Bloqueada", message: `Não é possível excluir "${unitToDelete.nome}" pois há colaboradores associados a ela.`, confirmVariant: 'warning' });
             return;
         }
-        const confirmed = await modal.confirm({ title: 'Confirmar Exclusão', message: `Tem certeza que deseja excluir a área "${unitToDelete.name}"?`, confirmVariant: 'danger' });
+        const confirmed = await modal.confirm({ title: 'Confirmar Exclusão', message: `Tem certeza que deseja excluir a área "${unitToDelete.nome}"?`, confirmVariant: 'danger' });
         if (confirmed) {
             setLocalUnits(prev => prev.filter(u => u.id !== unitToDelete.id));
             setIsDirty(true);
@@ -96,7 +96,7 @@ const AreasSection: React.FC<{
             <h4 className="text-lg font-bold text-slate-800 mb-4">Áreas</h4>
             <div className="flex items-center space-x-2 mb-4">
                 <input type="text" value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="Nova Área" className="bg-white flex-grow border-gray-300 rounded-lg shadow-sm" />
-                <button onClick={handleAdd} disabled={!newItemName.trim()} className="p-2 text-white bg-primary rounded-lg hover:bg-blue-600 disabled:bg-slate-400"><PlusIcon className="h-5 w-5"/></button>
+                <button onClick={handleAdd} disabled={!newItemName.trim()} className="p-2 text-white bg-primary rounded-lg hover:bg-blue-600 disabled:bg-slate-400"><PlusIcon className="h-5 w-5" /></button>
             </div>
             <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
                 {areas.map(unit => (
@@ -106,27 +106,27 @@ const AreasSection: React.FC<{
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-xs font-medium text-slate-600">Nome da Área</label>
-                                        <input type="text" value={editedItem.name} onChange={e => handleEditChange('name', e.target.value)} className="bg-white w-full mt-1 border-gray-300 rounded-lg shadow-sm text-sm" autoFocus />
+                                        <input type="text" value={editedItem.nome} onChange={e => handleEditChange('nome', e.target.value)} className="bg-white w-full mt-1 border-gray-300 rounded-lg shadow-sm text-sm" autoFocus />
                                     </div>
                                     <div>
                                         <label className="text-xs font-medium text-slate-600">Subordinado a</label>
-                                        <select value={editedItem.parentId || ''} onChange={e => handleEditChange('parentId', e.target.value || null)} className="bg-white w-full mt-1 border-gray-300 rounded-lg shadow-sm text-sm">
+                                        <select value={editedItem.idPai || ''} onChange={e => handleEditChange('idPai', e.target.value || null)} className="bg-white w-full mt-1 border-gray-300 rounded-lg shadow-sm text-sm">
                                             <option value="">Nenhuma</option>
-                                            {areas.filter(p => p.id !== unit.id).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                            {areas.filter(p => p.id !== unit.id).map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
                                         </select>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-end space-x-2 mt-3 pt-3 border-t">
-                                    <button onClick={handleCancelEdit} className="p-1.5 text-danger hover:bg-danger/10 rounded-full" title="Cancelar"><XCircleIcon className="h-5 w-5"/></button>
-                                    <button onClick={handleSaveEdit} className="p-1.5 text-success hover:bg-success/10 rounded-full" title="Salvar"><CheckCircleIcon className="h-5 w-5"/></button>
+                                    <button onClick={handleCancelEdit} className="p-1.5 text-danger hover:bg-danger/10 rounded-full" title="Cancelar"><XCircleIcon className="h-5 w-5" /></button>
+                                    <button onClick={handleSaveEdit} className="p-1.5 text-success hover:bg-success/10 rounded-full" title="Salvar"><CheckCircleIcon className="h-5 w-5" /></button>
                                 </div>
                             </div>
                         ) : (
                             <div className="flex justify-between items-center">
-                                <span className="font-semibold text-slate-800">{unit.name}</span>
+                                <span className="font-semibold text-slate-800">{unit.nome}</span>
                                 <div className="flex items-center space-x-1">
-                                    <button onClick={() => handleStartEdit(unit)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded-full hover:bg-blue-100/60" title="Alterar"><PencilIcon className="h-4 w-4"/></button>
-                                    <button onClick={() => handleDelete(unit)} className="p-1.5 text-slate-400 hover:text-danger rounded-full hover:bg-danger/10" title="Excluir"><TrashIcon className="h-4 w-4"/></button>
+                                    <button onClick={() => handleStartEdit(unit)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded-full hover:bg-blue-100/60" title="Alterar"><PencilIcon className="h-4 w-4" /></button>
+                                    <button onClick={() => handleDelete(unit)} className="p-1.5 text-slate-400 hover:text-danger rounded-full hover:bg-danger/10" title="Excluir"><TrashIcon className="h-4 w-4" /></button>
                                 </div>
                             </div>
                         )}
@@ -201,7 +201,7 @@ const UnitsSection: React.FC<{
             {error && <div className="mb-4 p-3 text-sm text-danger-dark bg-danger-light rounded-md border border-danger">{error}</div>}
             <div className="flex items-center space-x-2 mb-4">
                 <input type="text" value={newItem} onChange={e => setNewItem(e.target.value)} placeholder="Nova Unidade" className="bg-white flex-grow border-gray-300 rounded-lg shadow-sm" />
-                <button onClick={handleAddItem} disabled={!newItem.trim()} className="p-2 text-white bg-primary rounded-lg hover:bg-blue-600 disabled:bg-slate-400"><PlusIcon className="h-5 w-5"/></button>
+                <button onClick={handleAddItem} disabled={!newItem.trim()} className="p-2 text-white bg-primary rounded-lg hover:bg-blue-600 disabled:bg-slate-400"><PlusIcon className="h-5 w-5" /></button>
             </div>
             <ul className="space-y-2 max-h-60 overflow-y-auto pr-2">
                 {localUnits.map(item => (
@@ -209,15 +209,15 @@ const UnitsSection: React.FC<{
                         {editingItem === item ? (
                             <div className="flex items-center space-x-2">
                                 <input type="text" value={editedValue} onChange={e => setEditedValue(e.target.value)} className="bg-white flex-grow border-gray-300 rounded-lg shadow-sm text-sm p-1" autoFocus />
-                                <button onClick={handleSaveEdit} className="p-1.5 text-success hover:bg-success/10 rounded-full" title="Salvar"><CheckCircleIcon className="h-5 w-5"/></button>
-                                <button onClick={() => setEditingItem(null)} className="p-1.5 text-danger hover:bg-danger/10 rounded-full" title="Cancelar"><XCircleIcon className="h-5 w-5"/></button>
+                                <button onClick={handleSaveEdit} className="p-1.5 text-success hover:bg-success/10 rounded-full" title="Salvar"><CheckCircleIcon className="h-5 w-5" /></button>
+                                <button onClick={() => setEditingItem(null)} className="p-1.5 text-danger hover:bg-danger/10 rounded-full" title="Cancelar"><XCircleIcon className="h-5 w-5" /></button>
                             </div>
                         ) : (
                             <div className="flex justify-between items-center">
                                 <span className="text-slate-700">{item}</span>
                                 <div className="flex items-center space-x-1">
-                                    <button onClick={() => handleStartEdit(item)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded-full hover:bg-blue-100/60" title="Alterar"><PencilIcon className="h-4 w-4"/></button>
-                                    <button onClick={() => handleDeleteItem(item)} className="p-1.5 text-slate-400 hover:text-danger rounded-full hover:bg-danger/10" title="Excluir"><TrashIcon className="h-4 w-4"/></button>
+                                    <button onClick={() => handleStartEdit(item)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded-full hover:bg-blue-100/60" title="Alterar"><PencilIcon className="h-4 w-4" /></button>
+                                    <button onClick={() => handleDeleteItem(item)} className="p-1.5 text-slate-400 hover:text-danger rounded-full hover:bg-danger/10" title="Excluir"><TrashIcon className="h-4 w-4" /></button>
                                 </div>
                             </div>
                         )}
@@ -237,38 +237,38 @@ const HierarchyLevelsSection: React.FC<{
 }> = ({ localLevels, setLocalLevels, allEmployees, setIsDirty }) => {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editedValue, setEditedValue] = useState('');
-    const [newItem, setNewItem] = useState({ level: '', description: '' });
+    const [newItem, setNewItem] = useState({ nivel: '', descricao: '' });
     const modal = useModal();
 
     const handleAddItem = () => {
-        const level = parseInt(newItem.level);
-        const description = newItem.description.trim();
-        if (isNaN(level) || !description || localLevels.some(l => l.level === level)) return;
-        const newLevel: NivelHierarquico = { id: Date.now(), level, description };
-        setLocalLevels(prev => [...prev, newLevel].sort((a, b) => a.level - b.level));
-        setNewItem({ level: '', description: '' });
+        const nivel = parseInt(newItem.nivel);
+        const descricao = newItem.descricao.trim();
+        if (isNaN(nivel) || !descricao || localLevels.some(l => l.nivel === nivel)) return;
+        const newLevel: NivelHierarquico = { id: Date.now(), nivel, descricao };
+        setLocalLevels(prev => [...prev, newLevel].sort((a, b) => a.nivel - b.nivel));
+        setNewItem({ nivel: '', descricao: '' });
         setIsDirty(true);
     };
 
     const handleStartEdit = (level: NivelHierarquico) => {
         setEditingId(level.id);
-        setEditedValue(level.description);
+        setEditedValue(level.descricao);
     };
 
     const handleSaveEdit = () => {
         if (editingId === null) return;
-        setLocalLevels(prev => prev.map(l => l.id === editingId ? { ...l, description: editedValue.trim() } : l));
+        setLocalLevels(prev => prev.map(l => l.id === editingId ? { ...l, descricao: editedValue.trim() } : l));
         setEditingId(null);
         setEditedValue('');
         setIsDirty(true);
     };
 
     const handleDeleteItem = async (levelToDelete: NivelHierarquico) => {
-        if (allEmployees.some(emp => emp.nivelHierarquico === levelToDelete.level)) {
-            modal.alert({ title: 'Ação Bloqueada', message: `Não é possível excluir o Nível ${levelToDelete.level} pois está em uso.`, confirmVariant: 'warning' });
+        if (allEmployees.some(emp => emp.nivelHierarquico === levelToDelete.nivel)) {
+            modal.alert({ title: 'Ação Bloqueada', message: `Não é possível excluir o Nível ${levelToDelete.nivel} pois está em uso.`, confirmVariant: 'warning' });
             return;
         }
-        if (await modal.confirm({ title: 'Confirmar Exclusão', message: `Tem certeza que deseja excluir o Nível ${levelToDelete.level}?`, confirmVariant: 'danger' })) {
+        if (await modal.confirm({ title: 'Confirmar Exclusão', message: `Tem certeza que deseja excluir o Nível ${levelToDelete.nivel}?`, confirmVariant: 'danger' })) {
             setLocalLevels(prev => prev.filter(l => l.id !== levelToDelete.id));
             setIsDirty(true);
         }
@@ -283,20 +283,20 @@ const HierarchyLevelsSection: React.FC<{
                     <li key={level.id} className="p-2.5 bg-white rounded-md border border-slate-200 text-sm">
                         {editingId === level.id ? (
                             <div className="flex items-center space-x-2">
-                                <span className="font-bold text-slate-600 w-16 flex-shrink-0">{`Nível ${level.level}:`}</span>
+                                <span className="font-bold text-slate-600 w-16 flex-shrink-0">{`Nível ${level.nivel}:`}</span>
                                 <input type="text" value={editedValue} onChange={e => setEditedValue(e.target.value)} className="bg-white flex-grow border-gray-300 rounded-lg shadow-sm text-sm p-1" autoFocus />
-                                <button onClick={handleSaveEdit} className="p-1.5 text-success hover:bg-success/10 rounded-full" title="Salvar"><CheckCircleIcon className="h-5 w-5"/></button>
-                                <button onClick={() => setEditingId(null)} className="p-1.5 text-danger hover:bg-danger/10 rounded-full" title="Cancelar"><XCircleIcon className="h-5 w-5"/></button>
+                                <button onClick={handleSaveEdit} className="p-1.5 text-success hover:bg-success/10 rounded-full" title="Salvar"><CheckCircleIcon className="h-5 w-5" /></button>
+                                <button onClick={() => setEditingId(null)} className="p-1.5 text-danger hover:bg-danger/10 rounded-full" title="Cancelar"><XCircleIcon className="h-5 w-5" /></button>
                             </div>
                         ) : (
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center">
-                                    <span className="font-bold text-slate-600 w-16 flex-shrink-0">{`Nível ${level.level}:`}</span>
-                                    <span className="text-slate-800">{level.description}</span>
+                                    <span className="font-bold text-slate-600 w-16 flex-shrink-0">{`Nível ${level.nivel}:`}</span>
+                                    <span className="text-slate-800">{level.descricao}</span>
                                 </div>
                                 <div className="flex items-center space-x-1">
-                                    <button onClick={() => handleStartEdit(level)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded-full hover:bg-blue-100/60" title="Alterar"><PencilIcon className="h-4 w-4"/></button>
-                                    <button onClick={() => handleDeleteItem(level)} className="p-1.5 text-slate-400 hover:text-danger rounded-full hover:bg-danger/10" title="Excluir"><TrashIcon className="h-4 w-4"/></button>
+                                    <button onClick={() => handleStartEdit(level)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded-full hover:bg-blue-100/60" title="Alterar"><PencilIcon className="h-4 w-4" /></button>
+                                    <button onClick={() => handleDeleteItem(level)} className="p-1.5 text-slate-400 hover:text-danger rounded-full hover:bg-danger/10" title="Excluir"><TrashIcon className="h-4 w-4" /></button>
                                 </div>
                             </div>
                         )}
@@ -304,9 +304,9 @@ const HierarchyLevelsSection: React.FC<{
                 ))}
             </ul>
             <div className="flex items-center space-x-2 pt-4 border-t">
-                <input type="number" value={newItem.level} onChange={e => setNewItem(p => ({ ...p, level: e.target.value }))} placeholder="Nível" className="bg-white w-20 border-gray-300 rounded-lg shadow-sm" />
-                <input type="text" value={newItem.description} onChange={e => setNewItem(p => ({ ...p, description: e.target.value }))} placeholder="Descrição do Nível" className="bg-white flex-grow border-gray-300 rounded-lg shadow-sm" />
-                <button onClick={handleAddItem} disabled={!newItem.level || !newItem.description.trim()} className="p-2 text-white bg-primary rounded-lg hover:bg-blue-600 disabled:bg-slate-400"><PlusIcon className="h-5 w-5"/></button>
+                <input type="number" value={newItem.nivel} onChange={e => setNewItem(p => ({ ...p, nivel: e.target.value }))} placeholder="Nível" className="bg-white w-20 border-gray-300 rounded-lg shadow-sm" />
+                <input type="text" value={newItem.descricao} onChange={e => setNewItem(p => ({ ...p, descricao: e.target.value }))} placeholder="Descrição do Nível" className="bg-white flex-grow border-gray-300 rounded-lg shadow-sm" />
+                <button onClick={handleAddItem} disabled={!newItem.nivel || !newItem.descricao.trim()} className="p-2 text-white bg-primary rounded-lg hover:bg-blue-600 disabled:bg-slate-400"><PlusIcon className="h-5 w-5" /></button>
             </div>
         </div>
     );
@@ -363,7 +363,7 @@ const EstruturaOrganizacional: React.FC<{ setActiveView: (view: string) => void 
                 <p className="text-slate-600 mb-8">Gerencie a hierarquia, gestores e departamentos da empresa.</p>
                 <div className="space-y-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <AreasSection 
+                        <AreasSection
                             localUnits={localOrgUnits}
                             setLocalUnits={setLocalOrgUnits}
                             allEmployees={allEmployees}
@@ -379,7 +379,7 @@ const EstruturaOrganizacional: React.FC<{ setActiveView: (view: string) => void 
                         />
                     </div>
                     <div>
-                        <HierarchyLevelsSection 
+                        <HierarchyLevelsSection
                             localLevels={localHierarchyLevels}
                             setLocalLevels={setLocalHierarchyLevels}
                             allEmployees={allEmployees}

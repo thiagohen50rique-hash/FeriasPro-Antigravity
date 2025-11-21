@@ -6,24 +6,24 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import MenuIcon from './icons/MenuIcon';
 import AgendarFerias from './AgendarFerias';
-import TeamCalendar from './TeamCalendar';
-import Profile from './Profile';
-import AccessProfiles from './AccessProfiles';
+import CalendarioEquipe from './CalendarioEquipe';
+import Perfil from './Perfil';
+import PerfisDeAcesso from './PerfisDeAcesso';
 import SolicitacoesDeAprovacao from './SolicitacoesDeAprovacao';
-import Registrations from './Registrations';
+import Cadastros from './Cadastros';
 import CadastroDeFuncionario from './CadastroDeFuncionario';
 import CadastroDeFeriado from './CadastroDeFeriado';
-import GeneralSettings from './GeneralSettings';
+import ConfiguracoesGerais from './ConfiguracoesGerais';
 import ListaDeFuncionarios from './ListaDeFuncionarios';
 import ListaDeFeriados from './ListaDeFeriados';
 import GerenciarPeriodosAquisitivos from './GerenciarPeriodosAquisitivos';
 import EstruturaOrganizacional from './EstruturaOrganizacional';
 import LancamentoDeFerias from './LancamentoDeFerias';
-import Reports from './Reports';
-import ReportViewer from './ReportViewer';
+import Relatorios from './Relatorios';
+import VisualizadorRelatorios from './VisualizadorRelatorios';
 import GerenciarFerias from './GerenciarFerias';
 import { getLogoDataUrl } from '../services/logoService';
-import TeamSchedule from './TeamSchedule';
+import EscalaEquipe from './EscalaEquipe';
 
 const viewTitles: { [key: string]: string } = {
     inicio: 'Início',
@@ -66,7 +66,7 @@ const Dashboard: React.FC = () => {
     const employeeData = allEmployees.find(e => e.id === user?.id);
 
     if (!employeeData) return null;
-    
+
     const navigateToSchedule = (periodId: string) => {
         setSelectedPeriodForScheduling(periodId);
         setActiveView('agendar');
@@ -86,59 +86,59 @@ const Dashboard: React.FC = () => {
         setSelectedReportType(reportType);
         setActiveView('visualizar-relatorio');
     };
-    
+
     const title = viewTitles[activeView] || 'Início';
 
     const renderContent = () => {
         switch (activeView) {
             case 'inicio':
-                return <PainelDeFerias 
-                            setActiveView={setActiveView} 
-                            navigateToSchedule={navigateToSchedule}
-                        />;
+                return <PainelDeFerias
+                    setActiveView={setActiveView}
+                    navigateToSchedule={navigateToSchedule}
+                />;
             case 'agendar':
-                return <AgendarFerias 
-                            initialPeriodId={selectedPeriodForScheduling}
-                            resetInitialPeriod={() => setSelectedPeriodForScheduling(null)}
-                            initialVacationId={selectedVacationIdToEdit}
-                            resetInitialVacation={() => setSelectedVacationIdToEdit(null)}
-                        />;
+                return <AgendarFerias
+                    initialPeriodId={selectedPeriodForScheduling}
+                    resetInitialPeriod={() => setSelectedPeriodForScheduling(null)}
+                    initialVacationId={selectedVacationIdToEdit}
+                    resetInitialVacation={() => setSelectedVacationIdToEdit(null)}
+                />;
             case 'calendario':
-                 return <TeamCalendar />;
+                return <CalendarioEquipe />;
             case 'programacao-equipe':
-                return <TeamSchedule />;
+                return <EscalaEquipe />;
             case 'perfil':
-                return <Profile />;
+                return <Perfil />;
             case 'acessos':
-                return <AccessProfiles />;
+                return <PerfisDeAcesso />;
             case 'aprovacoes':
                 return <SolicitacoesDeAprovacao />;
             case 'cadastros':
-                return <Registrations setActiveView={setActiveView} />;
+                return <Cadastros setActiveView={setActiveView} />;
             case 'cadastro-colaborador':
-                return <CadastroDeFuncionario 
-                            setActiveView={setActiveView}
-                            employeeToEditId={selectedEmployeeIdToEdit}
-                            resetEmployeeToEdit={() => setSelectedEmployeeIdToEdit(null)}
-                        />;
+                return <CadastroDeFuncionario
+                    setActiveView={setActiveView}
+                    employeeToEditId={selectedEmployeeIdToEdit}
+                    resetEmployeeToEdit={() => setSelectedEmployeeIdToEdit(null)}
+                />;
             case 'cadastro-feriado':
-                return <CadastroDeFeriado 
-                            setActiveView={setActiveView}
-                            holidayToEditId={selectedHolidayIdToEdit}
-                            resetHolidayToEdit={() => setSelectedHolidayIdToEdit(null)}
-                        />;
+                return <CadastroDeFeriado
+                    setActiveView={setActiveView}
+                    holidayToEditId={selectedHolidayIdToEdit}
+                    resetHolidayToEdit={() => setSelectedHolidayIdToEdit(null)}
+                />;
             case 'configuracoes':
-                return <GeneralSettings setActiveView={setActiveView} />;
+                return <ConfiguracoesGerais setActiveView={setActiveView} />;
             case 'consulta-colaboradores':
-                return <ListaDeFuncionarios 
-                            setActiveView={setActiveView} 
-                            onEditEmployee={handleEditEmployee}
-                        />;
+                return <ListaDeFuncionarios
+                    setActiveView={setActiveView}
+                    onEditEmployee={handleEditEmployee}
+                />;
             case 'consulta-feriados':
-                return <ListaDeFeriados 
-                            setActiveView={setActiveView} 
-                            onEditHoliday={handleEditHoliday} 
-                        />;
+                return <ListaDeFeriados
+                    setActiveView={setActiveView}
+                    onEditHoliday={handleEditHoliday}
+                />;
             case 'gerenciar-periodos':
                 return <GerenciarPeriodosAquisitivos setActiveView={setActiveView} />;
             case 'organizational-structure':
@@ -148,26 +148,26 @@ const Dashboard: React.FC = () => {
             case 'gerenciar-ferias':
                 return <GerenciarFerias setActiveView={setActiveView} />;
             case 'relatorios':
-                return <Reports onSelectReport={handleViewReport} />;
+                return <Relatorios onSelectReport={handleViewReport} />;
             case 'visualizar-relatorio':
-                return <ReportViewer reportType={selectedReportType} setActiveView={setActiveView} />;
+                return <VisualizadorRelatorios reportType={selectedReportType} setActiveView={setActiveView} />;
             default:
-                return <PainelDeFerias 
-                            setActiveView={setActiveView} 
-                            navigateToSchedule={navigateToSchedule}
-                        />;
+                return <PainelDeFerias
+                    setActiveView={setActiveView}
+                    navigateToSchedule={navigateToSchedule}
+                />;
         }
     };
 
 
     return (
         <div className="flex h-screen bg-slate-100">
-             <Sidebar 
-                isOpen={isSidebarOpen} 
+            <Sidebar
+                isOpen={isSidebarOpen}
                 setSidebarOpen={setSidebarOpen}
                 activeView={activeView}
                 setActiveView={setActiveView}
-             />
+            />
             {isSidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black opacity-50 z-20 md:hidden"></div>}
 
             <div className="flex-1 flex flex-col overflow-hidden md:ml-64">

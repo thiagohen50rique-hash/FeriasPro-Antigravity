@@ -11,7 +11,7 @@ interface CalendarEvent {
     title: string;
 }
 
-const TeamCalendar: React.FC = () => {
+const CalendarioEquipe: React.FC = () => {
     const { user: currentUser, activeEmployees, holidays, collectiveVacationRules, orgUnits } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -25,22 +25,22 @@ const TeamCalendar: React.FC = () => {
 
     const employeesToDisplay = useMemo(() => {
         if (!currentUser) return [];
-    
+
         switch (currentUser.role) {
             case 'manager':
                 const managedUnits = orgUnits.filter(u => u.name === currentUser.departamento && u.type === 'Área');
                 const managedUnitIds = managedUnits.map(u => u.id);
-                
+
                 const descendantUnitIds: string[] = [];
                 managedUnits.forEach(unit => {
                     descendantUnitIds.push(...getDescendantUnitIds(unit.id, orgUnits));
                 });
-    
+
                 const allManagedUnitNames = [...new Set([
-                    ...managedUnits.map(u => u.name), 
+                    ...managedUnits.map(u => u.name),
                     ...orgUnits.filter(u => descendantUnitIds.includes(u.id)).map(u => u.name)
                 ])];
-    
+
                 return activeEmployees.filter(emp => {
                     if (emp.id === currentUser.id) return true; // Always include the manager themselves
                     return allManagedUnitNames.includes(emp.departamento);
@@ -58,7 +58,7 @@ const TeamCalendar: React.FC = () => {
         const year = currentDate.getUTCFullYear();
         const month = currentDate.getUTCMonth();
         const monthName = new Intl.DateTimeFormat('pt-BR', { month: 'long', timeZone: 'UTC' }).format(currentDate);
-        
+
         return {
             monthName: monthName.charAt(0).toUpperCase() + monthName.slice(1),
             year: year,
@@ -72,7 +72,7 @@ const TeamCalendar: React.FC = () => {
 
     const eventsByDate = useMemo(() => {
         const events = new Map<string, CalendarEvent[]>();
-        
+
         // Process collective vacations first to give them priority
         if (collectiveVacationRules) {
             collectiveVacationRules.forEach(rule => {
@@ -101,9 +101,9 @@ const TeamCalendar: React.FC = () => {
 
                             // If the day is already marked as collective vacation, skip adding individual vacations
                             if (events.get(dateString)?.some(e => e.type === 'collective')) {
-                                continue; 
+                                continue;
                             }
-                            
+
                             if (!events.has(dateString)) {
                                 events.set(dateString, []);
                             }
@@ -121,7 +121,7 @@ const TeamCalendar: React.FC = () => {
             const dateString = holiday.data;
             // If the day is already marked as collective vacation, skip adding holidays
             if (events.get(dateString)?.some(e => e.type === 'collective')) {
-                return; 
+                return;
             }
             if (!events.has(dateString)) {
                 events.set(dateString, []);
@@ -136,7 +136,7 @@ const TeamCalendar: React.FC = () => {
         const grid = [];
         const year = currentDate.getUTCFullYear();
         const month = currentDate.getUTCMonth();
-        
+
         const prevMonthDays = new Date(Date.UTC(year, month, 0)).getUTCDate();
 
         // Days from previous month
@@ -156,7 +156,7 @@ const TeamCalendar: React.FC = () => {
         const gridLength = grid.length;
         // Fill remaining cells to complete 42 (6 rows * 7 cols) or 35 (5 rows)
         const totalCells = gridLength > 35 ? 42 : 35;
-        
+
         for (let i = 1; grid.length < totalCells; i++) {
             const date = new Date(Date.UTC(year, month + 1, i));
             grid.push({ day: i, date, isCurrentMonth: false });
@@ -164,7 +164,7 @@ const TeamCalendar: React.FC = () => {
 
         return grid;
     }, [firstDayOfMonth, daysInMonth, currentDate]);
-    
+
     const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
     const renderEvent = (event: CalendarEvent, key: number) => {
@@ -194,7 +194,7 @@ const TeamCalendar: React.FC = () => {
                     </button>
                 </div>
             </div>
-            
+
             <div className="flex items-center space-x-6 mb-4">
                 <div className="flex items-center"><span className="h-3 w-3 rounded-full bg-blue-100 mr-2 border border-blue-300"></span><span className="text-sm text-slate-600">Férias</span></div>
                 <div className="flex items-center"><span className="h-3 w-3 rounded-full bg-green-50 mr-2 border border-green-300"></span><span className="text-sm text-slate-600">Férias Coletivas</span></div>
@@ -205,7 +205,7 @@ const TeamCalendar: React.FC = () => {
                 {weekDays.map((day, index) => (
                     <div key={day} className={`text-center py-2 bg-slate-100 text-xs font-bold ${index === 0 ? 'text-danger' : 'text-slate-600'} uppercase`}>{day}</div>
                 ))}
-                
+
                 {calendarGrid.map(({ day, date, isCurrentMonth }, index) => {
                     const dateString = date.toISOString().split('T')[0];
                     const dayEvents = eventsByDate.get(dateString) || [];
@@ -250,4 +250,4 @@ const TeamCalendar: React.FC = () => {
     );
 };
 
-export default TeamCalendar;
+export default CalendarioEquipe;

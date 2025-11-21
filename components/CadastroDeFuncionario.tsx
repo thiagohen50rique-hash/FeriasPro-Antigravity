@@ -1,9 +1,8 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { PapelUsuario, Funcionario } from '../tipos';
+import { PapelUsuario, Funcionario, NovosDadosFuncionario } from '../tipos';
 import ArrowLeftIcon from './icons/ArrowLeftIcon';
-import { NovosDadosFuncionario } from '../context/AuthContext';
 import { useModal } from '../hooks/useModal';
 import { getRoleText } from '../constants';
 
@@ -13,44 +12,44 @@ interface CadastroDeFuncionarioProps {
     resetEmployeeToEdit?: () => void;
 }
 
-const InputField: React.FC<{ label: string; name: string; type?: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; required?: boolean; disabled?: boolean; }> = 
-({ label, name, type = 'text', value, onChange, required, disabled = false }) => (
-    <div className="group">
-        <label htmlFor={name} className="block text-sm font-medium text-slate-700 mb-1 group-focus-within:text-primary transition-colors">{label}</label>
-        <input 
-            type={type} 
-            id={name}
-            name={name}
-            value={value}
-            onChange={onChange}
-            required={required}
-            disabled={disabled}
-            className="bg-slate-50 hover:bg-white focus:bg-white w-full border border-gray-300 rounded-lg shadow-sm text-base py-2.5 px-3 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-200 ease-in-out disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed placeholder-gray-400"
-        />
-    </div>
-);
+const InputField: React.FC<{ label: string; name: string; type?: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; required?: boolean; disabled?: boolean; }> =
+    ({ label, name, type = 'text', value, onChange, required, disabled = false }) => (
+        <div className="group">
+            <label htmlFor={name} className="block text-sm font-medium text-slate-700 mb-1 group-focus-within:text-primary transition-colors">{label}</label>
+            <input
+                type={type}
+                id={name}
+                name={name}
+                value={value}
+                onChange={onChange}
+                required={required}
+                disabled={disabled}
+                className="bg-slate-50 hover:bg-white focus:bg-white w-full border border-gray-300 rounded-lg shadow-sm text-base py-2.5 px-3 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-200 ease-in-out disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed placeholder-gray-400"
+            />
+        </div>
+    );
 
-const SelectField: React.FC<{ label: string; name: string; value: string | number; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void; options: (string | {value: string | number; text:string})[]; required?: boolean; }> = 
-({ label, name, value, onChange, options, required }) => (
-    <div className="group">
-        <label htmlFor={name} className="block text-sm font-medium text-slate-700 mb-1 group-focus-within:text-primary transition-colors">{label}</label>
-        <select 
-            id={name}
-            name={name}
-            value={value}
-            onChange={onChange}
-            required={required}
-            className="bg-slate-50 hover:bg-white focus:bg-white w-full border border-gray-300 rounded-lg shadow-sm text-base py-2.5 px-3 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-200 ease-in-out"
-        >
-            <option value="">Selecione...</option>
-            {options.map(opt => {
-                 const val = typeof opt === 'string' ? opt : opt.value;
-                 const text = typeof opt === 'string' ? opt : opt.text;
-                 return <option key={val} value={val}>{text}</option>;
-            })}
-        </select>
-    </div>
-);
+const SelectField: React.FC<{ label: string; name: string; value: string | number; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void; options: (string | { value: string | number; text: string })[]; required?: boolean; }> =
+    ({ label, name, value, onChange, options, required }) => (
+        <div className="group">
+            <label htmlFor={name} className="block text-sm font-medium text-slate-700 mb-1 group-focus-within:text-primary transition-colors">{label}</label>
+            <select
+                id={name}
+                name={name}
+                value={value}
+                onChange={onChange}
+                required={required}
+                className="bg-slate-50 hover:bg-white focus:bg-white w-full border border-gray-300 rounded-lg shadow-sm text-base py-2.5 px-3 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-200 ease-in-out"
+            >
+                <option value="">Selecione...</option>
+                {options.map(opt => {
+                    const val = typeof opt === 'string' ? opt : opt.value;
+                    const text = typeof opt === 'string' ? opt : opt.text;
+                    return <option key={val} value={val}>{text}</option>;
+                })}
+            </select>
+        </div>
+    );
 
 const CadastroDeFuncionario: React.FC<CadastroDeFuncionarioProps> = ({ setActiveView, employeeToEditId, resetEmployeeToEdit }) => {
     const { addEmployee, allEmployees, updateEmployee, companyAreas, companyManagements, companyUnits, hierarchyLevels } = useAuth();
@@ -90,37 +89,37 @@ const CadastroDeFuncionario: React.FC<CadastroDeFuncionarioProps> = ({ setActive
         }
     }, [isEditing, employeeToEdit]);
 
-    const managers = useMemo(() => 
+    const managers = useMemo(() =>
         allEmployees
             .filter(e => e.status === 'active' && (!isEditing || e.id !== employeeToEditId))
             .map(e => ({ value: e.id, text: e.nome }))
             .sort((a, b) => a.text.localeCompare(b.text)),
-    [allEmployees, isEditing, employeeToEditId]);
-    
-    const roleOptions: { value: PapelUsuario; text: string }[] = useMemo(() => 
+        [allEmployees, isEditing, employeeToEditId]);
+
+    const roleOptions: { value: PapelUsuario; text: string }[] = useMemo(() =>
         (['user', 'manager', 'admin', 'rh'] as PapelUsuario[]).map(role => ({
             value: role,
             text: getRoleText(role),
         })), []);
-    
-    const statusOptions: {value: 'active' | 'inactive', text: string}[] = [
-        {value: 'active', text: 'Ativo'},
-        {value: 'inactive', text: 'Inativo'},
+
+    const statusOptions: { value: 'active' | 'inactive', text: string }[] = [
+        { value: 'active', text: 'Ativo' },
+        { value: 'inactive', text: 'Inativo' },
     ];
 
-    const hierarchyLevelOptions = useMemo(() => 
-        hierarchyLevels.map(h => ({ value: h.level, text: `${h.level} - ${h.description}` })), 
-    [hierarchyLevels]);
+    const hierarchyLevelOptions = useMemo(() =>
+        hierarchyLevels.map(h => ({ value: h.level, text: `${h.level} - ${h.description}` })),
+        [hierarchyLevels]);
 
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ 
-            ...prev, 
-            [name]: (name === 'nivelHierarquico' || name === 'gestor') ? (value ? parseInt(value, 10) : null) : value 
+        setFormData(prev => ({
+            ...prev,
+            [name]: (name === 'nivelHierarquico' || name === 'gestor') ? (value ? parseInt(value, 10) : null) : value
         }));
     };
-    
+
     const handleBack = () => {
         resetEmployeeToEdit?.();
         setActiveView(isEditing ? 'consulta-colaboradores' : 'cadastros');
@@ -129,11 +128,11 @@ const CadastroDeFuncionario: React.FC<CadastroDeFuncionarioProps> = ({ setActive
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        
+
         const requiredFields: Array<keyof typeof formData> = ['nome', 'matricula', 'dataAdmissao', 'cpf', 'email', 'cargo', 'departamento', 'unidade', 'role', 'nivelHierarquico'];
         for (const key of requiredFields) {
-             if (!formData[key as keyof typeof formData]) {
-                 setError(`O campo "${String(key)}" é obrigatório.`);
+            if (!formData[key as keyof typeof formData]) {
+                setError(`O campo "${String(key)}" é obrigatório.`);
                 return;
             }
         }
@@ -142,26 +141,26 @@ const CadastroDeFuncionario: React.FC<CadastroDeFuncionarioProps> = ({ setActive
             setError('Um colaborador não pode ser seu próprio gestor.');
             return;
         }
-        
+
         if (isEditing && employeeToEdit) {
             const updatedEmployee: Funcionario = {
                 ...employeeToEdit,
                 ...formData,
             };
             updateEmployee(updatedEmployee);
-            modal.alert({ title: 'Sucesso', message: 'Dados do colaborador alterados com sucesso!', confirmVariant: 'success'});
+            modal.alert({ title: 'Sucesso', message: 'Dados do colaborador alterados com sucesso!', confirmVariant: 'success' });
         } else {
             addEmployee(formData as NovosDadosFuncionario);
-            modal.alert({ title: 'Sucesso', message: 'Colaborador cadastrado com sucesso!', confirmVariant: 'success'});
+            modal.alert({ title: 'Sucesso', message: 'Colaborador cadastrado com sucesso!', confirmVariant: 'success' });
         }
-        
+
         resetEmployeeToEdit?.();
         setActiveView('consulta-colaboradores');
     };
 
     return (
         <div>
-             <button onClick={handleBack} className="flex items-center text-sm font-semibold text-slate-600 hover:text-slate-800 mb-6 group">
+            <button onClick={handleBack} className="flex items-center text-sm font-semibold text-slate-600 hover:text-slate-800 mb-6 group">
                 <ArrowLeftIcon className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
                 {isEditing ? 'Voltar para Consulta' : 'Voltar para Cadastros'}
             </button>
