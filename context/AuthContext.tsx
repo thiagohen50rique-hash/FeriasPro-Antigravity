@@ -24,7 +24,7 @@ interface AuthContextType {
   holidays: FeriadoEmpresa[];
   addHoliday: (holidayData: NovoFeriadoEmpresa) => void;
   updateHoliday: (holiday: FeriadoEmpresa) => void;
-  deleteHoliday: (holidayId: string) => void;
+  deleteHoliday: (id: number) => void;
   config: ConfiguracaoApp | null;
   updateConfig: (newConfig: ConfiguracaoApp) => void;
   addAccrualPeriodsByDueDate: (dueDateLimit: string) => Promise<number>;
@@ -49,7 +49,7 @@ interface AuthContextType {
   collectiveVacationRules: RegraFeriasColetivas[];
   addCollectiveVacationRule: (rule: NovaRegraFeriasColetivas) => void;
   updateCollectiveVacationRule: (rule: RegraFeriasColetivas) => void;
-  deleteCollectiveVacationRule: (ruleId: string) => void;
+  deleteCollectiveVacationRule: (ruleId: number) => void;
   orgUnits: UnidadeOrganizacional[];
   updateOrgUnits: (newOrgUnits: UnidadeOrganizacional[], updatedEmployees?: Funcionario[]) => void;
   hierarchyLevels: NivelHierarquico[];
@@ -260,7 +260,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const addNotification = useCallback((notificationData: Omit<Notificacao, 'id' | 'timestamp' | 'read'>) => {
     const newNotification: Notificacao = {
       ...notificationData,
-      id: `notif-${Date.now()}`,
+      id: 0, // Será gerado pelo BD quando implementar tabela de notificações
       timestamp: new Date().toISOString(),
       read: false,
     };
@@ -274,10 +274,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [currentUser]);
 
   const addHoliday = useCallback((holidayData: NovoFeriadoEmpresa) => {
-    setHolidays(prev => [...prev, { ...holidayData, id: `h-${Date.now()}` }]);
+    // Agora usa API que retorna ID do BD
+    // TODO: Implementar createHoliday na API
   }, []);
   const updateHoliday = useCallback((h: FeriadoEmpresa) => setHolidays(p => p.map(x => x.id === h.id ? h : x)), []);
-  const deleteHoliday = useCallback((id: string) => setHolidays(p => p.filter(x => x.id !== id)), []);
+  const deleteHoliday = useCallback((id: number) => setHolidays(p => p.filter(x => x.id !== id)), []);
   const updateConfig = useCallback((c: ConfiguracaoApp) => setConfig(c), []);
 
 

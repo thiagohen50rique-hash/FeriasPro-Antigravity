@@ -30,7 +30,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
     afastamentos: [],
     periodosAquisitivos: [
       {
-        id: '2022-2023',
+        id: 1,
         rotulo_periodo: '2022-2023',
         inicioPa: '2022-05-10',
         terminoPa: '2023-05-09',
@@ -43,7 +43,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
         baseCalculoAbono: 'system',
         fracionamentos: [
           {
-            id: 'frac-ana-3',
+            id: 1,
             sequencia: 1,
             inicioFerias: '2024-09-01',
             terminoFerias: '2024-09-30',
@@ -55,7 +55,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
         ],
       },
       {
-        id: '2023-2024',
+        id: 2,
         rotulo_periodo: '2023-2024',
         inicioPa: '2023-05-10',
         terminoPa: '2024-05-09',
@@ -68,7 +68,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
         baseCalculoAbono: 'system',
         fracionamentos: [
           {
-            id: 'frac-ana-2',
+            id: 2,
             sequencia: 1,
             inicioFerias: '2025-01-10',
             terminoFerias: '2025-01-29',
@@ -78,7 +78,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
             status: 'scheduled',
           },
           {
-            id: 'frac-ana-4',
+            id: 3,
             sequencia: 2,
             inicioFerias: '2025-02-01',
             terminoFerias: '2025-02-10',
@@ -90,7 +90,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
         ],
       },
       {
-        id: '2024-2025',
+        id: 3,
         rotulo_periodo: '2024-2025',
         inicioPa: '2024-05-10',
         terminoPa: '2025-05-09',
@@ -101,7 +101,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
         baseCalculoAbono: 'system',
         fracionamentos: [
           {
-            id: 'frac-ana-5',
+            id: 4,
             sequencia: 1,
             inicioFerias: '2025-06-15',
             terminoFerias: '2025-06-24',
@@ -111,7 +111,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
             status: 'planned',
           },
           {
-            id: 'frac-ana-6',
+            id: 5,
             sequencia: 2,
             inicioFerias: '2025-07-01',
             terminoFerias: '2025-07-20',
@@ -142,7 +142,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
     afastamentos: [],
     periodosAquisitivos: [
       {
-        id: '2022-2023',
+        id: 4,
         rotulo_periodo: '2022-2023',
         inicioPa: '2022-02-20',
         terminoPa: '2023-02-19',
@@ -155,7 +155,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
         baseCalculoAbono: 'system',
         fracionamentos: [
           {
-            id: 'frac1',
+            id: 6,
             sequencia: 1,
             inicioFerias: '2024-01-02',
             terminoFerias: '2024-01-16',
@@ -167,7 +167,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
         ],
       },
       {
-        id: '2023-2024',
+        id: 5,
         rotulo_periodo: '2023-2024',
         inicioPa: '2023-02-20',
         terminoPa: '2024-02-19',
@@ -179,7 +179,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
         fracionamentos: [],
       },
       {
-        id: '2024-2025',
+        id: 6,
         rotulo_periodo: '2024-2025',
         inicioPa: '2024-02-20',
         terminoPa: '2025-02-19',
@@ -192,7 +192,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
         baseCalculoAbono: 'system',
         fracionamentos: [
           {
-            id: 'frac-bruno-2',
+            id: 7,
             sequencia: 1,
             inicioFerias: '2025-11-03',
             terminoFerias: '2025-12-02',
@@ -223,7 +223,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
     afastamentos: [],
     periodosAquisitivos: [
       {
-        id: '2022-2023',
+        id: 7,
         rotulo_periodo: '2022-2023',
         inicioPa: '2022-11-01',
         terminoPa: '2023-10-31',
@@ -293,39 +293,39 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
 ];
 
 export const MOCK_ORG_UNITS: UnidadeOrganizacional[] = [
-  { id: 'a_tech', nome: 'Tecnologia', tipo: 'Área', idPai: null },
-  { id: 'a_rh', nome: 'Recursos Humanos', tipo: 'Área', idPai: null },
-  { id: 'a_adm_pessoal', nome: 'Administração de Pessoal', tipo: 'Área', idPai: 'a_rh' },
-  { id: 'a_pmo', nome: 'PMO', tipo: 'Área', idPai: 'a_tech' },
+  { id: 1, nome: 'Tecnologia', tipo: 'Área', idPai: null },
+  { id: 2, nome: 'Recursos Humanos', tipo: 'Área', idPai: null },
+  { id: 3, nome: 'Administração de Pessoal', tipo: 'Área', idPai: 2 },
+  { id: 4, nome: 'PMO', tipo: 'Área', idPai: 1 },
 ];
 
 export const MOCK_HOLIDAYS: FeriadoEmpresa[] = [
-  { id: 'h1', ano: 2024, descricao: 'Confraternização Universal', data: '2024-01-01', tipo: 'feriado' },
-  { id: 'h2', ano: 2024, descricao: 'Carnaval', data: '2024-02-13', tipo: 'ponto_facultativo' },
-  { id: 'h3', ano: 2024, descricao: 'Sexta-feira Santa', data: '2024-03-29', tipo: 'feriado' },
-  { id: 'h4', ano: 2024, descricao: 'Tiradentes', data: '2024-04-21', tipo: 'feriado' },
-  { id: 'h5', ano: 2024, descricao: 'Dia do Trabalho', data: '2024-05-01', tipo: 'feriado' },
-  { id: 'h6', ano: 2024, descricao: 'Corpus Christi', data: '2024-05-30', tipo: 'ponto_facultativo' },
-  { id: 'h7', ano: 2024, descricao: 'Independência do Brasil', data: '2024-09-07', tipo: 'feriado' },
-  { id: 'h8', ano: 2024, descricao: 'Nossa Senhora Aparecida', data: '2024-10-12', tipo: 'feriado' },
-  { id: 'h9', ano: 2024, descricao: 'Finados', data: '2024-11-02', tipo: 'feriado' },
-  { id: 'h10', ano: 2024, descricao: 'Proclamação da República', data: '2024-11-15', tipo: 'feriado' },
-  { id: 'h11', ano: 2024, descricao: 'Natal', data: '2024-12-25', tipo: 'feriado' },
-  { id: 'h12', ano: 2025, descricao: 'Aniversário de São Paulo', data: '2025-01-25', tipo: 'feriado', unidade: 'Matriz - São Paulo' },
-  { id: 'h13', ano: 2025, descricao: 'Aniversário do Rio de Janeiro', data: '2025-03-01', tipo: 'feriado', unidade: 'Rio de Janeiro' },
-  { id: 'h14', ano: 2025, descricao: 'Folga (Feriado)', data: '2025-11-10', tipo: 'feriado' },
+  { id: 1, ano: 2024, descricao: 'Confraternização Universal', data: '2024-01-01', tipo: 'feriado' },
+  { id: 2, ano: 2024, descricao: 'Carnaval', data: '2024-02-13', tipo: 'ponto_facultativo' },
+  { id: 3, ano: 2024, descricao: 'Sexta-feira Santa', data: '2024-03-29', tipo: 'feriado' },
+  { id: 4, ano: 2024, descricao: 'Tiradentes', data: '2024-04-21', tipo: 'feriado' },
+  { id: 5, ano: 2024, descricao: 'Dia do Trabalho', data: '2024-05-01', tipo: 'feriado' },
+  { id: 6, ano: 2024, descricao: 'Corpus Christi', data: '2024-05-30', tipo: 'ponto_facultativo' },
+  { id: 7, ano: 2024, descricao: 'Independência do Brasil', data: '2024-09-07', tipo: 'feriado' },
+  { id: 8, ano: 2024, descricao: 'Nossa Senhora Aparecida', data: '2024-10-12', tipo: 'feriado' },
+  { id: 9, ano: 2024, descricao: 'Finados', data: '2024-11-02', tipo: 'feriado' },
+  { id: 10, ano: 2024, descricao: 'Proclamação da República', data: '2024-11-15', tipo: 'feriado' },
+  { id: 11, ano: 2024, descricao: 'Natal', data: '2024-12-25', tipo: 'feriado' },
+  { id: 12, ano: 2025, descricao: 'Aniversário de São Paulo', data: '2025-01-25', tipo: 'feriado', unidade: 'Matriz - São Paulo' },
+  { id: 13, ano: 2025, descricao: 'Aniversário do Rio de Janeiro', data: '2025-03-01', tipo: 'feriado', unidade: 'Rio de Janeiro' },
+  { id: 14, ano: 2025, descricao: 'Folga (Feriado)', data: '2025-11-10', tipo: 'feriado' },
 ];
 
 export const MOCK_COLLECTIVE_VACATION_RULES: RegraFeriasColetivas[] = [
   {
-    id: 'cv1',
+    id: 1,
     descricao: 'Férias Coletivas de Fim de Ano',
     inicio: '2024-12-23',
     fim: '2025-01-03',
     unidade: 'Matriz - São Paulo',
   },
   {
-    id: 'cv2',
+    id: 2,
     descricao: 'Férias Coletivas Fim de Ano 2025',
     inicio: '2025-12-22',
     fim: '2025-12-31',
@@ -482,7 +482,7 @@ export const getRoleText = (role: PapelUsuario): string => {
   }
 };
 
-export const getDescendantUnitIds = (parentId: string, allUnits: UnidadeOrganizacional[]): string[] => {
+export const getDescendantUnitIds = (parentId: number, allUnits: UnidadeOrganizacional[]): number[] => {
   const children = allUnits.filter(u => u.idPai === parentId);
   if (children.length === 0) {
     return [];

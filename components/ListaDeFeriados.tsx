@@ -34,7 +34,7 @@ const getTypeBadge = (type: string): string => {
     }
 };
 
-const TabelaListaDeFeriados: React.FC<{ holidays: FeriadoEmpresa[], onEdit: (id: string) => void, onDelete: (holiday: FeriadoEmpresa) => void }> = ({ holidays, onEdit, onDelete }) => (
+const TabelaListaDeFeriados: React.FC<{ holidays: FeriadoEmpresa[], onEdit: (id: number) => void, onDelete: (holiday: FeriadoEmpresa) => void }> = ({ holidays, onEdit, onDelete }) => (
     <table className="w-full text-sm text-left">
         <thead className="text-xs text-white uppercase bg-gray-800">
             <tr>

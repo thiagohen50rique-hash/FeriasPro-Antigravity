@@ -124,7 +124,7 @@ create table if not exists public.feriados (
 
 -- Regras de Férias Coletivas
 create table if not exists public.regras_ferias_coletivas (
-  id uuid default gen_random_uuid() primary key,
+  id bigint generated always as identity primary key,
   descricao text not null,
   inicio date not null,
   fim date not null,

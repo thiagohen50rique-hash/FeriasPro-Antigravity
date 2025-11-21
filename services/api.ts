@@ -111,7 +111,7 @@ export const fetchHolidays = async (): Promise<FeriadoEmpresa[]> => {
     const { data, error } = await supabase.from('feriados').select('*');
     if (error) throw error;
     return data.map((h: any) => ({
-        id: h.id.toString(),
+        id: h.id,
         ano: h.ano,
         descricao: h.descricao,
         data: h.data,
@@ -146,10 +146,10 @@ export const fetchOrgUnits = async (): Promise<UnidadeOrganizacional[]> => {
     const { data, error } = await supabase.from('unidades_organizacionais').select('*');
     if (error) throw error;
     return data.map((u: any) => ({
-        id: u.id.toString(),
+        id: u.id,
         nome: u.name,
         tipo: u.type,
-        idPai: u.parent_id ? u.parent_id.toString() : undefined
+        idPai: u.parent_id || null
     }));
 };
 

@@ -9,7 +9,7 @@ export interface EventoAssinatura {
 }
 
 export interface PeriodoDeFerias {
-  id: string;
+  id: number;
   sequencia: 1 | 2 | 3;
   inicioFerias: string;
   terminoFerias: string;
@@ -20,7 +20,7 @@ export interface PeriodoDeFerias {
 }
 
 export interface Afastamento {
-  id: string;
+  id: number;
   type: 'licenca_medica' | 'licenca_maternidade' | 'outro';
   dataInicio: string;
   dataFim: string;
@@ -62,7 +62,7 @@ export interface InformacaoAssinatura {
 }
 
 export interface PeriodoAquisitivo {
-  id: string;
+  id: number;
   rotulo_periodo: string;
   inicioPa: string;
   terminoPa: string;
@@ -85,10 +85,10 @@ export interface Funcionario extends FuncionarioBase {
 export type NovosDadosFuncionario = Omit<Funcionario, 'id' | 'periodosAquisitivos' | 'afastamentos'>;
 
 export interface UnidadeOrganizacional {
-  id: string;
+  id: number;
   nome: string;
   tipo: 'Área';
-  idPai: string | null;
+  idPai: number | null;
 }
 
 export interface NivelHierarquico {
@@ -98,7 +98,7 @@ export interface NivelHierarquico {
 }
 
 export interface FeriadoEmpresa {
-  id: string;
+  id: number;
   ano: number;
   descricao: string;
   data: string;
@@ -109,7 +109,7 @@ export interface FeriadoEmpresa {
 export type NovoFeriadoEmpresa = Omit<FeriadoEmpresa, 'id'>;
 
 export interface RegraFeriasColetivas {
-  id: string;
+  id: number;
   descricao: string;
   inicio: string;
   fim: string;
@@ -149,7 +149,7 @@ export interface ConfiguracaoApp {
 }
 
 export interface Notificacao {
-  id: string;
+  id: number;
   userId: number;
   message: string;
   timestamp: string;

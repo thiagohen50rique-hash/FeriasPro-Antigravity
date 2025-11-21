@@ -32,7 +32,7 @@ const AreasSection: React.FC<{
     const handleAdd = () => {
         if (!newItemName.trim()) return;
         const newUnit: UnidadeOrganizacional = {
-            id: `area_${Date.now()}`,
+            id: 0, // Será gerado pelo BD
             nome: newItemName.trim(),
             tipo: 'Área',
             idPai: null,
@@ -244,7 +244,7 @@ const HierarchyLevelsSection: React.FC<{
         const nivel = parseInt(newItem.nivel);
         const descricao = newItem.descricao.trim();
         if (isNaN(nivel) || !descricao || localLevels.some(l => l.nivel === nivel)) return;
-        const newLevel: NivelHierarquico = { id: Date.now(), nivel, descricao };
+        const newLevel: NivelHierarquico = { id: 0, nivel, descricao }; // ID será gerado pelo BD
         setLocalLevels(prev => [...prev, newLevel].sort((a, b) => a.nivel - b.nivel));
         setNewItem({ nivel: '', descricao: '' });
         setIsDirty(true);

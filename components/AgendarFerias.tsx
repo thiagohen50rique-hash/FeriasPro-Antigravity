@@ -691,7 +691,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
                     : f
             );
         } else {
-            const newSplit: PeriodoDeFerias = { ...tempVacation, id: `new-${Date.now()}`, sequencia: 1, status: 'planned' };
+            const newSplit: PeriodoDeFerias = { ...tempVacation, id: 0, sequencia: 1, status: 'planned' }; // ID será gerado pelo BD
             updatedFractions = [...activePeriod.fracionamentos, newSplit];
         }
 

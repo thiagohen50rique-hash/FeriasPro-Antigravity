@@ -177,7 +177,7 @@ function App() {
     const addNotification = useCallback((notificationData: Omit<Notificacao, 'id' | 'timestamp' | 'read'>) => {
         const newNotification: Notificacao = {
             ...notificationData,
-            id: `notif-${Date.now()}-${Math.random()}`,
+            id: 0, // Será gerado pelo BD quando implementar tabela de notificações
             timestamp: new Date().toISOString(),
             read: false,
         };
@@ -296,10 +296,11 @@ function App() {
     const addCollectiveVacationRule = useCallback((ruleData: NovaRegraFeriasColetivas) => {
         const newRule: RegraFeriasColetivas = {
             ...ruleData,
-            id: `cv-${Date.now()}`,
+            id: 0, // ID será retornado pela API createCollectiveVacationRule
         };
         setCollectiveVacationRules(prev => [...prev, newRule]);
         // API call
+        // TODO: Implement createCollectiveVacationRule in API
     }, []);
 
     const updateCollectiveVacationRule = useCallback((updatedRule: RegraFeriasColetivas) => {
