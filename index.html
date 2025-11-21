@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel de Férias - Planejador de Férias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style type="text/tailwindcss">
+        @layer base {
+
+            @font-face {
+                font-family: 'Glober';
+                src: url('https://www.cbclubes.org.br/fonts/Glober-Regular.woff2') format('woff2'),
+                    url('https://www.cbclubes.org.br/fonts/Glober-Regular.woff') format('woff');
+                font-weight: 400;
+                font-style: normal;
+                font-display: swap;
+            }
+
+            @font-face {
+                font-family: 'Glober';
+                src: url('https://www.cbclubes.org.br/fonts/Glober-Bold.woff2') format('woff2'),
+                    url('https://www.cbclubes.org.br/fonts/Glober-Bold.woff') format('woff');
+                font-weight: 700;
+                font-style: normal;
+            }
+
+            body {
+                font-family: 'Glober', sans-serif;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+                                  
+            h1 {
+                @apply text-blue-900 text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight;
+            }
+
+            h2 {
+                @apply text-blue-900 text-2xl md:text-3xl font-bold max-w-4xl leading-snug tracking-normal;
+            }
+
+            h3 {
+                @apply text-blue-900 text-xl md:text-2xl font-bold max-w-4xl leading-snug tracking-normal;
+            }
+
+            h4 {
+                @apply mb-4 text-blue-900 text-lg md:text-xl max-w-4xl font-semibold leading-normal tracking-normal;
+            }
+
+            h5 {
+                @apply text-gray-800 text-base md:text-lg max-w-4xl font-semibold leading-normal tracking-normal;
+            }
+
+            h6 {
+                @apply text-gray-800 text-base max-w-4xl font-semibold leading-normal tracking-normal;
+            }
+
+            p {
+                @apply pt-0 mt-0 text-gray-800 text-base max-w-4xl leading-relaxed tracking-normal;
+            }
+
+            .text-body {
+                @apply text-gray-800 text-sm max-w-4xl leading-relaxed tracking-normal;
+            }
+
+            details > summary {
+                list-style: none;
+            }
+            details > summary::-webkit-details-marker {
+                display: none;
+            }
+            details[open] > summary svg {
+                transform: rotate(180deg);
+            }
+            summary svg {
+                transition: transform 0.2s ease-in-out;
+            }
+
+            @keyframes pulse-warning {
+                0%, 100% {
+                    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4);
+                }
+                70% {
+                    box-shadow: 0 0 0 10px rgba(217, 119, 6, 0);
+                }
+            }
+
+            .animate-pulse-warning {
+                animation: pulse-warning 2s infinite;
+                border-color: #FBBF24; /* amber-400 */
+            }
+        }
+        
+        /* Estilo para a barra de rolagem (opcional, mas melhora a estética) */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; /* slate-100 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8; /* slate-400 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; /* slate-500 */
+        }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Glober', 'sans-serif'],
+                },
+                colors: {
+                    'primary': '#002C78',
+                    'blue': {
+                        '25': '#EBF2FF',
+                        '50': '#E6EAF2',
+                        '100': '#CCD5E4',
+                        '200': '#B3C0D7',
+                        '300': '#99ABC9',
+                        '400': '#6680AE',
+                        '500': '#002C78',
+                        '600': '#002360',
+                        '700': '#001A48',
+                        '800': '#001230',
+                        '900': '#000918',
+                        '950': '#00040C',
+                    },
+                    'white': '#FFFFFF',
+                    'gray': {
+                        '50': '#F9FAFB',
+                        '100': '#F3F4F6',
+                        '200': '#E5E7EB',
+                        '300': '#D1D5DB',
+                        '400': '#9CA3AF',
+                        '500': '#6B7280',
+                        '600': '#4B5563',
+                        '700': '#374151',
+                        '800': '#1F2937',
+                        '900': '#111827',
+                        '950': '#030712',
+                    },
+                    'green': {
+                        '50': '#E6F2EC',
+                        '100': '#CCE4D8',
+                        '200': '#B3D7C5',
+                        '300': '#99C9B2',
+                        '400': '#66AE8B',
+                        '500': '#00783E',
+                        '600': '#006C38',
+                        '700': '#006032',
+                        '800': '#00542B',
+                        '900': '#004825',
+                        '950': '#003C1F',
+                    },
+                    'slate': {
+                        '50': '#F8FAFC',
+                        '100': '#F1F5F9',
+                        '200': '#E2E8F0',
+                        '300': '#CBD5E1',
+                        '400': '#94A3B8',
+                        '500': '#64748B',
+                        '600': '#475569',
+                        '700': '#334155',
+                        '800': '#1E293B',
+                        '900': '#0F172A',
+                        '950': '#020617',
+                    },
+                    'success': {
+                        'DEFAULT': '#00783E', 'light': '#F0FDF4', 'dark': '#14532D', 'hover': '#006C38',
+                    },
+                    'info': {
+                        'DEFAULT': '#2563EB', 'light': '#EFF6FF', 'dark': '#1D4ED8', 'hover': '#2159D4',
+                    },
+                    'warning': {
+                        'DEFAULT': '#D97706', 'light': '#FFFBEB', 'dark': '#92400E', 'hover': '#C36B05',
+                    },
+                    'danger': {
+                        'DEFAULT': '#D91F2D', 'light': '#FEF2F2', 'dark': '#B91C1C', 'hover': '#C31C29',
+                    },
+                }
+            }
+        }
+    }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "jspdf": "https://aistudiocdn.com/jspdf@^3.0.3",
+    "jspdf-autotable": "https://aistudiocdn.com/jspdf-autotable@^5.0.2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-gray-100 font-sans">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
