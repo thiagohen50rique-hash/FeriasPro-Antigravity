@@ -221,7 +221,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [fetchEmployees]); // Adicionado fetchEmployees como dependência para evitar stale closures
 
 
-  // --- AUTENTICAÇÃO (Lógica Híbrida Temporária) ---
+  // --- AUTENTICAÇÃO (Lógica implantada) ---
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
 try {
         // O Supabase verifica a senha criptografada internamente
@@ -281,11 +281,7 @@ try {
   const updateHoliday = useCallback((h: FeriadoEmpresa) => setHolidays(p => p.map(x => x.id === h.id ? h : x)), []);
   const deleteHoliday = useCallback((id: string) => setHolidays(p => p.filter(x => x.id !== id)), []);
   const updateConfig = useCallback((c: ConfiguracaoApp) => setConfig(c), []);
-  
-  const updateEmployee = useCallback((updatedEmployee: Funcionario) => {
-      setAllEmployees(prev => prev.map(emp => (emp.id === updatedEmployee.id ? updatedEmployee : emp)));
-      if (currentUser && currentUser.id === updatedEmployee.id) setCurrentUser(updatedEmployee);
-  }, [currentUser]);
+
 
   const addEmployee = useCallback((employeeData: NovosDadosFuncionario) => {
       console.log("Adicionar funcionário: implementar INSERT no Supabase", employeeData);
@@ -300,6 +296,43 @@ try {
   }, []);
 
 
+  // --- AÇÕES DE ESCRITA (Placeholders e Implementações concluídas) ---
+    
+const updateEmployee = useCallback(async (updatedEmployee: Funcionario) => {
+    try {
+      const { error } = await supabase
+        .from('perfis')
+        .update({
+          nome: updatedEmployee.nome,
+          cargo: updatedEmployee.cargo,
+          departamento: updatedEmployee.departamento,
+          area: updatedEmployee.area,
+          unidade: updatedEmployee.unidade,
+          gestor_id: updatedEmployee.gestor,
+          status: updatedEmployee.status,
+          nivel_hierarquico: updatedEmployee.nivelHierarquico,
+          // Adicione outros campos conforme necessário
+        })
+        .eq('id', updatedEmployee.id);
+
+      if (error) throw error;
+
+      // Atualiza estado local
+      setAllEmployees(prev => prev.map(emp => (emp.id === updatedEmployee.id ? updatedEmployee : emp)));
+      
+      if (currentUser && currentUser.id === updatedEmployee.id) {
+        setCurrentUser(updatedEmployee);
+      }
+      
+    } catch (error: any) {
+      console.error('Erro ao atualizar funcionário:', error.message);
+    }
+  }, [currentUser]);
+//--------------------------------------------
+
+
+
+  
   // --- GESTÃO DE FÉRIAS (Comunicação Real com Supabase) ---
 
   const addAccrualPeriodsByDueDate = useCallback(async (dueDateLimit: string): Promise<number> => {
@@ -359,10 +392,72 @@ try {
     }
   }, []);
 
-  // Placeholders para as outras funções
+  // Placeholders para as outras funções (funções implmementadas)
+const addDirectVacation = useCallback(async (employeeId: number, periodId: string | number, vacationData: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('fracionamentos')
+        .insert({
+          perfil_id: employeeId,
+          periodo_aquisitivo_id: Number(periodId), // Garante que é número
+          sequencia: 1, // Você pode implementar lógica para calcular (ex: contar existentes + 1)
+          inicio_ferias: vacationData.inicioFerias,
+          termino_ferias: vacationData.terminoFerias,
+          quantidade_dias: vacationData.quantidadeDias,
+          dias_abono: vacationData.diasAbono || 0,
+          adiantamento_13: vacationData.adiantamento13 || false,
+          status: 'scheduled'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Atualiza o estado local (Frontend) sem precisar recarregar a página
+      if (data) {
+        const newVacation: PeriodoDeFerias = {
+          id: data.id,
+          sequencia: data.sequencia,
+          inicioFerias: data.inicio_ferias,
+          terminoFerias: data.termino_ferias,
+          quantidadeDias: data.quantidade_dias,
+          diasAbono: data.dias_abono,
+          adiantamento13: data.adiantamento_13,
+          status: data.status
+        };
+
+        setAllEmployees(prev => prev.map(emp => {
+          if (emp.id === employeeId) {
+            return {
+              ...emp,
+              periodosAquisitivos: emp.periodosAquisitivos.map(pa => {
+                if (pa.id === Number(periodId)) {
+                  return {
+                    ...pa,
+                    fracionamentos: [...pa.fracionamentos, newVacation]
+                      .sort((a, b) => new Date(a.inicioFerias).getTime() - new Date(b.inicioFerias).getTime())
+                  };
+                }
+                return pa;
+              })
+            };
+          }
+          return emp;
+        }));
+        
+        // Feedback visual (opcional: useModal().alert(...) se tiver acesso ao modal aqui)
+        console.log("Férias lançadas com sucesso!");
+      }
+    } catch (error: any) {
+      console.error('Erro ao lançar férias:', error.message);
+    }
+  }, []);
+
+
+  // Placeholders para as outras funções (funções ainda não implmementadas)
   const updateAccrualPeriod = useCallback(() => {}, []);
   const deleteAccrualPeriod = useCallback(() => {}, []);
-  const addDirectVacation = useCallback(() => {}, []);
+  
   const updateVacationPeriod = useCallback(() => {}, []);
   const deleteVacation = useCallback(() => {}, []);
   const addCollectiveVacation = useCallback(async () => ({ success: false, message: 'Não implementado' }), []);

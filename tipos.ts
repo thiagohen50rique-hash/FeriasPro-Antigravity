@@ -8,7 +8,7 @@ export interface EventoAssinatura {
 }
 
 export interface PeriodoDeFerias {
-  id: string;
+  id: number;
   sequencia: 1 | 2 | 3;
   inicioFerias: string;
   terminoFerias: string;
