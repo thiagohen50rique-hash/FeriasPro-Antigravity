@@ -258,7 +258,7 @@ function App() {
                         const newStartDateStr = newStartDate.toISOString().split('T')[0];
                         const newEndDateStr = newEndDate.toISOString().split('T')[0];
                         
-                        const newPeriodId = `${newStartDate.getUTCFullYear()}-${newEndDate.getUTCFullYear()}`;
+                        const newPeriodId = Number(`${newStartDate.getUTCFullYear()}${newEndDate.getUTCFullYear()}`);
             
                         const periodExists = emp.periodosAquisitivos.some(p => p.id === newPeriodId);
                         if (!periodExists) {
@@ -272,6 +272,7 @@ function App() {
                                 inicioPa: newStartDateStr,
                                 terminoPa: newEndDateStr,
                                 limiteConcessao: limitConcessaoDate.toISOString().split('T')[0],
+                                rotulo_periodo: `${newStartDateStr} a ${newEndDateStr}`,
                                 saldoTotal: 30,
                                 status: 'planning',
                                 fracionamentos: [],
@@ -344,10 +345,10 @@ const addDirectVacation = useCallback((employeeId: number, periodId: string, vac
     setAllEmployees(prev => prev.map(emp => {
         if (emp.id === employeeId) {
             const updatedPeriods = emp.periodosAquisitivos.map(p => {
-                if (p.id === periodId) {
+                    if (p.id === periodId) {
                     const newVacation: PeriodoDeFerias = {
                         ...vacationData,
-                        id: `direct-${Date.now()}`,
+                        id: Date.now() + Math.floor(Math.random() * 1000),
                         status: 'scheduled',
                         sequencia: 1, // Placeholder, will be recalculated
                     };
@@ -512,8 +513,8 @@ const addCollectiveVacation = useCallback(async (
                     endDateForFraction.setUTCDate(endDateForFraction.getUTCDate() + daysFromThisPeriod - 1);
                     const endDateStr = endDateForFraction.toISOString().split('T')[0];
 
-                     const vacationData: PeriodoDeFerias = {
-                        id: `coll-${Date.now()}-${Math.random()}`,
+                    const vacationData: PeriodoDeFerias = {
+                        id: Date.now() + Math.floor(Math.random() * 1000),
                         sequencia: 1, // placeholder
                         inicioFerias: startDateForFractionStr,
                         terminoFerias: endDateStr,
