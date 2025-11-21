@@ -41,7 +41,7 @@ const DateInput: React.FC<{ label: string, name: string, value: string, onChange
 
 
 const EscalaEquipe: React.FC = () => {
-    const { user: currentUser, allEmployees, orgUnits, companyUnits, companyManagements, companyAreas, config } = useAuth();
+    const { user: currentUser, allEmployees, orgUnits, companyUnits, companyAreas, config } = useAuth();
 
     // Filters State
     const [filters, setFilters] = useState({

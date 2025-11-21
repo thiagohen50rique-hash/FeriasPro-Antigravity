@@ -111,7 +111,7 @@ interface ReportViewerProps {
 }
 
 const VisualizadorRelatorios: React.FC<ReportViewerProps> = ({ reportType, setActiveView }) => {
-    const { allEmployees, companyUnits, companyManagements, companyAreas, hierarchyLevels, config } = useAuth();
+    const { allEmployees, companyUnits, companyAreas, hierarchyLevels, config } = useAuth();
 
     const [filters, setFilters] = useState({
         unidade: '',
@@ -205,7 +205,7 @@ const VisualizadorRelatorios: React.FC<ReportViewerProps> = ({ reportType, setAc
                         'employee.cargo': emp.cargo,
                         'employee.unidade': emp.unidade,
                         'employee.departamento': emp.departamento,
-                        'employee.area': emp.area,
+
                         'employee.matricula': emp.matricula,
                         'employee.dataAdmissao': emp.dataAdmissao
                     };

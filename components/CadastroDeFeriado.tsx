@@ -153,7 +153,7 @@ const FormularioFeriado: React.FC<CadastroDeFeriadoProps> = ({ setActiveView, ho
 };
 
 const FormularioFeriasColetivas: React.FC<Omit<CadastroDeFeriadoProps, 'holidayToEditId' | 'resetHolidayToEdit'>> = ({ setActiveView }) => {
-    const { addCollectiveVacationRule, allEmployees, companyAreas, companyManagements, companyUnits } = useAuth();
+    const { addCollectiveVacationRule, allEmployees, companyAreas, companyUnits } = useAuth();
     const modal = useModal();
     const [formData, setFormData] = useState<Partial<NovaRegraFeriasColetivas>>({
         descricao: '',

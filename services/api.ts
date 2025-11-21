@@ -85,7 +85,7 @@ export const fetchEmployees = async (): Promise<Funcionario[]> => {
             dataAdmissao: empData.data_admissao,
             cargo: empData.cargo,
             departamento: empData.departamento,
-            area: empData.area,
+
             unidade: empData.unidade,
             gestor: empData.gestor_id,
             email: empData.email,
@@ -162,7 +162,7 @@ export const fetchCollectiveVacationRules = async (): Promise<RegraFeriasColetiv
         inicio: r.inicio,
         fim: r.fim,
         unidade: r.unidade,
-        area: r.area,
+
         departamento: r.departamento,
         colaboradorIds: r.colaborador_ids || []
     }));
@@ -177,7 +177,7 @@ export const updateEmployee = async (id: number, employeeData: Partial<Funcionar
             nome: employeeData.nome,
             cargo: employeeData.cargo,
             departamento: employeeData.departamento,
-            area: employeeData.area,
+
             unidade: employeeData.unidade,
             gestor_id: employeeData.gestor,
             status: employeeData.status,
@@ -199,7 +199,7 @@ export const createEmployee = async (employee: NovosDadosFuncionario) => {
             data_admissao: employee.dataAdmissao,
             cargo: employee.cargo,
             departamento: employee.departamento,
-            area: employee.area,
+
             unidade: employee.unidade,
             gestor_id: employee.gestor,
             role: employee.role,

@@ -505,7 +505,7 @@ interface SimulationCandidate {
 }
 
 const CollectiveEntry: React.FC = () => {
-    const { activeEmployees, addCollectiveVacation, companyUnits, companyManagements, companyAreas } = useAuth();
+    const { activeEmployees, addCollectiveVacation, companyUnits, companyAreas } = useAuth();
     const modal = useModal();
     const [step, setStep] = useState<'configure' | 'preview'>('configure');
     const [isSubmitting, setIsSubmitting] = useState(false);

@@ -18,13 +18,13 @@ insert into niveis_hierarquicos (level, description) values
 on conflict (level) do nothing;
 
 -- Perfis (perfis)
-insert into perfis (id, matricula, nome, data_admissao, cargo, departamento, area, unidade, gestor_id, email, cpf, role, status, nivel_hierarquico) values
-(1, '100524', 'Ana Silva', '2022-05-10', 'Analista de RH Pleno', 'Recursos Humanos', 'Recursos Humanos', 'Matriz - São Paulo', 4, 'ana.silva@empresa.com', '11122233344', 'user', 'active', 1),
-(2, '2002', 'Bruno Costa', '2018-02-20', 'Gerente de Projetos', 'PMO', 'Tecnologia', 'São Paulo', 5, 'bruno.costa@empresa.com', '55566677788', 'admin', 'active', 4),
-(3, '3003', 'Carla Dias', '2019-11-01', 'Analista de RH', 'Recursos Humanos', 'Recursos Humanos', 'Rio de Janeiro', 6, 'carla.dias@empresa.com', '99988877766', 'rh', 'active', 1),
-(4, '4004', 'Carlos Pereira', '2015-03-15', 'Coordenador de RH', 'Recursos Humanos', 'Recursos Humanos', 'Matriz - São Paulo', 6, 'carlos.pereira@empresa.com', '44455566677', 'manager', 'active', 2),
-(5, '5005', 'Marcia Lima', '2012-01-10', 'Diretora de Tecnologia', 'Tecnologia', 'Tecnologia', 'Matriz - São Paulo', null, 'marcia.lima@empresa.com', '12312312312', 'manager', 'active', 5),
-(6, '6006', 'Roberto Almeida', '2014-08-01', 'Gerente de RH', 'Recursos Humanos', 'Recursos Humanos', 'Rio de Janeiro', 5, 'roberto.almeida@empresa.com', '32132132132', 'manager', 'active', 4)
+insert into perfis (id, matricula, nome, data_admissao, cargo, departamento, unidade, gestor_id, email, cpf, role, status, nivel_hierarquico) values
+(1, '100524', 'Ana Silva', '2022-05-10', 'Analista de RH Pleno', 'Recursos Humanos', 'Matriz - São Paulo', 4, 'ana.silva@empresa.com', '11122233344', 'user', 'active', 1),
+(2, '2002', 'Bruno Costa', '2018-02-20', 'Gerente de Projetos', 'PMO', 'São Paulo', 5, 'bruno.costa@empresa.com', '55566677788', 'admin', 'active', 4),
+(3, '3003', 'Carla Dias', '2019-11-01', 'Analista de RH', 'Recursos Humanos', 'Rio de Janeiro', 6, 'carla.dias@empresa.com', '99988877766', 'rh', 'active', 1),
+(4, '4004', 'Carlos Pereira', '2015-03-15', 'Coordenador de RH', 'Recursos Humanos', 'Matriz - São Paulo', 6, 'carlos.pereira@empresa.com', '44455566677', 'manager', 'active', 2),
+(5, '5005', 'Marcia Lima', '2012-01-10', 'Diretora de Tecnologia', 'Tecnologia', 'Matriz - São Paulo', null, 'marcia.lima@empresa.com', '12312312312', 'manager', 'active', 5),
+(6, '6006', 'Roberto Almeida', '2014-08-01', 'Gerente de RH', 'Recursos Humanos', 'Rio de Janeiro', 5, 'roberto.almeida@empresa.com', '32132132132', 'manager', 'active', 4)
 on conflict (matricula) do nothing;
 
 -- Períodos Aquisitivos (periodos_aquisitivos)

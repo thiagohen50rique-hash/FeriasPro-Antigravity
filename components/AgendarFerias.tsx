@@ -39,7 +39,6 @@ const findApplicableCollectiveRule = (employee: Funcionario, rules: RegraFeriasC
         if (rule.fim < today) continue;
         let matches = true;
         if (rule.unidade && rule.unidade !== employee.unidade) matches = false;
-        if (rule.area && rule.area !== employee.area) matches = false;
         if (rule.departamento && rule.departamento !== employee.departamento) matches = false;
         if (rule.colaboradorIds && rule.colaboradorIds.length > 0 && !rule.colaboradorIds.includes(employee.id)) matches = false;
         if (matches) return rule;

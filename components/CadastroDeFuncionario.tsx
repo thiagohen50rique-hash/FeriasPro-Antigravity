@@ -52,7 +52,7 @@ const SelectField: React.FC<{ label: string; name: string; value: string | numbe
     );
 
 const CadastroDeFuncionario: React.FC<CadastroDeFuncionarioProps> = ({ setActiveView, employeeToEditId, resetEmployeeToEdit }) => {
-    const { addEmployee, allEmployees, updateEmployee, companyAreas, companyManagements, companyUnits, hierarchyLevels } = useAuth();
+    const { addEmployee, allEmployees, updateEmployee, companyAreas, companyUnits, hierarchyLevels } = useAuth();
     const modal = useModal();
     const [formData, setFormData] = useState<Omit<Funcionario, 'id' | 'periodosAquisitivos' | 'afastamentos'>>({
         nome: '',

@@ -63,7 +63,7 @@ create table if not exists public.perfis (
   data_admissao date not null,
   cargo text not null,
   departamento text,
-  area text,
+
   unidade text,
   gestor_id bigint references public.perfis(id),
   role papel_usuario not null default 'user',
@@ -129,7 +129,7 @@ create table if not exists public.regras_ferias_coletivas (
   inicio date not null,
   fim date not null,
   unidade text,
-  area text,
+
   departamento text,
   colaborador_ids bigint[] -- Array de IDs
 );

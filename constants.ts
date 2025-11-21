@@ -19,7 +19,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
     dataAdmissao: '2022-05-10',
     cargo: 'Analista de RH Pleno',
     departamento: 'Recursos Humanos',
-    area: 'Recursos Humanos',
+
     unidade: 'Matriz - São Paulo',
     gestor: 4,
     email: 'ana.silva@empresa.com',
@@ -131,7 +131,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
     dataAdmissao: '2018-02-20',
     cargo: 'Gerente de Projetos',
     departamento: 'PMO',
-    area: 'Tecnologia',
+
     unidade: 'São Paulo',
     gestor: 5,
     email: 'bruno.costa@empresa.com',
@@ -212,7 +212,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
     dataAdmissao: '2019-11-01',
     cargo: 'Analista de RH',
     departamento: 'Recursos Humanos',
-    area: 'Recursos Humanos',
+
     unidade: 'Rio de Janeiro',
     gestor: 6,
     email: 'carla.dias@empresa.com',
@@ -243,7 +243,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
     dataAdmissao: '2015-03-15',
     cargo: 'Coordenador de RH',
     departamento: 'Recursos Humanos',
-    area: 'Recursos Humanos',
+
     unidade: 'Matriz - São Paulo',
     gestor: 6,
     email: 'carlos.pereira@empresa.com',
@@ -261,7 +261,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
     dataAdmissao: '2012-01-10',
     cargo: 'Diretora de Tecnologia',
     departamento: 'Tecnologia',
-    area: 'Tecnologia',
+
     unidade: 'Matriz - São Paulo',
     gestor: null,
     email: 'marcia.lima@empresa.com',
@@ -279,7 +279,7 @@ export const MOCK_EMPLOYEES: Funcionario[] = [
     dataAdmissao: '2014-08-01',
     cargo: 'Gerente de RH',
     departamento: 'Recursos Humanos',
-    area: 'Recursos Humanos',
+
     unidade: 'Rio de Janeiro',
     gestor: 5,
     email: 'roberto.almeida@empresa.com',

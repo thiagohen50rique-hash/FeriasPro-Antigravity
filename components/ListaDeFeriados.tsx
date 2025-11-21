@@ -67,7 +67,7 @@ const TabelaListaDeFeriados: React.FC<{ holidays: FeriadoEmpresa[], onEdit: (id:
 );
 
 const TabelaFeriasColetivas: React.FC<{ rules: RegraFeriasColetivas[], onDelete: (rule: RegraFeriasColetivas) => void }> = ({ rules, onDelete }) => (
-     <table className="w-full text-sm text-left">
+    <table className="w-full text-sm text-left">
         <thead className="text-xs text-white uppercase bg-gray-800">
             <tr>
                 <th scope="col" className="px-6 py-3 font-semibold">Descrição</th>
@@ -78,8 +78,8 @@ const TabelaFeriasColetivas: React.FC<{ rules: RegraFeriasColetivas[], onDelete:
         </thead>
         <tbody>
             {rules.map((rule) => {
-                const filters = [rule.unidade, rule.area, rule.departamento].filter(Boolean).join(' / ');
-                const application = filters || (rule.colaboradorIds && rule.colaboradorIds.length > 0 ? `${rule.colaboradorIds.length} colaborador(es)`: 'Geral');
+                const filters = [rule.unidade, rule.departamento].filter(Boolean).join(' / ');
+                const application = filters || (rule.colaboradorIds && rule.colaboradorIds.length > 0 ? `${rule.colaboradorIds.length} colaborador(es)` : 'Geral');
                 return (
                     <tr key={rule.id} className="bg-white border-b border-slate-200 hover:bg-slate-50">
                         <td className="px-6 py-4 font-semibold text-slate-800">{rule.descricao}</td>
@@ -141,7 +141,7 @@ const ListaDeFeriados: React.FC<ListaDeFeriadosProps> = ({ setActiveView, onEdit
             modal.alert({ title: 'Sucesso', message: 'Feriado excluído com sucesso!' });
         }
     };
-    
+
     const handleDeleteRule = async (rule: RegraFeriasColetivas) => {
         const confirmed = await modal.confirm({
             title: 'Confirmar Exclusão',
@@ -152,7 +152,7 @@ const ListaDeFeriados: React.FC<ListaDeFeriadosProps> = ({ setActiveView, onEdit
 
         if (confirmed) {
             deleteCollectiveVacationRule(rule.id);
-             modal.alert({ title: 'Sucesso', message: 'Regra de férias coletivas excluída com sucesso!' });
+            modal.alert({ title: 'Sucesso', message: 'Regra de férias coletivas excluída com sucesso!' });
         }
     };
 
@@ -178,8 +178,8 @@ const ListaDeFeriados: React.FC<ListaDeFeriadosProps> = ({ setActiveView, onEdit
                         Novo Cadastro
                     </button>
                 </div>
-                
-                 <div className="border-b border-slate-200 mb-6">
+
+                <div className="border-b border-slate-200 mb-6">
                     <nav className="-mb-px flex space-x-6">
                         <button onClick={() => setActiveTab('holidays')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'holidays' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
                             Feriados e Recessos
@@ -191,7 +191,7 @@ const ListaDeFeriados: React.FC<ListaDeFeriadosProps> = ({ setActiveView, onEdit
                 </div>
 
                 {activeTab === 'holidays' && (
-                     <div className="flex flex-wrap justify-end items-center mb-6 gap-4">
+                    <div className="flex flex-wrap justify-end items-center mb-6 gap-4">
                         <div>
                             <label htmlFor="unit-select" className="block text-sm font-medium text-slate-700 mb-1">Filtrar por unidade</label>
                             <select id="unit-select" value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="bg-white w-full md:w-auto border-gray-300 rounded-lg shadow-sm text-base py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
@@ -221,9 +221,9 @@ const ListaDeFeriados: React.FC<ListaDeFeriadosProps> = ({ setActiveView, onEdit
                         )
                     ) : (
                         collectiveVacationRules.length > 0 ? (
-                           <TabelaFeriasColetivas rules={collectiveVacationRules} onDelete={handleDeleteRule} />
+                            <TabelaFeriasColetivas rules={collectiveVacationRules} onDelete={handleDeleteRule} />
                         ) : (
-                             <div className="text-center py-16">
+                            <div className="text-center py-16">
                                 <CalendarDaysIcon className="mx-auto h-12 w-12 text-slate-400" />
                                 <h4 className="mt-4 text-lg font-semibold text-slate-700">Nenhuma Regra Encontrada</h4>
                                 <p className="mt-1 text-sm text-slate-500">Nenhuma regra de férias coletivas foi cadastrada ainda.</p>

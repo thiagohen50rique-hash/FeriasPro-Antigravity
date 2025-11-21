@@ -392,7 +392,7 @@ function App() {
     const authContextValue = useMemo(() => {
         const activeEmployees = allEmployees.filter(e => e.status === 'active');
         const companyAreas = [...new Set(activeEmployees.map(e => e.departamento))].sort();
-        const companyManagements = [...new Set(activeEmployees.map(e => e.area))].sort();
+
 
         return {
             user: currentUser,
@@ -425,7 +425,7 @@ function App() {
             updateLeave,
             deleteLeave,
             companyAreas,
-            companyManagements,
+
             companyUnits,
             setCompanyUnits,
             holidayTypes,

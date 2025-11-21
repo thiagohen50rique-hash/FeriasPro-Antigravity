@@ -41,7 +41,7 @@ interface AuthContextType {
   updateLeave: (employeeId: number, leaveId: string, updatedLeave: Omit<Afastamento, 'id'>) => void;
   deleteLeave: (employeeId: number, leaveId: string) => void;
   companyAreas: string[];
-  companyManagements: string[];
+
   companyUnits: string[];
   setCompanyUnits: Dispatch<SetStateAction<string[]>>;
   holidayTypes: string[];
@@ -87,7 +87,7 @@ export const AuthContext = createContext<AuthContextType>({
   updateLeave: () => { },
   deleteLeave: () => { },
   companyAreas: [],
-  companyManagements: [],
+
   companyUnits: [],
   setCompanyUnits: () => { },
   holidayTypes: [],
@@ -154,7 +154,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         dataAdmissao: emp.data_admissao,
         cargo: emp.cargo,
         departamento: emp.departamento,
-        area: emp.area,
+
         unidade: emp.unidade,
         gestor: emp.gestor_id,
         email: emp.email,
@@ -304,7 +304,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           nome: updatedEmployee.nome,
           cargo: updatedEmployee.cargo,
           departamento: updatedEmployee.departamento,
-          area: updatedEmployee.area,
+
           unidade: updatedEmployee.unidade,
           gestor_id: updatedEmployee.gestor,
           status: updatedEmployee.status,
@@ -473,7 +473,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Valores derivados
   const activeEmployees = allEmployees.filter(e => e.status === 'active');
   const companyAreas = [...new Set(activeEmployees.map(e => e.departamento))].sort();
-  const companyManagements = [...new Set(activeEmployees.map(e => e.area))].sort();
+
 
   return (
     <AuthContext.Provider value={{
@@ -507,7 +507,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       updateLeave,
       deleteLeave,
       companyAreas,
-      companyManagements,
+
       companyUnits,
       setCompanyUnits,
       holidayTypes,
