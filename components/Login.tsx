@@ -18,7 +18,7 @@ const GraphicPanel = () => {
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
-  const [cpf, setCpf] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
@@ -27,17 +27,17 @@ const Login: React.FC = () => {
   const { login, allEmployees } = useAuth();
   const modal = useModal();
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const user = allEmployees.find(emp => emp.email.toLowerCase() === email.toLowerCase() && emp.cpf === cpf);
+    const user = allEmployees.find(emp => emp.email.toLowerCase() === email.toLowerCase());
 
     if (user && user.status === 'inactive') {
         setError('Este usuário está inativo. Entre em contato com o RH.');
         return;
     }
 
-    if (!login(email, cpf)) {
+    if (!login(email, password)) {
       setError('E-mail ou Senha inválidos. Tente novamente.');
     }
   };
@@ -130,8 +130,8 @@ const Login: React.FC = () => {
                                         required
                                         className="bg-white appearance-none rounded-full relative block w-full px-4 py-3 border border-slate-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info sm:text-sm"
                                         placeholder="Senha"
-                                        value={cpf}
-                                        onChange={(e) => setCpf(e.target.value)}
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
                                     />
                                 </div>
                             </div>

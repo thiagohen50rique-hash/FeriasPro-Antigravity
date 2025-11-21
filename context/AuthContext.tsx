@@ -12,7 +12,7 @@ export interface CollectiveVacationProposal {
 
 interface AuthContextType {
   user: Funcionario | null;
-  login: (email: string, cpf: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   allEmployees: Funcionario[];
   activeEmployees: Funcionario[];
@@ -222,15 +222,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   // --- AUTENTICAÇÃO (Lógica Híbrida Temporária) ---
-  const login = useCallback((email: string, cpf: string): boolean => {
-    const user = allEmployees.find(
-      (emp) => emp.email.toLowerCase() === email.toLowerCase() && emp.cpf === cpf && emp.status === 'active'
-    );
-    if (user) {
-      setCurrentUser(user);
-      return true;
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+try {
+        // O Supabase verifica a senha criptografada internamente
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password, 
+        });
+
+        if (error) {
+            console.error("Erro de autenticação:", error.message);
+            return false;
+        }
+
+        // Se o login no Supabase passar, buscamos os dados do perfil
+        const userProfile = allEmployees.find(emp => emp.email.toLowerCase() === email.toLowerCase());
+        
+        if (userProfile) {
+            setCurrentUser(userProfile);
+            return true;
+        } else {
+            console.error("Usuário autenticado mas sem perfil na tabela 'perfis'");
+            return false;
+        }
+
+    } catch (error) {
+        console.error("Erro inesperado no login:", error);
+        return false;
     }
-    return false;
   }, [allEmployees]);
 
   const logout = useCallback(() => {
