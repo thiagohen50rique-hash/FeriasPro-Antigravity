@@ -240,6 +240,24 @@ export const addVacationFraction = async (periodId: string | number, fraction: a
     if (error) throw error;
 };
 
+export const createAccrualPeriod = async (periodData: any) => {
+    const { error } = await supabase
+        .from('periodos_aquisitivos')
+        .insert({
+            perfil_id: periodData.perfilId,
+            rotulo_periodo: periodData.rotulo_periodo,
+            inicio_pa: periodData.inicioPa,
+            termino_pa: periodData.terminoPa,
+            limite_concessao: periodData.limiteConcessao,
+            saldo_total: periodData.saldoTotal || 30,
+            status: periodData.status || 'planning',
+            vacation_days_input_type: periodData.tipoEntradaDiasFerias,
+            abono_calculation_basis: periodData.baseCalculoAbono
+        });
+
+    if (error) throw error;
+};
+
 export const updateAccrualPeriod = async (periodId: string | number, periodData: any) => {
     const { error } = await supabase
         .from('periodos_aquisitivos')

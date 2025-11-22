@@ -20,7 +20,7 @@ function App() {
         fetchEmployees, updateEmployee, addEmployee, deleteEmployee, toggleEmployeeStatus,
         addAccrualPeriodToEmployee, updateAccrualPeriod, deleteAccrualPeriod,
         addDirectVacation, updateVacationPeriod, deleteVacation,
-        addLeaveToEmployee, updateLeave, deleteLeave
+        addLeaveToEmployee, updateLeave, deleteLeave, addCollectiveVacation
     } = useEmployees(addNotification);
 
     const {
@@ -55,14 +55,6 @@ function App() {
         // Logic remains similar but needs to persist to DB
         // For prototype, keeping local state update logic but should ideally be a backend function
         return 0;
-    }, []);
-
-    // Placeholder for addCollectiveVacation
-    const addCollectiveVacation = useCallback(async (
-        proposals: CollectiveVacationProposal[]
-    ): Promise<{ success: boolean; message: string; details?: string[] }> => {
-        // Complex logic, needs backend implementation or careful frontend orchestration
-        return { success: true, message: "Not implemented yet" };
     }, []);
 
     const authContextValue = useMemo(() => {

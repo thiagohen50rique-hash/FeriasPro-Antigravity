@@ -112,17 +112,24 @@ export const useEmployees = (addNotification?: (n: Omit<Notificacao, 'id' | 'tim
     // Placeholder functions for vacation management that were in App.tsx
     // Ideally these should be in a separate hook or service, but keeping here for now to match App.tsx structure
     const addAccrualPeriodToEmployee = useCallback(async (employeeId: number, newPeriodData: Omit<PeriodoAquisitivo, 'fracionamentos' | 'saldoTotal'>) => {
-        // This was previously implemented in AuthContext with direct Supabase call.
-        // We should move that logic to api.ts if we want consistency, or keep it here if it's complex.
-        // For now, let's assume we want to use the api layer.
-        // However, the previous implementation in AuthContext was quite detailed.
-        // Let's keep the placeholder for now as the user didn't ask to refactor THIS specific complex logic yet, 
-        // but asked to implement the MISSING ones.
-        // Wait, the task IS to complete API implementation.
-        // Let's leave this one as is (it was working in AuthContext?) No, in AuthContext it WAS implemented.
-        // In useEmployees it is empty. I need to bring the logic from AuthContext or api.ts.
-        // Since I didn't add `createAccrualPeriod` to api.ts yet (I added update/delete), let's stick to what I added.
-    }, []);
+        try {
+            await api.createAccrualPeriod({ ...newPeriodData, perfilId: employeeId });
+            await fetchEmployees();
+        } catch (error) {
+            console.error("Failed to add accrual period:", error);
+        }
+    }, [fetchEmployees]);
+
+    const addCollectiveVacation = useCallback(async (proposals: any[]) => {
+        try {
+            await api.createCollectiveVacation(proposals);
+            await fetchEmployees();
+            return { success: true, message: "Férias coletivas aplicadas com sucesso." };
+        } catch (error: any) {
+            console.error("Failed to add collective vacation:", error);
+            return { success: false, message: "Erro ao aplicar férias coletivas.", details: [error.message] };
+        }
+    }, [fetchEmployees]);
 
     const updateAccrualPeriod = useCallback(async (employeeId: number, periodId: number, newPeriodData: Partial<Omit<PeriodoAquisitivo, 'id' | 'fracionamentos' | 'saldoTotal'>>) => {
         try {
@@ -221,6 +228,7 @@ export const useEmployees = (addNotification?: (n: Omit<Notificacao, 'id' | 'tim
         deleteVacation,
         addLeaveToEmployee,
         updateLeave,
-        deleteLeave
+        deleteLeave,
+        addCollectiveVacation
     };
 };
