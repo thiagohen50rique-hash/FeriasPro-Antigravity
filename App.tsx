@@ -1,17 +1,17 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import { AuthContext, CollectiveVacationProposal } from './context/AuthContext';
+import { AuthContext } from './context/AuthContext';
 import { Funcionario } from './tipos';
 import { ModalProvider } from './context/ModalContext';
 import Modal from './components/Modal';
-import { useAuth } from './hooks/useAuth';
+import { useSupabaseAuth } from './hooks/useSupabaseAuth';
 import { useEmployees } from './hooks/useEmployees';
 import { useAppData } from './hooks/useAppData';
 import { useNotifications } from './hooks/useNotifications';
 
 function App() {
-    const { session, login, logout, loading: authLoading } = useAuth();
+    const { session, login, logout, loading: authLoading } = useSupabaseAuth();
     const { notifications, addNotification, markNotificationsAsRead } = useNotifications();
 
     const {

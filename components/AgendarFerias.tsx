@@ -307,7 +307,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
     initialVacationId,
     resetInitialVacation
 }) => {
-    const { user, allEmployees, updateEmployee, addNotification, config, collectiveVacationRules, holidays } = useAuth();
+    const { user, allEmployees, updateEmployee, addNotification, config, collectiveVacationRules, holidays, addDirectVacation, updateVacationPeriod, deleteVacation } = useAuth();
     const modal = useModal();
     const [expandedPeriodId, setExpandedPeriodId] = useState<string | null>(initialPeriodId);
     const [activeTab, setActiveTab] = useState('minha-programacao');
@@ -676,53 +676,32 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             }
         }
 
-        const signatureParticipant = createInitialSignatureParticipant(employee);
-        const infoAssinatura: InformacaoAssinatura = {
-            documentId: `doc-${Date.now()}`,
-            operationId: `${Math.floor(1000000 + Math.random() * 9000000)}`,
-            participantes: [signatureParticipant],
-        };
+        try {
+            if (editingVacationId) {
+                await updateVacationPeriod(employee.id, activePeriod.id, editingVacationId, {
+                    ...tempVacation,
+                    status: 'planned'
+                });
+            } else {
+                await addDirectVacation(employee.id, activePeriod.id, {
+                    ...tempVacation,
+                    status: 'planned'
+                });
+            }
 
-        let updatedFractions: PeriodoDeFerias[];
-        if (editingVacationId) {
-            updatedFractions = activePeriod.fracionamentos.map(f =>
-                f.id === editingVacationId
-                    ? { ...f, ...tempVacation, status: 'planned' }
-                    : f
-            );
-        } else {
-            const newSplit: PeriodoDeFerias = { ...tempVacation, id: 0, sequencia: 1, status: 'planned' }; // ID será gerado pelo BD
-            updatedFractions = [...activePeriod.fracionamentos, newSplit];
+            const manager = allEmployees.find(e => e.id === employee.gestor);
+            if (manager) {
+                addNotification({
+                    userId: manager.id,
+                    message: `${employee.nome} solicitou um novo período de férias.`
+                });
+            }
+
+            resetFormState();
+        } catch (error) {
+            console.error("Erro ao salvar férias:", error);
+            setError("Erro ao salvar férias. Tente novamente.");
         }
-
-        updatedFractions.sort((a, b) => new Date(a.inicioFerias).getTime() - new Date(b.inicioFerias).getTime());
-        updatedFractions = updatedFractions.map((frac, index) => ({ ...frac, sequencia: (index + 1) as (1 | 2 | 3) }));
-
-        const updatedActivePeriod: PeriodoAquisitivo = {
-            ...activePeriod,
-            fracionamentos: updatedFractions,
-            status: 'pending_manager',
-            idAprovadorGestor: undefined,
-            idAprovadorRH: undefined,
-            infoAssinatura: infoAssinatura,
-        };
-
-        const updatedEmployee = {
-            ...employee,
-            periodosAquisitivos: employee.periodosAquisitivos.map(p => p.id === updatedActivePeriod.id ? updatedActivePeriod : p)
-        };
-        updateEmployee(updatedEmployee);
-
-
-        const manager = allEmployees.find(e => e.id === employee.gestor);
-        if (manager) {
-            addNotification({
-                userId: manager.id,
-                message: `${employee.nome} solicitou um novo período de férias.`
-            });
-        }
-
-        resetFormState();
     };
 
     const handleDeleteVacation = async (vacationId: string) => {
@@ -749,16 +728,16 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
         });
 
         if (confirmed) {
-            const updatedFractions = activePeriod.fracionamentos.filter((frac) => frac.id !== vacationId)
-                .sort((a, b) => new Date(a.inicioFerias).getTime() - new Date(b.inicioFerias).getTime())
-                .map((frac, index) => ({ ...frac, sequencia: (index + 1) as 1 | 2 | 3 }));
-
-            const updatedActivePeriod = { ...activePeriod, fracionamentos: updatedFractions };
-            const updatedEmployee = {
-                ...employee,
-                periodosAquisitivos: employee.periodosAquisitivos.map(p => p.id === updatedActivePeriod.id ? updatedActivePeriod : p)
-            };
-            updateEmployee(updatedEmployee);
+            try {
+                await deleteVacation(employee.id, activePeriod.id, vacationId);
+            } catch (error) {
+                console.error("Erro ao excluir férias:", error);
+                modal.alert({
+                    title: 'Erro',
+                    message: 'Erro ao excluir férias. Tente novamente.',
+                    confirmVariant: 'danger'
+                });
+            }
         }
     };
 
