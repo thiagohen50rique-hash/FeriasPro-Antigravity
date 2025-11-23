@@ -24,6 +24,7 @@ import VisualizadorRelatorios from './VisualizadorRelatorios';
 import GerenciarFerias from './GerenciarFerias';
 import { getLogoDataUrl } from '../services/logoService';
 import EscalaEquipe from './EscalaEquipe';
+import GerenciarAfastamentos from './GerenciarAfastamentos';
 
 const viewTitles: { [key: string]: string } = {
     inicio: 'Início',
@@ -45,6 +46,7 @@ const viewTitles: { [key: string]: string } = {
     relatorios: 'Relatórios',
     'visualizar-relatorio': 'Visualizador de Relatório',
     'programacao-equipe': 'Programação da Equipe',
+    afastamentos: 'Gerenciar Afastamentos',
 };
 
 
@@ -98,9 +100,9 @@ const Dashboard: React.FC = () => {
                 />;
             case 'agendar':
                 return <AgendarFerias
-                    initialPeriodId={selectedPeriodForScheduling}
+                    initialPeriodId={selectedPeriodForScheduling ? Number(selectedPeriodForScheduling) : null}
                     resetInitialPeriod={() => setSelectedPeriodForScheduling(null)}
-                    initialVacationId={selectedVacationIdToEdit}
+                    initialVacationId={selectedVacationIdToEdit ? Number(selectedVacationIdToEdit) : null}
                     resetInitialVacation={() => setSelectedVacationIdToEdit(null)}
                 />;
             case 'calendario':
@@ -151,6 +153,8 @@ const Dashboard: React.FC = () => {
                 return <Relatorios onSelectReport={handleViewReport} />;
             case 'visualizar-relatorio':
                 return <VisualizadorRelatorios reportType={selectedReportType} setActiveView={setActiveView} />;
+            case 'afastamentos':
+                return <GerenciarAfastamentos />;
             default:
                 return <PainelDeFerias
                     setActiveView={setActiveView}

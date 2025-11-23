@@ -84,9 +84,9 @@ const TabButton: React.FC<{
 
 
 interface AgendarFeriasProps {
-    initialPeriodId?: string | null;
+    initialPeriodId?: number | null;
     resetInitialPeriod?: () => void;
-    initialVacationId?: string | null;
+    initialVacationId?: number | null;
     resetInitialVacation?: () => void;
 }
 
@@ -109,7 +109,7 @@ interface ExpandedContentProps {
     handleGenerateOverallPDF: () => void;
     setIsPlanInEditMode: React.Dispatch<React.SetStateAction<boolean>>;
     handleDeleteEntirePlan: () => void;
-    editingVacationId: string | null;
+    editingVacationId: number | null;
     newVacation: NewVacationState;
     setNewVacation: React.Dispatch<React.SetStateAction<NewVacationState>>;
     tipoEntradaDiasFerias: 'list' | 'input';
@@ -121,7 +121,7 @@ interface ExpandedContentProps {
     handleSaveVacation: () => void;
     handleStartAdding: () => void;
     handleStartEditing: (vacation: PeriodoDeFerias) => void;
-    handleDeleteVacation: (vacationId: string) => void;
+    handleDeleteVacation: (vacationId: number) => void;
     config: ConfiguracaoApp;
 }
 
@@ -307,14 +307,14 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
     initialVacationId,
     resetInitialVacation
 }) => {
-    const { user, allEmployees, updateEmployee, addNotification, config, collectiveVacationRules, holidays, addDirectVacation, updateVacationPeriod, deleteVacation } = useAuth();
+    const { user, allEmployees, addNotification, config, collectiveVacationRules, holidays, addDirectVacation, updateVacationPeriod, deleteVacation } = useAuth();
     const modal = useModal();
-    const [expandedPeriodId, setExpandedPeriodId] = useState<string | null>(initialPeriodId);
+    const [expandedPeriodId, setExpandedPeriodId] = useState<number | null>(initialPeriodId || null);
     const [activeTab, setActiveTab] = useState('minha-programacao');
     const [isPlanInEditMode, setIsPlanInEditMode] = useState(false);
 
     const [isScheduling, setIsScheduling] = useState(false);
-    const [editingVacationId, setEditingVacationId] = useState<string | null>(null);
+    const [editingVacationId, setEditingVacationId] = useState<number | null>(null);
     const [newVacation, setNewVacation] = useState<NewVacationState>({
         startDate: '',
         days: config?.diasFeriasOptions.includes(15) ? 15 : config?.diasFeriasOptions[0] || 10,
@@ -465,7 +465,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             : activePeriod.tipoEntradaDiasFerias;
     }, [activePeriod, config]);
 
-    const handleToggleExpand = (periodId: string) => {
+    const handleToggleExpand = (periodId: number) => {
         setExpandedPeriodId(current => (current === periodId ? null : periodId));
     };
 
@@ -704,7 +704,7 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
         }
     };
 
-    const handleDeleteVacation = async (vacationId: string) => {
+    const handleDeleteVacation = async (vacationId: number) => {
         if (!activePeriod || !employee) return;
 
         const vacation = activePeriod.fracionamentos.find(f => f.id === vacationId);
@@ -741,6 +741,11 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
         }
     };
 
+    const handleGenerateOverallPDF = async () => {
+        if (!activePeriod || !employee) return;
+        await generateVacationRequestPDF(employee, activePeriod, allEmployees);
+    };
+
     const handleDeleteEntirePlan = async () => {
         if (!activePeriod || !employee) return;
 
@@ -748,137 +753,170 @@ const AgendarFerias: React.FC<AgendarFeriasProps> = ({
             const status = getDynamicStatus(f);
             return status === 'enjoying' || status === 'enjoyed';
         });
-        await generateVacationRequestPDF(employee, activePeriod, allEmployees);
-    }
-};
+
+        if (hasStartedVacations) {
+            modal.alert({
+                title: 'Ação Bloqueada',
+                message: 'Não é possível excluir o planejamento pois existem férias em andamento ou já gozadas.',
+                confirmVariant: 'warning'
+            });
+            return;
+        }
+
+        const confirmed = await modal.confirm({
+            title: 'Confirmar Exclusão Total',
+            message: 'Tem certeza que deseja excluir TODO o planejamento de férias deste período? Esta ação não pode ser desfeita.',
+            confirmText: 'Excluir Tudo',
+            confirmVariant: 'danger'
+        });
+
+        if (confirmed) {
+            try {
+                // Delete all fractions one by one
+                // In a real backend, we might want a bulk delete endpoint, but here we iterate
+                const fractionsToDelete = activePeriod.fracionamentos.filter(f => f.status !== 'canceled' && f.status !== 'rejected');
+
+                for (const fraction of fractionsToDelete) {
+                    await deleteVacation(employee.id, activePeriod.id, fraction.id);
+                }
+
+                modal.alert({ title: 'Sucesso', message: 'Planejamento excluído com sucesso.' });
+                setIsPlanInEditMode(false);
+            } catch (error) {
+                console.error("Erro ao excluir planejamento:", error);
+                modal.alert({ title: 'Erro', message: 'Ocorreu um erro ao excluir o planejamento.', confirmVariant: 'danger' });
+            }
+        }
+    };
 
 
-const nonCanceledFractions = useMemo(() => activePeriod?.fracionamentos.filter(f => f.status !== 'canceled' && f.status !== 'rejected') || [], [activePeriod]);
 
-const canModifySchedule = useMemo(() => {
-    if (!activePeriod) return false;
+    const nonCanceledFractions = useMemo(() => activePeriod?.fracionamentos.filter(f => f.status !== 'canceled' && f.status !== 'rejected') || [], [activePeriod]);
 
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const concessionDate = new Date(`${activePeriod.limiteConcessao}T12:00:00Z`);
-    if (concessionDate < today) {
-        return false;
-    }
+    const canModifySchedule = useMemo(() => {
+        if (!activePeriod) return false;
 
-    const hasStartedVacations = activePeriod.fracionamentos.some(f => {
-        const status = getDynamicStatus(f);
-        return status === 'enjoying' || status === 'enjoyed';
-    });
+        const today = new Date();
+        today.setUTCHours(0, 0, 0, 0);
+        const concessionDate = new Date(`${activePeriod.limiteConcessao}T12:00:00Z`);
+        if (concessionDate < today) {
+            return false;
+        }
 
-    return !hasStartedVacations;
-}, [activePeriod]);
+        const hasStartedVacations = activePeriod.fracionamentos.some(f => {
+            const status = getDynamicStatus(f);
+            return status === 'enjoying' || status === 'enjoyed';
+        });
+
+        return !hasStartedVacations;
+    }, [activePeriod]);
 
 
-if (!employee || !config) return null;
+    if (!employee || !config) return null;
 
-const calculatePeriodRemainingDays = (period: PeriodoAquisitivo) => {
-    const usedAndAbono = period.fracionamentos
-        .filter(f => f.status !== 'canceled' && f.status !== 'rejected')
-        .reduce((sum, frac) => sum + frac.quantidadeDias + (frac.diasAbono || 0), 0);
-    return period.saldoTotal - usedAndAbono;
-};
+    const calculatePeriodRemainingDays = (period: PeriodoAquisitivo) => {
+        const usedAndAbono = period.fracionamentos
+            .filter(f => f.status !== 'canceled' && f.status !== 'rejected')
+            .reduce((sum, frac) => sum + frac.quantidadeDias + (frac.diasAbono || 0), 0);
+        return period.saldoTotal - usedAndAbono;
+    };
 
-return (
-    <div>
-        {hasTeamView && (
-            <div className="flex border-b mb-6 bg-white rounded-t-lg shadow-lg border-x border-t border-slate-200">
-                <TabButton icon={<CalendarIcon className="h-5 w-5 mr-2" />} label="Minha Programação" isActive={activeTab === 'minha-programacao'} onClick={() => setActiveTab('minha-programacao')} />
-                <TabButton icon={<UsersIcon className="h-5 w-5 mr-2" />} label="Programação da Equipe" isActive={activeTab === 'programacao-equipe'} onClick={() => setActiveTab('programacao-equipe')} />
-            </div>
-        )}
+    return (
+        <div>
+            {hasTeamView && (
+                <div className="flex border-b mb-6 bg-white rounded-t-lg shadow-lg border-x border-t border-slate-200">
+                    <TabButton icon={<CalendarIcon className="h-5 w-5 mr-2" />} label="Minha Programação" isActive={activeTab === 'minha-programacao'} onClick={() => setActiveTab('minha-programacao')} />
+                    <TabButton icon={<UsersIcon className="h-5 w-5 mr-2" />} label="Programação da Equipe" isActive={activeTab === 'programacao-equipe'} onClick={() => setActiveTab('programacao-equipe')} />
+                </div>
+            )}
 
-        {activeTab === 'minha-programacao' ? (
-            <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg border border-slate-200">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="text-xs text-white uppercase bg-gray-800">
-                            <tr>
-                                <th className="px-4 py-3 font-semibold">Data de Admissão</th>
-                                <th className="px-4 py-3 font-semibold">Período Aquisitivo</th>
-                                <th className="px-4 py-3 font-semibold">Limite Concessão</th>
-                                <th className="px-4 py-3 font-semibold text-center">Dias Disponíveis</th>
-                                <th className="px-4 py-3 font-semibold text-center">Status</th>
-                                <th className="px-4 py-3 font-semibold text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {displayablePeriods.map(period => {
-                                const remainingDays = calculatePeriodRemainingDays(period);
-                                const isExpired = new Date(period.limiteConcessao) < new Date();
-                                const dynamicStatus = getDynamicAccrualPeriodStatus(period);
-                                return (
-                                    <React.Fragment key={period.id}>
-                                        <tr className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
-                                            <td className="px-4 py-4 text-slate-600">{formatDate(employee.dataAdmissao)}</td>
-                                            <td className="px-4 py-4 font-medium text-slate-800">{formatDate(period.inicioPa)} a {formatDate(period.terminoPa)}</td>
-                                            <td className={`px-4 py-4 text-slate-600 ${isExpired ? 'text-danger font-semibold' : ''}`}>{formatDate(period.limiteConcessao)}</td>
-                                            <td className="px-4 py-4 text-center font-bold text-lg text-blue-800">{remainingDays}</td>
-                                            <td className="px-4 py-4 text-center"><span className={getStatusBadge(dynamicStatus, config)}>{getStatusText(dynamicStatus, config)}</span></td>
-                                            <td className="px-4 py-4 text-center">
-                                                <button
-                                                    onClick={() => handleToggleExpand(period.id)}
-                                                    className="px-4 py-2 text-sm font-semibold text-primary bg-blue-25 border border-primary/20 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
-                                                >
-                                                    {expandedPeriodId === period.id ? 'Fechar' : 'Ver detalhes'}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        {expandedPeriodId === period.id && activePeriod && (
-                                            <tr>
-                                                <td colSpan={6} className="p-0 bg-slate-50 border-b-4 border-primary">
-                                                    <div className="p-4 md:p-6">
-                                                        <ExpandedContent
-                                                            activePeriod={activePeriod}
-                                                            totalUtilizado={totalUtilizado}
-                                                            remainingBalance={remainingBalance}
-                                                            isScheduling={isScheduling}
-                                                            nonCanceledFractions={nonCanceledFractions}
-                                                            isPlanInEditMode={isPlanInEditMode}
-                                                            canModifySchedule={canModifySchedule}
-                                                            handleGenerateOverallPDF={handleGenerateOverallPDF}
-                                                            setIsPlanInEditMode={setIsPlanInEditMode}
-                                                            handleDeleteEntirePlan={handleDeleteEntirePlan}
-                                                            editingVacationId={editingVacationId}
-                                                            newVacation={newVacation}
-                                                            setNewVacation={setNewVacation}
-                                                            tipoEntradaDiasFerias={tipoEntradaDiasFerias}
-                                                            availableDaysForNewRequest={availableDaysForNewRequest}
-                                                            exactAbonoDays={exactAbonoDays}
-                                                            isAbonoDisabled={isAbonoDisabled}
-                                                            error={error}
-                                                            resetFormState={resetFormState}
-                                                            handleSaveVacation={handleSaveVacation}
-                                                            handleStartAdding={handleStartAdding}
-                                                            handleStartEditing={handleStartEditing}
-                                                            handleDeleteVacation={handleDeleteVacation}
-                                                            config={config}
-                                                        />
-                                                    </div>
+            {activeTab === 'minha-programacao' ? (
+                <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg border border-slate-200">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="text-xs text-white uppercase bg-gray-800">
+                                <tr>
+                                    <th className="px-4 py-3 font-semibold">Data de Admissão</th>
+                                    <th className="px-4 py-3 font-semibold">Período Aquisitivo</th>
+                                    <th className="px-4 py-3 font-semibold">Limite Concessão</th>
+                                    <th className="px-4 py-3 font-semibold text-center">Dias Disponíveis</th>
+                                    <th className="px-4 py-3 font-semibold text-center">Status</th>
+                                    <th className="px-4 py-3 font-semibold text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {displayablePeriods.map(period => {
+                                    const remainingDays = calculatePeriodRemainingDays(period);
+                                    const isExpired = new Date(period.limiteConcessao) < new Date();
+                                    const dynamicStatus = getDynamicAccrualPeriodStatus(period);
+                                    return (
+                                        <React.Fragment key={period.id}>
+                                            <tr className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
+                                                <td className="px-4 py-4 text-slate-600">{formatDate(employee.dataAdmissao)}</td>
+                                                <td className="px-4 py-4 font-medium text-slate-800">{formatDate(period.inicioPa)} a {formatDate(period.terminoPa)}</td>
+                                                <td className={`px-4 py-4 text-slate-600 ${isExpired ? 'text-danger font-semibold' : ''}`}>{formatDate(period.limiteConcessao)}</td>
+                                                <td className="px-4 py-4 text-center font-bold text-lg text-blue-800">{remainingDays}</td>
+                                                <td className="px-4 py-4 text-center"><span className={getStatusBadge(dynamicStatus, config)}>{getStatusText(dynamicStatus, config)}</span></td>
+                                                <td className="px-4 py-4 text-center">
+                                                    <button
+                                                        onClick={() => handleToggleExpand(period.id)}
+                                                        className="px-4 py-2 text-sm font-semibold text-primary bg-blue-25 border border-primary/20 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
+                                                    >
+                                                        {expandedPeriodId === period.id ? 'Fechar' : 'Ver detalhes'}
+                                                    </button>
                                                 </td>
                                             </tr>
-                                        )}
-                                    </React.Fragment>
-                                )
-                            })}
-                        </tbody>
-                    </table>
-                    {displayablePeriods.length === 0 && (
-                        <div className="text-center py-16">
-                            <p className="text-slate-500">Nenhum período de férias disponível para agendamento.</p>
-                        </div>
-                    )}
+                                            {expandedPeriodId === period.id && activePeriod && (
+                                                <tr>
+                                                    <td colSpan={6} className="p-0 bg-slate-50 border-b-4 border-primary">
+                                                        <div className="p-4 md:p-6">
+                                                            <ExpandedContent
+                                                                activePeriod={activePeriod}
+                                                                totalUtilizado={totalUtilizado}
+                                                                remainingBalance={remainingBalance}
+                                                                isScheduling={isScheduling}
+                                                                nonCanceledFractions={nonCanceledFractions}
+                                                                isPlanInEditMode={isPlanInEditMode}
+                                                                canModifySchedule={canModifySchedule}
+                                                                handleGenerateOverallPDF={handleGenerateOverallPDF}
+                                                                setIsPlanInEditMode={setIsPlanInEditMode}
+                                                                handleDeleteEntirePlan={handleDeleteEntirePlan}
+                                                                editingVacationId={editingVacationId}
+                                                                newVacation={newVacation}
+                                                                setNewVacation={setNewVacation}
+                                                                tipoEntradaDiasFerias={tipoEntradaDiasFerias}
+                                                                availableDaysForNewRequest={availableDaysForNewRequest}
+                                                                exactAbonoDays={exactAbonoDays}
+                                                                isAbonoDisabled={isAbonoDisabled}
+                                                                error={error}
+                                                                resetFormState={resetFormState}
+                                                                handleSaveVacation={handleSaveVacation}
+                                                                handleStartAdding={handleStartAdding}
+                                                                handleStartEditing={handleStartEditing}
+                                                                handleDeleteVacation={handleDeleteVacation}
+                                                                config={config}
+                                                            />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    )
+                                })}
+                            </tbody>
+                        </table>
+                        {displayablePeriods.length === 0 && (
+                            <div className="text-center py-16">
+                                <p className="text-slate-500">Nenhum período de férias disponível para agendamento.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
-        ) : (
-            <EscalaEquipe />
-        )}
-    </div>
-);
+            ) : (
+                <EscalaEquipe />
+            )}
+        </div>
+    );
 };
 
 export default AgendarFerias;

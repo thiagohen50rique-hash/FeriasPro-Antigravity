@@ -164,7 +164,7 @@ const createApproverSignatureParticipant = (approver: Funcionario, period: Perio
 
 
 const SolicitacoesDeAprovacao: React.FC = () => {
-    const { user: currentUser, allEmployees, updateEmployee, addNotification, orgUnits, config, updateAccrualPeriod, updateVacationPeriod } = useAuth();
+    const { user: currentUser, allEmployees, addNotification, orgUnits, config, updateAccrualPeriod, updateVacationPeriod } = useAuth();
     const [expandedRequestId, setExpandedRequestId] = useState<string | null>(null);
     const [filters, setFilters] = useState({ status: 'pending', search: '' });
 

@@ -1,6 +1,7 @@
 import { createContext, Dispatch, SetStateAction, useCallback, useEffect, useState, ReactNode } from 'react';
 import { Funcionario, Notificacao, FeriadoEmpresa, ConfiguracaoApp, NovoFeriadoEmpresa, PeriodoAquisitivo, PeriodoDeFerias, Afastamento, RegraFeriasColetivas, NovaRegraFeriasColetivas, UnidadeOrganizacional, NivelHierarquico, NovosDadosFuncionario } from '../tipos';
 import { supabase } from '../services/supabaseClient';
+import * as api from '../services/api';
 
 export interface CollectiveVacationProposal {
   employeeId: number;
@@ -26,19 +27,17 @@ interface AuthContextType {
   updateHoliday: (holiday: FeriadoEmpresa) => void;
   deleteHoliday: (id: number) => void;
   config: ConfiguracaoApp | null;
-  updateConfig: (newConfig: ConfiguracaoApp) => void;
+  updateConfig: (config: ConfiguracaoApp) => void;
   addAccrualPeriodsByDueDate: (dueDateLimit: string) => Promise<number>;
-  addAccrualPeriodToEmployee: (employeeId: number, periodoData: any) => Promise<void>;
-  updateAccrualPeriod: (employeeId: number, periodId: string, newPeriodData: Partial<Omit<PeriodoAquisitivo, 'id' | 'fracionamentos' | 'saldoTotal'>>) => void;
-  deleteAccrualPeriod: (employeeId: number, periodId: string) => void;
-  addDirectVacation: (employeeId: number, periodId: string, vacationData: Omit<PeriodoDeFerias, 'id' | 'status' | 'sequencia'>) => void;
-  updateVacationPeriod: (employeeId: number, periodId: string, vacationId: string, updatedData: Partial<PeriodoDeFerias>) => void;
-  deleteVacation: (employeeId: number, periodId: string, vacationId: string) => void;
-  addCollectiveVacation: (
-    proposals: CollectiveVacationProposal[]
-  ) => Promise<{ success: boolean; message: string; details?: string[] }>;
-  addLeaveToEmployee: (employeeId: number, leaveData: Omit<Afastamento, 'id'>) => void;
-  updateLeave: (employeeId: number, leaveId: string, updatedLeave: Omit<Afastamento, 'id'>) => void;
+  addAccrualPeriodToEmployee: (employeeId: number, periodData: any) => Promise<void>;
+  updateAccrualPeriod: (employeeId: number, periodId: number, periodData: any) => void;
+  deleteAccrualPeriod: (employeeId: number, periodId: number) => void;
+  addDirectVacation: (employeeId: number, periodId: string | number, vacationData: any) => void;
+  updateVacationPeriod: (employeeId: number, periodId: number, vacationId: number, vacationData: any) => void;
+  deleteVacation: (employeeId: number, periodId: number, vacationId: number) => void;
+  addCollectiveVacation: (proposals: any[]) => Promise<{ success: boolean; message: string }>;
+  addLeaveToEmployee: (employeeId: number, leaveData: any) => void;
+  updateLeave: (employeeId: number, leaveId: string, leaveData: any) => void;
   deleteLeave: (employeeId: number, leaveId: string) => void;
   companyAreas: string[];
 
@@ -58,7 +57,7 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: () => false,
+  login: () => Promise.resolve(false),
   logout: () => { },
   allEmployees: [],
   activeEmployees: [],
@@ -452,24 +451,149 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const updateAccrualPeriod = useCallback(async (employeeId: number, periodId: number, periodData: any) => {
+    try {
+      await api.updateAccrualPeriod(periodId, periodData);
+      setAllEmployees(prev => prev.map(emp => {
+        if (emp.id === employeeId) {
+          return {
+            ...emp,
+            periodosAquisitivos: emp.periodosAquisitivos.map(pa => pa.id === periodId ? { ...pa, ...periodData } : pa)
+          };
+        }
+        return emp;
+      }));
+    } catch (error) {
+      console.error("Error updating accrual period:", error);
+    }
+  }, []);
 
-  // Placeholders para as outras funções (funções ainda não implmementadas)
-  const updateAccrualPeriod = useCallback(() => { }, []);
-  const deleteAccrualPeriod = useCallback(() => { }, []);
+  const deleteAccrualPeriod = useCallback(async (employeeId: number, periodId: number) => {
+    try {
+      await api.deleteAccrualPeriod(periodId);
+      setAllEmployees(prev => prev.map(emp => {
+        if (emp.id === employeeId) {
+          return {
+            ...emp,
+            periodosAquisitivos: emp.periodosAquisitivos.filter(pa => pa.id !== periodId)
+          };
+        }
+        return emp;
+      }));
+    } catch (error) {
+      console.error("Error deleting accrual period:", error);
+    }
+  }, []);
 
-  const updateVacationPeriod = useCallback(() => { }, []);
-  const deleteVacation = useCallback(() => { }, []);
-  const addCollectiveVacation = useCallback(async () => ({ success: false, message: 'Não implementado' }), []);
+  const updateVacationPeriod = useCallback(async (employeeId: number, periodId: number, vacationId: number, vacationData: any) => {
+    try {
+      await api.updateVacationFraction(vacationId, vacationData);
+      setAllEmployees(prev => prev.map(emp => {
+        if (emp.id === employeeId) {
+          return {
+            ...emp,
+            periodosAquisitivos: emp.periodosAquisitivos.map(pa => {
+              if (pa.id === periodId) {
+                return {
+                  ...pa,
+                  fracionamentos: pa.fracionamentos.map(f => f.id === vacationId ? { ...f, ...vacationData } : f)
+                };
+              }
+              return pa;
+            })
+          };
+        }
+        return emp;
+      }));
+    } catch (error) {
+      console.error("Error updating vacation:", error);
+    }
+  }, []);
 
-  const addLeaveToEmployee = useCallback(() => { }, []);
-  const updateLeave = useCallback(() => { }, []);
-  const deleteLeave = useCallback(() => { }, []);
+  const deleteVacation = useCallback(async (employeeId: number, periodId: number, vacationId: number) => {
+    try {
+      await api.deleteVacationFraction(vacationId);
+      setAllEmployees(prev => prev.map(emp => {
+        if (emp.id === employeeId) {
+          return {
+            ...emp,
+            periodosAquisitivos: emp.periodosAquisitivos.map(pa => {
+              if (pa.id === periodId) {
+                return {
+                  ...pa,
+                  fracionamentos: pa.fracionamentos.filter(f => f.id !== vacationId)
+                };
+              }
+              return pa;
+            })
+          };
+        }
+        return emp;
+      }));
+    } catch (error) {
+      console.error("Error deleting vacation:", error);
+    }
+  }, []);
 
-  const addCollectiveVacationRule = useCallback(() => { }, []);
-  const updateCollectiveVacationRule = useCallback(() => { }, []);
-  const deleteCollectiveVacationRule = useCallback(() => { }, []);
-  const updateOrgUnits = useCallback(() => { }, []);
-  const updateHierarchyLevels = useCallback(() => { }, []);
+  const addCollectiveVacation = useCallback(async (proposals: any[]) => {
+    try {
+      await api.createCollectiveVacation(proposals);
+      await fetchEmployees();
+      return { success: true, message: 'Férias coletivas criadas com sucesso' };
+    } catch (error: any) {
+      console.error("Error creating collective vacations:", error);
+      return { success: false, message: error.message || 'Erro ao criar férias coletivas' };
+    }
+  }, [fetchEmployees]);
+
+  const addLeaveToEmployee = useCallback(async (employeeId: number, leaveData: any) => {
+    try {
+      await api.createLeave({ ...leaveData, perfilId: employeeId });
+      await fetchEmployees();
+    } catch (error) {
+      console.error("Error adding leave:", error);
+    }
+  }, [fetchEmployees]);
+
+  const updateLeave = useCallback(async (employeeId: number, leaveId: string, leaveData: any) => {
+    try {
+      await api.updateLeave(leaveId, leaveData);
+      setAllEmployees(prev => prev.map(emp => {
+        if (emp.id === employeeId) {
+          return {
+            ...emp,
+            afastamentos: emp.afastamentos.map(l => l.id === leaveId ? { ...l, ...leaveData } : l)
+          };
+        }
+        return emp;
+      }));
+    } catch (error) {
+      console.error("Error updating leave:", error);
+    }
+  }, []);
+
+  const deleteLeave = useCallback(async (employeeId: number, leaveId: string) => {
+    try {
+      await api.deleteLeave(leaveId);
+      setAllEmployees(prev => prev.map(emp => {
+        if (emp.id === employeeId) {
+          return {
+            ...emp,
+            afastamentos: emp.afastamentos.filter(l => l.id !== leaveId)
+          };
+        }
+        return emp;
+      }));
+    } catch (error) {
+      console.error("Error deleting leave:", error);
+    }
+  }, []);
+
+  const addCollectiveVacationRule = useCallback((rule: NovaRegraFeriasColetivas) => { }, []);
+  const updateCollectiveVacationRule = useCallback((rule: RegraFeriasColetivas) => { }, []);
+  const deleteCollectiveVacationRule = useCallback((ruleId: number) => { }, []);
+  const updateOrgUnits = useCallback((newOrgUnits: UnidadeOrganizacional[], updatedEmployees?: Funcionario[]) => { }, []);
+  const updateHierarchyLevels = useCallback((newLevels: NivelHierarquico[]) => { }, []);
 
   // Valores derivados
   const activeEmployees = allEmployees.filter(e => e.status === 'active');
