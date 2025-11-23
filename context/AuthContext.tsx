@@ -37,8 +37,8 @@ interface AuthContextType {
   deleteVacation: (employeeId: number, periodId: number, vacationId: number) => void;
   addCollectiveVacation: (proposals: any[]) => Promise<{ success: boolean; message: string }>;
   addLeaveToEmployee: (employeeId: number, leaveData: any) => void;
-  updateLeave: (employeeId: number, leaveId: string, leaveData: any) => void;
-  deleteLeave: (employeeId: number, leaveId: string) => void;
+  updateLeave: (employeeId: number, leaveId: number, leaveData: any) => void;
+  deleteLeave: (employeeId: number, leaveId: number) => void;
   companyAreas: string[];
 
   companyUnits: string[];
@@ -555,7 +555,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [fetchEmployees]);
 
-  const updateLeave = useCallback(async (employeeId: number, leaveId: string, leaveData: any) => {
+  const updateLeave = useCallback(async (employeeId: number, leaveId: number, leaveData: any) => {
     try {
       await api.updateLeave(leaveId, leaveData);
       setAllEmployees(prev => prev.map(emp => {
@@ -572,7 +572,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const deleteLeave = useCallback(async (employeeId: number, leaveId: string) => {
+  const deleteLeave = useCallback(async (employeeId: number, leaveId: number) => {
     try {
       await api.deleteLeave(leaveId);
       setAllEmployees(prev => prev.map(emp => {

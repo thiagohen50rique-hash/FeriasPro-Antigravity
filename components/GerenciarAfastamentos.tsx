@@ -81,7 +81,7 @@ const GerenciarAfastamentos: React.FC = () => {
         }
     };
 
-    const handleDelete = async (employeeId: number, leaveId: string) => {
+    const handleDelete = async (employeeId: number, leaveId: number) => {
         const confirmed = await modal.confirm({
             title: 'Confirmar Exclusão',
             message: 'Tem certeza que deseja excluir este afastamento?',
