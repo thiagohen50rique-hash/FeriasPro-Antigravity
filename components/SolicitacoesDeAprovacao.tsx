@@ -164,7 +164,7 @@ const createApproverSignatureParticipant = (approver: Funcionario, period: Perio
 
 
 const SolicitacoesDeAprovacao: React.FC = () => {
-    const { user: currentUser, allEmployees, updateEmployee, addNotification, orgUnits, config } = useAuth();
+    const { user: currentUser, allEmployees, updateEmployee, addNotification, orgUnits, config, updateAccrualPeriod, updateVacationPeriod } = useAuth();
     const [expandedRequestId, setExpandedRequestId] = useState<string | null>(null);
     const [filters, setFilters] = useState({ status: 'pending', search: '' });
 
@@ -213,28 +213,29 @@ const SolicitacoesDeAprovacao: React.FC = () => {
     }, [allRequestsFromAllEmployees, filters, currentUser, orgUnits]);
 
 
-    const handleApprovalAction = (request: PendingRequest, action: 'approve' | 'reject') => {
+    const handleApprovalAction = async (request: PendingRequest, action: 'approve' | 'reject') => {
         const { employee } = request;
 
-        let updatedPeriod: PeriodoAquisitivo = { ...request };
         let notificationMessage = '';
         let notifyTo: (Funcionario | undefined)[] = [];
+        let newStatus: PeriodoAquisitivo['status'] = request.status;
+        let updatedSignatureInfo = request.infoAssinatura;
 
         if (action === 'reject') {
-            updatedPeriod.status = 'rejected';
+            newStatus = 'rejected';
             notificationMessage = `Sua programação de férias para o período de ${formatDate(request.inicioPa)} a ${formatDate(request.terminoPa)} foi rejeitada.`;
             notifyTo.push(employee);
         } else { // approve
             const signatureParticipant = createApproverSignatureParticipant(currentUser, request);
-            const updatedSignatureInfo = {
+            updatedSignatureInfo = {
                 ...(request.infoAssinatura as InformacaoAssinatura),
                 participantes: [...(request.infoAssinatura?.participantes || []), signatureParticipant],
             };
-            updatedPeriod.infoAssinatura = updatedSignatureInfo;
 
             if (request.status === 'pending_manager') {
-                updatedPeriod.status = 'pending_rh';
-                updatedPeriod.idAprovadorGestor = currentUser.id;
+                newStatus = 'pending_rh';
+                // Note: idAprovadorGestor update should be handled by backend or passed in payload if supported
+                // For now assuming updateAccrualPeriod handles generic data or we pass it explicitly if typed
 
                 notificationMessage = `Sua programação de férias foi aprovada pelo seu gestor e aguarda o RH.`;
                 notifyTo.push(employee);
@@ -248,13 +249,13 @@ const SolicitacoesDeAprovacao: React.FC = () => {
                 });
 
             } else if (request.status === 'pending_rh') {
-                updatedPeriod.status = 'scheduled';
-                updatedPeriod.idAprovadorRH = currentUser.id;
+                newStatus = 'scheduled';
 
-                // Set all planned vacations to scheduled
-                updatedPeriod.fracionamentos = updatedPeriod.fracionamentos.map(f =>
-                    f.status === 'planned' ? { ...f, status: 'scheduled' } : f
-                );
+                // Update all planned vacations to scheduled
+                const vacationsToUpdate = request.fracionamentos.filter(f => f.status === 'planned');
+                for (const vacation of vacationsToUpdate) {
+                    await updateVacationPeriod(employee.id, request.id, vacation.id, { status: 'scheduled' });
+                }
 
                 notificationMessage = `Sua programação de férias para o período de ${formatDate(request.inicioPa)} a ${formatDate(request.terminoPa)} foi aprovada!`;
                 notifyTo.push(employee);
@@ -269,13 +270,14 @@ const SolicitacoesDeAprovacao: React.FC = () => {
             }
         }
 
-        const updatedEmployee = {
-            ...employee,
-            periodosAquisitivos: employee.periodosAquisitivos.map(p =>
-                p.id === updatedPeriod.id ? updatedPeriod : p
-            )
-        };
-        updateEmployee(updatedEmployee);
+        // Update the Accrual Period
+        await updateAccrualPeriod(employee.id, request.id, {
+            status: newStatus,
+            infoAssinatura: updatedSignatureInfo,
+            // Pass approver IDs if the API supports it, otherwise they might be lost or need a specific field
+            ...(action === 'approve' && request.status === 'pending_manager' ? { idAprovadorGestor: currentUser.id } : {}),
+            ...(action === 'approve' && request.status === 'pending_rh' ? { idAprovadorRH: currentUser.id } : {})
+        });
 
         notifyTo.forEach(userToNotify => {
             if (userToNotify) {
